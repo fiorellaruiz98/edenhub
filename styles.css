@@ -612,6 +612,39 @@ input::placeholder{color:#9CA4B0;}
 }
 .btn-ribbon-outline:active{transform:translateY(0);}
 
+.btn-ribbon-neutral{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 20px;
+  background:transparent;
+  color:var(--black);
+  font-family:var(--font-body);
+  font-weight:700;
+  font-size:13.5px;
+  border:1px solid var(--light-grey);
+  border-radius:9999px;
+  text-decoration:none;
+  cursor:pointer;
+  transition:all .2s ease;
+  white-space:nowrap;
+}
+.btn-ribbon-neutral svg{width:16px;height:16px;}
+.btn-ribbon-neutral:hover{
+  background:var(--surface-muted);
+  border-color:var(--black);
+}
+
+.btn-sm{padding:7px 14px;font-size:12.5px;}
+.btn-xs{padding:5px 12px;font-size:12px;}
+
+.btn-spinner{
+  width:14px;height:14px;border-radius:50%;
+  border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;
+  animation:btn-spin .7s linear infinite;flex-shrink:0;
+}
+@keyframes btn-spin{ to{ transform:rotate(360deg); } }
+
 .btn-ghost{
   display:inline-flex;align-items:center;gap:6px;
   background:none;border:1px solid var(--light-grey);
@@ -1579,43 +1612,9 @@ table.approval-table{width:100%;border-collapse:collapse;}
   
   
 
-    #view-pricebook .pb-btn{
-    /* Reset de estilos nativos de <button> (el UA pinta border:2px outset por
-       defecto — era el anillo visible en "Nuevo servicio"). Mismo patrón que
-       .btn-ribbon del host: sin borde base, cursor pointer. Las variantes
-       outline/brand sobreescriben el borde transparente con el suyo. */
-    appearance: none; -webkit-appearance: none;
-    border: 1px solid transparent;
-    background: none;
-    cursor: pointer;
-    font-family: var(--font-body);
-    text-decoration: none;
-    display: inline-flex; align-items: center; gap: 8px;
-    border-radius: var(--radius-pill);
-    padding: 10px 20px;
-    font-size: 13.5px; font-weight: 700; /* unificado con el sistema del host */
-    transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-    white-space: nowrap;
-  }
-    #view-pricebook .pb-btn svg{ width: 16px; height: 16px; flex-shrink: 0; }
-    #view-pricebook .pb-btn-ribbon{ background-color: var(--primary); color: #FFFFFF; box-shadow: 0 6px 16px rgba(247,39,23,.28); }
-    #view-pricebook .pb-btn-ribbon:hover{ background-color: var(--primary-hover); box-shadow: 0 8px 18px rgba(255,89,120,.32); transform: translateY(-1px); }
-    #view-pricebook .pb-btn-ribbon:active{ transform: translateY(0); }
-    #view-pricebook .pb-btn-outline{ background: transparent; color: var(--text); border: 1px solid var(--light-grey); }
-    #view-pricebook .pb-btn-outline:hover{ background: var(--bg-app); color: var(--text); border-color: var(--text); }
-    /* Outline de marca — espejo de .btn-ribbon-outline del host (unicidad de botones) */
-    #view-pricebook .pb-btn-brand{ background: var(--surface); color: var(--danger); border: 1.5px solid var(--primary); }
-    #view-pricebook .pb-btn-brand:hover{ background: var(--accent-light); transform: translateY(-1px); }
-    #view-pricebook .pb-btn-brand:active{ transform: translateY(0); }
-    #view-pricebook .pb-btn-sm{ padding: 7px 14px; font-size: 12.5px; }
-    #view-pricebook .pb-btn-xs{ padding: 5px 12px; font-size: 12px; }
-    #view-pricebook .pb-btn:disabled{ opacity: 0.75; cursor: not-allowed; transform: none !important; }
-    #view-pricebook .pb-btn-spinner{
-    width: 14px; height: 14px; border-radius: 50%;
-    border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff;
-    animation: btn-spin 0.7s linear infinite; flex-shrink: 0;
-  }
-  @keyframes btn-spin{ to{ transform: rotate(360deg); } }
+    #view-pricebook .btn-ribbon:disabled,
+    #view-pricebook .btn-ribbon-outline:disabled,
+    #view-pricebook .btn-ribbon-neutral:disabled{ opacity: 0.75; cursor: not-allowed; transform: none !important; }
 
   /* ============================================================
      PAGE HEADER (dentro del contenido)
@@ -1632,15 +1631,8 @@ table.approval-table{width:100%;border-collapse:collapse;}
     #view-pricebook .panel{ background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
 
   /* --- Filtros avanzados --- */
-    #view-pricebook .pb-filters-panel{ padding: 16px 20px 18px; margin-bottom: 18px; }
-    #view-pricebook .filters-panel-header{ display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-    #view-pricebook .filters-panel-title{ display: flex; align-items: center; gap: 9px; font-size: 12.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text); }
-    #view-pricebook .filters-panel-title svg{ width: 15px; height: 15px; color: var(--primary); }
-    #view-pricebook .clear-filters-link{ appearance: none; background: none; border: none; cursor: pointer; font-family: var(--font-body); display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; color: var(--text-secondary); padding: 4px 8px; border-radius: 6px; transition: all 0.2s ease; }
-    #view-pricebook .clear-filters-link:hover{ color: var(--primary); background: var(--accent-light); }
-    #view-pricebook .clear-filters-link svg{ width: 13px; height: 13px; }
-    #view-pricebook .filters-panel-grid{ display: grid; grid-template-columns: 1.6fr repeat(4, 1fr); gap: 12px; align-items: end; }
-    #view-pricebook .filters-panel-grid .field-search{ grid-column: span 1; }
+    #view-pricebook .pb-filters-grid{ grid-template-columns: 1.6fr repeat(4, 1fr); align-items: end; }
+    #view-pricebook .pb-filters-grid .field-search{ grid-column: span 1; }
 
     #view-pricebook .field{ display: flex; flex-direction: column; gap: 6px; }
     #view-pricebook .field label{ font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.03em; }
@@ -1660,14 +1652,11 @@ table.approval-table{width:100%;border-collapse:collapse;}
     background-repeat: no-repeat; background-position: right 10px center; background-size: 14px; padding-right: 30px;
   }
 
-    #view-pricebook .pb-table-panel{ overflow: hidden; }
-    #view-pricebook .pb-table-toolbar{ display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); }
-    #view-pricebook .pb-table-toolbar h2{ font-family: var(--font-title); font-size: 16px; font-weight: 700; }
-    #view-pricebook .pb-table-toolbar .count{ font-size: 12.5px; color: var(--text-secondary); font-weight: 400; margin-left: 8px; font-family: var(--font-body); }
-    #view-pricebook .pb-table-toolbar-actions{ display: flex; align-items: center; gap: 10px; }
+    #view-pricebook .table-toolbar h2{ font-family: var(--font-title); font-size: 16px; font-weight: 700; }
+    #view-pricebook .table-toolbar .count{ font-size: 12.5px; color: var(--text-secondary); font-weight: 400; margin-left: 8px; font-family: var(--font-body); }
 
     #view-pricebook .export-dropdown{ position: relative; }
-    #view-pricebook .export-dropdown .pb-btn .chev{ width: 12px; height: 12px; margin-left: -2px; }
+    #view-pricebook .export-dropdown .btn-ribbon-outline .chev{ width: 12px; height: 12px; margin-left: -2px; }
     #view-pricebook .export-menu{
     position: absolute; top: calc(100% + 6px); right: 0; min-width: 190px;
     background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md);
@@ -1683,7 +1672,6 @@ table.approval-table{width:100%;border-collapse:collapse;}
     #view-pricebook .export-menu button svg{ width: 15px; height: 15px; color: var(--text-secondary); flex-shrink: 0; }
     #view-pricebook .export-menu button:hover{ background: var(--bg-app); }
 
-    #view-pricebook .pb-table-scroll{ overflow-x: auto; }
     #view-pricebook table{ width: 100%; border-collapse: collapse; }
     #view-pricebook #main-table{ min-width: 880px; }
     #view-pricebook thead th{
@@ -1867,7 +1855,7 @@ table.approval-table{width:100%;border-collapse:collapse;}
     #view-pricebook .table-empty{ padding: 48px 20px; text-align: center; color: var(--text-secondary); }
     #view-pricebook .table-empty svg{ width: 32px; height: 32px; margin-bottom: 10px; color: var(--border); }
     #view-pricebook .table-empty p{ font-size: 13.5px; }
-    #view-pricebook .table-empty .pb-btn{ margin-top: 14px; }
+    #view-pricebook .table-empty .btn-ribbon-neutral{ margin-top: 14px; }
 
     #view-pricebook .audit-box{ background: var(--bg-app); border: 1px dashed var(--border); border-radius: var(--radius-md); padding: 14px 16px; margin-top: 4px; }
     #view-pricebook .audit-box h3{ font-size: 11.5px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
@@ -1894,8 +1882,6 @@ table.approval-table{width:100%;border-collapse:collapse;}
     #view-pricebook .pb-modal p{ font-size: 13px; color: var(--text-secondary); line-height: 1.55; }
     #view-pricebook .pb-modal p b{ color: var(--text); font-weight: 700; }
     #view-pricebook .modal-actions{ display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
-    #view-pricebook .pb-btn-danger{ background-color: var(--surface); color: var(--danger); border: 1px solid var(--danger-bg); }
-    #view-pricebook .pb-btn-danger:hover{ background-color: var(--danger-bg); }
 
     #view-pricebook #tarifa-modal{ width: 440px; max-width: calc(100vw - 32px); }
     #view-pricebook #tarifa-modal .pb-modal-header{ display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 18px; }
@@ -1920,19 +1906,19 @@ table.approval-table{width:100%;border-collapse:collapse;}
     
     
     
-        #view-pricebook .filters-panel-grid{ grid-template-columns: 1fr 1fr; }
+        #view-pricebook .pb-filters-grid{ grid-template-columns: 1fr 1fr; }
         #view-pricebook .pb-drawer{ width: 100%; }
         #view-pricebook .pb-form-grid, #view-pricebook .form-grid-3, #view-pricebook .audit-grid{ grid-template-columns: 1fr; }
   }
   @media (max-width: 620px){
-        #view-pricebook .filters-panel-grid{ grid-template-columns: 1fr; }
+        #view-pricebook .pb-filters-grid{ grid-template-columns: 1fr; }
         #view-pricebook .field-search{ min-width: 0; }
         #view-pricebook .select{ width: 100%; }
-        #view-pricebook .pb-table-toolbar{ flex-direction: column; align-items: flex-start; gap: 10px; }
-        #view-pricebook .pb-table-toolbar-actions{ width: 100%; }
-        #view-pricebook .pb-table-toolbar-actions .pb-btn-ribbon{ flex: 1; justify-content: center; }
+        #view-pricebook .table-toolbar{ flex-direction: column; align-items: flex-start; gap: 10px; }
+        #view-pricebook .table-toolbar-actions{ width: 100%; }
+        #view-pricebook .table-toolbar-actions .btn-ribbon{ flex: 1; justify-content: center; }
         #view-pricebook .export-dropdown{ flex: 1; }
-        #view-pricebook .export-dropdown .pb-btn{ width: 100%; justify-content: center; }
+        #view-pricebook .export-dropdown .btn-ribbon-outline{ width: 100%; justify-content: center; }
         #view-pricebook .pagination{ flex-direction: column; gap: 10px; align-items: flex-start; }
         #view-pricebook #tarifa-modal{ width: calc(100vw - 32px); }
     

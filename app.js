@@ -1601,14 +1601,13 @@ document.addEventListener("DOMContentLoaded", function(){
    NAVEGACIÓN LATERAL (Sidebar) — cambio de vista y responsive
    ============================================================ */
 const PLACEHOLDER_COPY = {
-  "inicio": {crumb:"Inicio", title:"Bienvenida", heading:"Bienvenida a Edenred Benefits", body:"Aquí encontrarás un resumen de tu actividad, accesos directos y novedades del sistema. Este módulo está en construcción."},
-  "pricebook": {crumb:"Pricebook › Servicios y Tarifas", title:"Servicios y Tarifas", heading:"Pricebook en construcción", body:"El catálogo de servicios y tarifas estará disponible próximamente para administrar precios base por solución y categoría de producto."},
-  "cotizaciones": {crumb:"Gestión comercial › Cotizaciones", title:"Cotizaciones", heading:"Cotizaciones en construcción", body:"Aquí podrás dar seguimiento a las cotizaciones generadas a partir de propuestas comerciales rentables."},
-  "orden-comercial": {crumb:"Gestión comercial › Orden Comercial", title:"Orden Comercial", heading:"Orden Comercial en construcción", body:"Aquí se gestionará la orden comercial generada a partir de una propuesta o cotización aprobada."},
-  "linea-credito": {crumb:"Flujos de Aprobación › Línea de Crédito", title:"Línea de Crédito", heading:"Bandeja de Línea de Crédito", body:"Vista consolidada de solicitudes de línea de crédito de todas las propuestas. Gestiónalas directamente desde cada propuesta por ahora."},
-  "excepciones": {crumb:"Flujos de Aprobación › Excepciones", title:"Excepciones", heading:"Bandeja de Excepciones", body:"Vista consolidada de solicitudes de excepción de todas las propuestas. Gestiónalas directamente desde cada propuesta por ahora."},
-  "usuarios": {crumb:"Usuarios › Usuarios", title:"Usuarios", heading:"Administración de usuarios", body:"Próximamente podrás crear, editar y desactivar usuarios del sistema desde este módulo."},
-  "permisos": {crumb:"Usuarios › Permisos y Roles", title:"Permisos y Roles", heading:"Permisos y roles", body:"Próximamente podrás configurar roles y permisos granulares por módulo desde aquí."}
+  "inicio": {crumb:"Inicio", title:"Inicio", heading:"Inicio", body:"Próximamente verás aquí un resumen de tu actividad, accesos directos y novedades del sistema."},
+  "cotizaciones": {crumb:"Gestión comercial › Cotizaciones", title:"Cotizaciones", heading:"Cotizaciones", body:"Próximamente podrás dar seguimiento a las cotizaciones generadas a partir de propuestas rentables."},
+  "orden-comercial": {crumb:"Gestión comercial › Orden Comercial", title:"Orden Comercial", heading:"Orden Comercial", body:"Próximamente podrás gestionar la orden comercial generada a partir de una propuesta o cotización aprobada."},
+  "linea-credito": {crumb:"Flujos de Aprobación › Línea de Crédito", title:"Línea de Crédito", heading:"Línea de Crédito", body:"Próximamente podrás revisar de forma consolidada las solicitudes de línea de crédito de todas las propuestas."},
+  "excepciones": {crumb:"Flujos de Aprobación › Excepciones", title:"Excepciones", heading:"Excepciones", body:"Próximamente podrás revisar de forma consolidada las solicitudes de excepción de todas las propuestas."},
+  "usuarios": {crumb:"Usuarios › Usuarios", title:"Usuarios", heading:"Usuarios", body:"Próximamente podrás crear, editar y desactivar usuarios del sistema."},
+  "permisos": {crumb:"Usuarios › Permisos y Roles", title:"Permisos y Roles", heading:"Permisos y Roles", body:"Próximamente podrás configurar roles y permisos granulares por módulo."}
 };
 
 function closeSidebar(){
@@ -1898,7 +1897,7 @@ function initSidebarNav(){
         <div class="table-empty">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <p>No se encontraron servicios con estos filtros.</p>
-          <button type="button" class="pb-btn pb-btn-outline pb-btn-sm" onclick="clearPricebookFilters()">Limpiar filtros</button>
+          <button type="button" class="btn-ribbon-neutral btn-sm" onclick="clearPricebookFilters()">Limpiar filtros</button>
         </div>
       </td></tr>`;
       return;
@@ -2002,7 +2001,7 @@ function initSidebarNav(){
     }).join('');
 
     wrap.innerHTML = `
-      <div class="pb-table-scroll">
+      <div class="table-scroll">
         <table class="tarifas-table">
           <thead>
             <tr><th>Nombre tarifa</th><th>Tipo de producto</th><th>Moneda</th><th>Unidad</th><th class="num">Precio base</th><th>Vigencia</th><th class="num">Acciones</th></tr>
@@ -2178,7 +2177,7 @@ function initSidebarNav(){
   function setButtonLoading(btn, loadingLabel){
     btn.dataset.originalHtml = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = `<span class="pb-btn-spinner"></span> ${loadingLabel}`;
+    btn.innerHTML = `<span class="btn-spinner"></span> ${loadingLabel}`;
   }
   function restoreButton(btn){
     btn.disabled = false;
@@ -2466,6 +2465,13 @@ function initSidebarNav(){
     toast.classList.remove('show');
     setTimeout(() => pbShowToast('Acción deshecha'), 350);
   }
+
+  document.getElementById('pbBtnClearFilters').addEventListener('click', clearPricebookFilters);
+
+  document.querySelector('#main-table thead').addEventListener('click', (e) => {
+    const th = e.target.closest('th.sortable');
+    if(th) toggleSort(th.dataset.field);
+  });
 
   /* Init del módulo Pricebook — expuesto al router del host.
      El router llama ensureRendered() al entrar a la vista. */

@@ -336,18 +336,18 @@
 
       
 
-      <section class="panel pb-filters-panel" aria-label="Filtros avanzados">
-        <div class="filters-panel-header">
-          <div class="filters-panel-title">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+      <section class="panel filters-panel" aria-label="Filtros avanzados">
+        <div class="filters-head">
+          <div class="filters-title">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
             Filtros avanzados
           </div>
-          <button type="button" class="clear-filters-link" onclick="clearPricebookFilters()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <button type="button" class="filters-clear" id="pbBtnClearFilters">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             Limpiar filtros
           </button>
         </div>
-        <div class="filters-panel-grid">
+        <div class="filters-grid pb-filters-grid">
           <div class="field field-search">
             <label for="f-search">Servicio (ID o nombre)</label>
             <div class="search-wrap">
@@ -394,12 +394,12 @@
         </div>
       </section>
 
-      <section class="panel pb-table-panel" aria-label="Listado de servicios">
-        <div class="pb-table-toolbar">
+      <section class="panel table-panel" aria-label="Listado de servicios">
+        <div class="table-toolbar">
           <div><h2>Listado de servicios<span class="count" id="row-count">7 resultados</span></h2></div>
-          <div class="pb-table-toolbar-actions">
+          <div class="table-toolbar-actions">
             <div class="export-dropdown" id="export-dropdown">
-              <button type="button" class="pb-btn pb-btn-brand pb-btn-sm" onclick="toggleExportMenu(event)">
+              <button type="button" class="btn-ribbon-outline btn-sm" onclick="toggleExportMenu(event)">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v13m0 0-4-4m4 4 4-4M4 21h16"/></svg>
                 Exportar
                 <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
@@ -415,22 +415,22 @@
                 </button>
               </div>
             </div>
-            <button class="pb-btn pb-btn-ribbon pb-btn-sm" onclick="openServiceDrawer()">
+            <button class="btn-ribbon btn-sm" onclick="openServiceDrawer()">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               Nuevo servicio
             </button>
           </div>
         </div>
 
-        <div class="pb-table-scroll">
+        <div class="table-scroll">
           <table id="main-table">
             <thead>
               <tr>
-                <th class="sortable" data-field="id" onclick="toggleSort('id')">ID Servicio<span class="sort-icon"></span></th>
-                <th class="sortable" data-field="nombre" onclick="toggleSort('nombre')">Servicio<span class="sort-icon"></span></th>
-                <th class="sortable" data-field="producto" onclick="toggleSort('producto')">Producto<span class="sort-icon"></span></th>
-                <th class="sortable" data-field="tarifas" onclick="toggleSort('tarifas')">Tarifario<span class="sort-icon"></span></th>
-                <th class="sortable" data-field="estado" onclick="toggleSort('estado')">Estado<span class="sort-icon"></span></th>
+                <th class="sortable" data-field="id">ID Servicio<span class="sort-icon"></span></th>
+                <th class="sortable" data-field="nombre">Servicio<span class="sort-icon"></span></th>
+                <th class="sortable" data-field="producto">Producto<span class="sort-icon"></span></th>
+                <th class="sortable" data-field="tarifas">Tarifario<span class="sort-icon"></span></th>
+                <th class="sortable" data-field="estado">Estado<span class="sort-icon"></span></th>
                 <th class="num">Acciones</th>
               </tr>
             </thead>
@@ -546,7 +546,7 @@
 
     <div class="section-label">
       <div class="left"><span class="chip"></span><span class="title">Tarifario asociado <small id="tarifas-count-label">· 0 tarifas</small></span></div>
-      <button type="button" class="pb-btn pb-btn-brand pb-btn-xs" onclick="openTarifaModal(null)">
+      <button type="button" class="btn-ribbon-outline btn-xs" onclick="openTarifaModal(null)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Agregar tarifa
       </button>
@@ -570,8 +570,8 @@
   </form>
 
   <div class="pb-drawer-footer">
-    <button type="button" class="pb-btn pb-btn-outline" onclick="closeTopLayer()">Cancelar</button>
-    <button type="submit" form="service-form" class="pb-btn pb-btn-ribbon" id="service-submit-btn">
+    <button type="button" class="btn-ribbon-neutral" onclick="closeTopLayer()">Cancelar</button>
+    <button type="submit" form="service-form" class="btn-ribbon" id="service-submit-btn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
       Guardar servicio
     </button>
@@ -660,8 +660,8 @@
   </form>
 
   <div class="modal-actions">
-    <button type="button" class="pb-btn pb-btn-outline" onclick="closeTopLayer()">Cancelar</button>
-    <button type="submit" form="tarifa-form" class="pb-btn pb-btn-ribbon pb-btn-sm" id="tarifa-submit-btn">Guardar tarifa</button>
+    <button type="button" class="btn-ribbon-neutral" onclick="closeTopLayer()">Cancelar</button>
+    <button type="submit" form="tarifa-form" class="btn-ribbon btn-sm" id="tarifa-submit-btn">Guardar tarifa</button>
   </div>
 </div>
 
@@ -673,8 +673,8 @@
   <h3 id="delete-modal-title">Eliminar registro</h3>
   <p id="delete-modal-text">Esta acción no se puede deshacer.</p>
   <div class="modal-actions">
-    <button class="pb-btn pb-btn-outline" onclick="closeTopLayer()">Cancelar</button>
-    <button class="pb-btn pb-btn-danger" onclick="confirmPricebookDelete()">Sí, eliminar</button>
+    <button class="btn-ribbon-neutral" onclick="closeTopLayer()">Cancelar</button>
+    <button class="btn-ribbon-outline" onclick="confirmPricebookDelete()">Sí, eliminar</button>
   </div>
 </div>
 
@@ -683,8 +683,8 @@
   <h3>Tienes cambios sin guardar</h3>
   <p>Si sales ahora, se perderán los cambios que no has guardado. Esta acción no se puede deshacer.</p>
   <div class="modal-actions">
-    <button class="pb-btn pb-btn-outline" onclick="keepEditing()">Seguir editando</button>
-    <button class="pb-btn pb-btn-danger" onclick="discardChanges()">Descartar cambios</button>
+    <button class="btn-ribbon-neutral" onclick="keepEditing()">Seguir editando</button>
+    <button class="btn-ribbon-outline" onclick="discardChanges()">Descartar cambios</button>
   </div>
 </div>
 
