@@ -1682,6 +1682,15 @@ function initSidebarNav(){
       activateView(view);
     });
   });
+
+  /* Expuesto para que el flujo de login (IIFE aparte) pueda devolver a
+     Inicio la vista activa al autenticarse, sin duplicar esta lógica. */
+  window.goToInicio = function(){
+    document.querySelectorAll(".nav-link").forEach(l=>l.classList.remove("active"));
+    const inicioLink = document.querySelector('.nav-link[data-view="inicio"]');
+    if(inicioLink) inicioLink.classList.add("active");
+    activateView("inicio");
+  };
 }
 
 })();
@@ -2517,6 +2526,7 @@ function hideLogin(){
   screen.classList.add("closing");
   document.body.style.overflow = "";
   document.querySelector(".app-shell").removeAttribute("aria-hidden");
+  if(window.goToInicio) window.goToInicio();
 }
 
 form.addEventListener("submit", function(e){
