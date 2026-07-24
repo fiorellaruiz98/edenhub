@@ -749,6 +749,20 @@ table.data-table{
 .icon-btn.history:hover{color:var(--grey);background:var(--surface-muted);}
 .icon-btn.reject:hover{color:var(--red-hero-dark);background:var(--light-pink);border-color:transparent;}
 .icon-btn.kebab:hover{color:var(--black);background:var(--surface-muted);border-color:transparent;}
+
+/* Tooltip genérico reutilizable (mismo patrón que .sidebar.collapsed
+   .nav-link, adaptado para mostrarse debajo en vez de al costado). */
+[data-tooltip]{position:relative;}
+[data-tooltip]:hover::after{
+  content:attr(data-tooltip);
+  position:absolute;left:50%;top:100%;transform:translateX(-50%);
+  margin-top:8px;
+  background:var(--black);color:#fff;
+  font-size:11px;font-weight:600;
+  padding:5px 9px;border-radius:6px;
+  white-space:nowrap;z-index:200;pointer-events:none;
+  box-shadow:var(--shadow-pop);
+}
 .icon-btn.kebab[aria-expanded="true"]{background:var(--surface-muted);color:var(--black);}
 
 /* ---------- Row overflow menu (portal, avoids table overflow clipping) ---------- */
@@ -2024,19 +2038,13 @@ table.approval-table{width:100%;border-collapse:collapse;}
   text-align:center;
   border-left:1px solid var(--border-soft);
 }
-.login-brand-col::before,
-.login-brand-col::after{
-  content:'';position:absolute;border-radius:var(--radius-ribbon);pointer-events:none;
-}
-.login-brand-col::before{
-  width:420px;height:150px;background:var(--red-hero);
-  top:-50px;right:-160px;transform:rotate(-18deg);opacity:.92;
-}
-.login-brand-col::after{
-  width:360px;height:130px;background:var(--benefits-pink);
-  bottom:-40px;left:-150px;transform:rotate(-18deg);opacity:.85;
-}
 .login-brand-col-logo{position:relative;z-index:1;width:96px;height:96px;display:block;}
+.login-brand-col-illustration{
+  position:relative;z-index:1;
+  width:230px;height:230px;
+  object-fit:contain;
+  display:block;
+}
 .login-brand-col-msg{
   position:relative;z-index:1;margin:0;max-width:230px;
   font-family:var(--font-title);font-size:16px;font-weight:600;color:var(--black);line-height:1.4;
@@ -2065,6 +2073,24 @@ table.approval-table{width:100%;border-collapse:collapse;}
   --mv-amber-fg:#8A5A00;
   --mv-amber-border:#F0D68A;
 }
+
+/* El header de columnas ya es sticky (.data-table thead th, top:0), pero
+   no se trataba solo de que compitiera con el topbar por el mismo top:0.
+   .table-scroll usa overflow-x:auto para el scroll horizontal en pantallas
+   angostas — y por spec, fijar overflow-x fuerza overflow-y a 'auto'
+   también (no hay forma de dejarlo en 'visible' mientras el eje X esté en
+   auto). Eso convierte a .table-scroll en el contenedor de scroll que
+   "cuenta" para el sticky, pero como .table-scroll nunca tiene su propio
+   scroll interno (crece con el contenido, quien scrollea es la página),
+   el header sticky terminaba fijo en su posición de flujo normal en vez
+   de pegarse a la ventana. Con las tablas paginadas de Propuestas/
+   Pricebook nunca se nota; con 61 conceptos sin paginar, sí.
+   Fix: acotar la altura de .table-scroll en esta vista para que sea ELLA
+   la que scrollee internamente (con su propio overflow-y:auto real) — el
+   patrón estándar de "grilla con header congelado". El header queda justo
+   debajo del topbar (57px medidos + 1px de borde). */
+#view-motor-variables .table-scroll{max-height:calc(100vh - 320px);overflow-y:auto;}
+#view-motor-variables .data-table thead th{top:0;z-index:2;}
 
 /* ---------- Cabecera de vista: acciones contextuales por pestaña ---------- */
 #view-motor-variables .mv-actions-bar{justify-content:flex-end;margin-bottom:14px;}
@@ -2165,7 +2191,8 @@ table.approval-table{width:100%;border-collapse:collapse;}
   max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
 #view-motor-variables .mv-cell-nominal{font-family:var(--mv-font-mono);font-size:12.5px;}
-#view-motor-variables .mv-assumed{display:block;font-size:10.5px;color:var(--grey);font-style:italic;font-family:var(--font-body);margin-top:1px;}
+#view-motor-variables .mv-assumed{display:flex;align-items:center;justify-content:flex-end;gap:4px;font-size:10.5px;color:var(--grey);font-style:italic;font-family:var(--font-body);margin-top:1px;}
+#view-motor-variables .mv-assumed-warn{display:flex;flex:0 0 auto;color:var(--mv-amber-fg);}
 #view-motor-variables .mv-nominal-calc{font-size:11.5px;color:var(--grey);font-style:italic;font-family:var(--font-body);}
 
 /* Filas de categoría (agrupación colapsable dentro de la tabla) */
@@ -2184,6 +2211,7 @@ table.approval-table{width:100%;border-collapse:collapse;}
   color:var(--red-hero-dark);
 }
 #view-motor-variables .mv-cat-count{font-size:11px;color:var(--grey);font-weight:500;}
+#view-motor-variables .mv-cat-pending{font-size:11px;color:var(--mv-amber-fg);font-weight:700;}
 
 /* Badges semánticos del módulo (heredan .badge + dot ::before del host) */
 #view-motor-variables .badge.mv-rent-ingresos{background:var(--status-aprobada-bg);color:var(--status-aprobada-fg);}
@@ -2396,6 +2424,14 @@ table.approval-table{width:100%;border-collapse:collapse;}
   transition:color .15s ease,border-color .15s ease;
 }
 #view-motor-variables .mv-dep-chip:hover{border-color:var(--red-hero);color:var(--red-hero);}
+#view-motor-variables .mv-dep-item{display:inline-flex;align-items:center;gap:3px;}
+#view-motor-variables .mv-dep-locate{
+  appearance:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  width:22px;height:22px;border-radius:50%;
+  background:var(--white);border:1px solid var(--light-grey);color:var(--grey);
+  transition:color .15s ease,border-color .15s ease,background-color .15s ease;
+}
+#view-motor-variables .mv-dep-locate:hover{border-color:var(--red-hero);color:var(--red-hero);background:var(--surface-muted);}
 #view-motor-variables .mv-dep-empty{font-size:12px;color:var(--grey);font-style:italic;}
 
 /* Confirmación de eliminación */

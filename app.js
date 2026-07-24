@@ -2716,7 +2716,17 @@ let DATA = JSON.parse(JSON.stringify(RAW_DATA));
 let editingId  = null;   // id abierto en el modal de edición (null = creando)
 let deletingId = null;   // id pendiente de confirmación de eliminado
 let editDirty  = false;  // cambios sin guardar en el modal de edición
-const collapsedCrudCats = new Set();
+const MV_COLLAPSED_CATS_KEY = 'mv_collapsed_cats';
+function loadCollapsedCats(){
+  try{
+    const raw = localStorage.getItem(MV_COLLAPSED_CATS_KEY);
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  }catch(e){ return new Set(); }
+}
+function persistCollapsedCats(){
+  try{ localStorage.setItem(MV_COLLAPSED_CATS_KEY, JSON.stringify(Array.from(collapsedCrudCats))); }catch(e){}
+}
+const collapsedCrudCats = loadCollapsedCats();
 const collapsedSimCats  = {intermediate:new Set(), output:new Set()};
 let wired = false, rendered = false, activeTab = 'crud';
 let mvLastFocus = null, simInputTimer = null;
@@ -2846,7 +2856,9 @@ const ICONS = {
   clock: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>',
   pencil:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
   trash: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6h16Z"/></svg>',
-  chevron:'<svg class="mv-cat-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>'
+  chevron:'<svg class="mv-cat-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
+  warning:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>',
+  locate:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>'
 };
 
 function renderConceptosTable(){
@@ -2881,12 +2893,14 @@ function renderConceptosTable(){
   tbody.innerHTML = orderedCats.map(cat=>{
     const groupRows = groups[cat];
     const isCollapsed = !filtersActive && collapsedCrudCats.has(cat);
+    const pendingCount = groupRows.filter(d=>d.estado==='Pendiente').length;
     const groupHeader = categoriaFilterActive ? '' : (
       '<tr class="mv-cat-row"><td colspan="'+colCount+'">'+
         '<button type="button" class="mv-cat-toggle '+(isCollapsed?'is-collapsed':'')+'" data-mv-cat="'+esc(cat)+'" aria-expanded="'+(!isCollapsed)+'">'+
           ICONS.chevron+
           '<span class="mv-cat-label">'+esc(cat)+'</span>'+
           '<span class="mv-cat-count">'+groupRows.length+' concepto'+(groupRows.length===1?'':'s')+'</span>'+
+          (pendingCount>0 ? '<span class="mv-cat-pending">· '+pendingCount+' pendiente'+(pendingCount===1?'':'s')+'</span>' : '')+
         '</button>'+
       '</td></tr>');
     if(isCollapsed) return groupHeader;
@@ -2896,7 +2910,7 @@ function renderConceptosTable(){
       if(d.nominal!==null){
         nominalCell = '<span>'+fmtNum(d.nominal, Number.isInteger(d.nominal)?0:2)+'</span>';
       } else if(d.assumed!==undefined){
-        nominalCell = '<span>—</span><span class="mv-assumed">supuesto: '+fmtNum(d.assumed,2)+'</span>';
+        nominalCell = '<span>—</span><span class="mv-assumed"><span class="mv-assumed-warn" data-tooltip="Este valor es un supuesto, no está confirmado">'+ICONS.warning+'</span>supuesto: '+fmtNum(d.assumed,2)+'</span>';
       } else if(d.clase==='OUTPUT'){
         nominalCell = '<span class="mv-nominal-calc">calculado</span>';
       } else {
@@ -2907,7 +2921,7 @@ function renderConceptosTable(){
         : '<span class="mv-concept-plain">'+esc(d.label||d.nombre)+'</span>';
       const conceptSub = d.resumen ? '<span class="mv-concept-sub" title="'+esc(d.resumen)+'">'+esc(d.resumen)+'</span>' : '';
       return (
-      '<tr>'+
+      '<tr id="mv-row-'+esc(d.id)+'">'+
         '<td><span class="mv-cell-id">'+esc(d.id)+'</span></td>'+
         '<td style="white-space:normal;">'+conceptMain+conceptSub+'</td>'+
         '<td>'+rentBadge(d.rent)+'</td>'+
@@ -2916,9 +2930,9 @@ function renderConceptosTable(){
         '<td>'+monedaName(d.moneda)+'</td>'+
         '<td>'+estadoBadge(d.estado)+'</td>'+
         '<td class="center"><div class="row-actions" style="justify-content:center;">'+
-          '<button type="button" class="icon-btn history" data-mv-history="'+d.id+'" title="Ver historial" aria-label="Ver historial de '+esc(d.label||d.nombre)+'">'+ICONS.clock+'</button>'+
-          '<button type="button" class="icon-btn edit" data-mv-edit="'+d.id+'" title="Editar" aria-label="Editar '+esc(d.label||d.nombre)+'">'+ICONS.pencil+'</button>'+
-          '<button type="button" class="icon-btn reject" data-mv-delete="'+d.id+'" title="Eliminar" aria-label="Eliminar '+esc(d.label||d.nombre)+'">'+ICONS.trash+'</button>'+
+          '<button type="button" class="icon-btn history" data-mv-history="'+d.id+'" data-tooltip="Ver histórico" aria-label="Ver historial de '+esc(d.label||d.nombre)+'">'+ICONS.clock+'</button>'+
+          '<button type="button" class="icon-btn edit" data-mv-edit="'+d.id+'" data-tooltip="Editar" aria-label="Editar '+esc(d.label||d.nombre)+'">'+ICONS.pencil+'</button>'+
+          '<button type="button" class="icon-btn reject" data-mv-delete="'+d.id+'" data-tooltip="Eliminar" aria-label="Eliminar '+esc(d.label||d.nombre)+'">'+ICONS.trash+'</button>'+
         '</div></td>'+
       '</tr>');
     }).join('');
@@ -3008,6 +3022,32 @@ function closeModal(id){
   mvLastFocus = null;
 }
 
+/* Cierra el modal de fórmula y lleva al usuario a la fila del concepto
+   en la tabla del catálogo: expande su categoría si estaba colapsada,
+   hace scroll y la resalta con la misma animación que usa Propuestas. */
+function locateConceptRow(id){
+  const d = byId(id);
+  if(!d) return;
+  closeModal('mvFormulaModal');
+  switchTab('crud');
+  /* Cualquier filtro/búsqueda activo podría estar ocultando este
+     concepto — se limpia para garantizar que la fila exista en el DOM. */
+  clearCrudFilters();
+  const cat = d.categoria || 'Otros';
+  if(collapsedCrudCats.has(cat)){
+    collapsedCrudCats.delete(cat);
+    persistCollapsedCats();
+    refreshCrudView();
+  }
+  setTimeout(()=>{
+    const row = document.getElementById('mv-row-'+id);
+    if(!row) return;
+    row.scrollIntoView({behavior:'smooth', block:'center'});
+    row.classList.add('row-flash');
+    setTimeout(()=>row.classList.remove('row-flash'), 1600);
+  }, 50);
+}
+
 /* -------------------------------------------------------------------------
    6) MODAL DE DETALLE DE FÓRMULA (compartido catálogo/simulador)
    ------------------------------------------------------------------------- */
@@ -3021,7 +3061,10 @@ function openFormulaModal(id){
   const nominalLine = d.nominal!==null ? fmtNum(d.nominal,2) : (d.assumed!==undefined ? fmtNum(d.assumed,2)+' (supuesto)' : 'Sin definir');
   const depChips = (list)=>list.map(depId=>{
     const dd = byId(depId);
-    return '<button type="button" class="mv-dep-chip" data-mv-view="'+depId+'">'+esc(dd.label||dd.nombre)+'</button>';
+    return '<span class="mv-dep-item">'+
+      '<button type="button" class="mv-dep-chip" data-mv-view="'+depId+'">'+esc(dd.label||dd.nombre)+'</button>'+
+      '<button type="button" class="mv-dep-locate" data-mv-locate="'+depId+'" data-tooltip="Ver en la tabla">'+ICONS.locate+'</button>'+
+    '</span>';
   }).join('');
   $('#mv-formula-body').innerHTML =
     '<div class="mv-tech-line"><span class="mv-mono-chip">'+esc(d.id)+' · '+esc(d.idc)+'</span><span class="mv-tech-name">'+esc(d.nombre)+'</span></div>'+
@@ -3681,8 +3724,8 @@ function wireStatic(){
   });
   $('#mv-btn-clear-filters').addEventListener('click', clearCrudFilters);
   $('#mv-btn-empty-clear').addEventListener('click', clearCrudFilters);
-  $('#mv-btn-expand-all').addEventListener('click', ()=>{ collapsedCrudCats.clear(); renderConceptosTable(); });
-  $('#mv-btn-collapse-all').addEventListener('click', ()=>{ CATEGORY_ORDER.forEach(c=>collapsedCrudCats.add(c)); renderConceptosTable(); });
+  $('#mv-btn-expand-all').addEventListener('click', ()=>{ collapsedCrudCats.clear(); persistCollapsedCats(); renderConceptosTable(); });
+  $('#mv-btn-collapse-all').addEventListener('click', ()=>{ CATEGORY_ORDER.forEach(c=>collapsedCrudCats.add(c)); persistCollapsedCats(); renderConceptosTable(); });
 
   /* Cabecera: alta y exportación */
   $('#mv-btn-new').addEventListener('click', ()=>openEditModal(null));
@@ -3721,6 +3764,7 @@ function wireStatic(){
     if(catBtn){
       const cat = catBtn.dataset.mvCat;
       if(collapsedCrudCats.has(cat)) collapsedCrudCats.delete(cat); else collapsedCrudCats.add(cat);
+      persistCollapsedCats();
       renderConceptosTable();
       return;
     }
@@ -3738,6 +3782,8 @@ function wireStatic(){
     if(histBtn){ openConceptHistoryModal(histBtn.dataset.mvHistory); return; }
     const delBtn = e.target.closest('[data-mv-delete]');
     if(delBtn){ openDeleteModal(delBtn.dataset.mvDelete); return; }
+    const locateBtn = e.target.closest('[data-mv-locate]');
+    if(locateBtn){ locateConceptRow(locateBtn.dataset.mvLocate); return; }
     const viewBtn = e.target.closest('[data-mv-view]');
     if(viewBtn){ openFormulaModal(viewBtn.dataset.mvView); return; }
     const closeBtn = e.target.closest('[data-mv-close]');
