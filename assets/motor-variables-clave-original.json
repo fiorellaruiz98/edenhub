@@ -1,0 +1,327 @@
+[
+  {
+    "id": "C001",
+    "claveOriginal": "PERSONALIZACION_ADHOC",
+    "concepto": "Personalización adhoc"
+  },
+  {
+    "id": "C002",
+    "claveOriginal": "WELCOME_KIT",
+    "concepto": "Welcome kit"
+  },
+  {
+    "id": "C003",
+    "claveOriginal": "EMBOZADO",
+    "concepto": "Embozado"
+  },
+  {
+    "id": "C004",
+    "claveOriginal": "EMISION_TARJETAS_CON_AFINIDAD",
+    "concepto": "Emisión de tarjetas con afinidad"
+  },
+  {
+    "id": "C005",
+    "claveOriginal": "COSTO_PLASTICO_DE_TARJETAS",
+    "concepto": "Costo del plástico de tarjetas"
+  },
+  {
+    "id": "C006",
+    "claveOriginal": "ENVIO_TARJETAS_PROVINCIA",
+    "concepto": "Envío de tarjetas a provincia"
+  },
+  {
+    "id": "C007",
+    "claveOriginal": "ENVIO_TARJETAS_LIMA",
+    "concepto": "Envío de tarjetas a Lima"
+  },
+  {
+    "id": "C008",
+    "claveOriginal": "REPOSICION_POR_PERDIDA/ROBO",
+    "concepto": "Reposición por pérdida o robo"
+  },
+  {
+    "id": "C009",
+    "claveOriginal": "TRANSACCIONES_APROBADAS_",
+    "concepto": "Transacciones aprobadas"
+  },
+  {
+    "id": "C010",
+    "claveOriginal": "CUENTA_ACTIVA",
+    "concepto": "Cuenta activa"
+  },
+  {
+    "id": "C011",
+    "claveOriginal": "PROCESAMIENTO (OTROS COSTOS)",
+    "concepto": "Procesamiento (otros costos)"
+  },
+  {
+    "id": "C012",
+    "claveOriginal": "PROCESAMIENTO_TX_MARCA",
+    "concepto": "Procesamiento de transacción de marca"
+  },
+  {
+    "id": "C013",
+    "claveOriginal": "INTERCHANGE_FEE",
+    "concepto": "Interchange fee"
+  },
+  {
+    "id": "C014",
+    "claveOriginal": "MDR_ADICIONAL",
+    "concepto": "MDR adicional"
+  },
+  {
+    "id": "C015",
+    "claveOriginal": "RATIO_DE_CONSUMO_SOBRE_LA_CARGA",
+    "concepto": "Ratio de consumo sobre la carga"
+  },
+  {
+    "id": "C016",
+    "claveOriginal": "L&E",
+    "concepto": "Logística y envíos (L&E)"
+  },
+  {
+    "id": "C017",
+    "claveOriginal": "COSTO_PROMEDIO_DE_MANTENIMIENTO",
+    "concepto": "Costo promedio de mantenimiento"
+  },
+  {
+    "id": "C018",
+    "claveOriginal": "CARTA_FIANZA(TASA)",
+    "concepto": "Carta fianza (tasa)"
+  },
+  {
+    "id": "C019",
+    "claveOriginal": "COMISION_CLIENTE",
+    "concepto": "Comisión al cliente"
+  },
+  {
+    "id": "C020",
+    "claveOriginal": "TUR_COMISION_CLIENTE",
+    "concepto": "Tasa unitaria — comisión cliente"
+  },
+  {
+    "id": "C021",
+    "claveOriginal": "COMISION_MERCHANT",
+    "concepto": "Comisión merchant"
+  },
+  {
+    "id": "C022",
+    "claveOriginal": "TUR_COMISION_MERCHANT",
+    "concepto": "Tasa unitaria — comisión merchant"
+  },
+  {
+    "id": "C023",
+    "claveOriginal": "OTROS_INGRESOS(CALCULADO)",
+    "concepto": "Otros ingresos (calculado)"
+  },
+  {
+    "id": "C024",
+    "claveOriginal": "TUR_OTROS_INGRESOS",
+    "concepto": "Tasa unitaria — otros ingresos"
+  },
+  {
+    "id": "C025",
+    "claveOriginal": "L&E_CALCULADO",
+    "concepto": "Logística y envíos (calculado)"
+  },
+  {
+    "id": "C026",
+    "claveOriginal": "MANTENIMIENTO",
+    "concepto": "Mantenimiento"
+  },
+  {
+    "id": "C027",
+    "claveOriginal": "TUR__MANTENIMIENTO",
+    "concepto": "Tasa unitaria — mantenimiento"
+  },
+  {
+    "id": "C028",
+    "claveOriginal": "TUR_PERSONALIZACION_ADHOC",
+    "concepto": "Tasa unitaria — personalización adhoc"
+  },
+  {
+    "id": "C029",
+    "claveOriginal": "DISTRIBUCION_COSTO",
+    "concepto": "Distribución (costo)"
+  },
+  {
+    "id": "C030",
+    "claveOriginal": "TUR_DISTRIBUCION",
+    "concepto": "Tasa unitaria — distribución"
+  },
+  {
+    "id": "C031",
+    "claveOriginal": "COSTO_VENTA",
+    "concepto": "Costo de venta"
+  },
+  {
+    "id": "C032",
+    "claveOriginal": "TUR_COSTO_VENTA",
+    "concepto": "Tasa unitaria — costo de venta"
+  },
+  {
+    "id": "C033",
+    "claveOriginal": "INSUMOS_PERZ_ENSOBRADO",
+    "concepto": "Insumos, personalización y ensobrado"
+  },
+  {
+    "id": "C034",
+    "claveOriginal": "TUR_INSUMOS_PERZ_ENSOBRADO",
+    "concepto": "Tasa unitaria — insumos y ensobrado"
+  },
+  {
+    "id": "C035",
+    "claveOriginal": "PROCESAMIENTO",
+    "concepto": "Procesamiento"
+  },
+  {
+    "id": "C036",
+    "claveOriginal": "TUR_PROCESAMIENTO",
+    "concepto": "Tasa unitaria — procesamiento"
+  },
+  {
+    "id": "C037",
+    "claveOriginal": "OTROS_GASTOS",
+    "concepto": "Otros gastos"
+  },
+  {
+    "id": "C038",
+    "claveOriginal": "TUR_OTROS_GASTOS",
+    "concepto": "Tasa unitaria — otros gastos"
+  },
+  {
+    "id": "C039",
+    "claveOriginal": "PAYROLL",
+    "concepto": "Payroll comercial"
+  },
+  {
+    "id": "C040",
+    "claveOriginal": "TUR_PAYROLL",
+    "concepto": "Tasa unitaria — payroll"
+  },
+  {
+    "id": "C041",
+    "claveOriginal": "COMISION_VARIABLE_EJECUTIVO",
+    "concepto": "Comisión variable del ejecutivo"
+  },
+  {
+    "id": "C042",
+    "claveOriginal": "BONO_LARGE_DEAL",
+    "concepto": "Bono por large deal"
+  },
+  {
+    "id": "C043",
+    "claveOriginal": "CARTA_FIANZA",
+    "concepto": "Carta fianza"
+  },
+  {
+    "id": "C044",
+    "claveOriginal": "TUR_CARTA_FIANZA",
+    "concepto": "Tasa unitaria — carta fianza"
+  },
+  {
+    "id": "C045",
+    "claveOriginal": "GASTOS_FINANCIEROS",
+    "concepto": "Gastos financieros"
+  },
+  {
+    "id": "C046",
+    "claveOriginal": "TUR_GASTOS_FINANCIEROS",
+    "concepto": "Tasa unitaria — gastos financieros"
+  },
+  {
+    "id": "C047",
+    "claveOriginal": "RENTABILIDAD",
+    "concepto": "Rentabilidad"
+  },
+  {
+    "id": "C048",
+    "claveOriginal": "NUMERO_TRANSACCIONES_PROMEDIO",
+    "concepto": "Número de transacciones promedio"
+  },
+  {
+    "id": "C049",
+    "claveOriginal": "TICKET_PROMEDIO",
+    "concepto": "Ticket promedio"
+  },
+  {
+    "id": "C050",
+    "claveOriginal": "REEMBOLSO",
+    "concepto": "Reembolso"
+  },
+  {
+    "id": "C051",
+    "claveOriginal": "MONTO_CARTA_FIANZA",
+    "concepto": "Monto de carta fianza"
+  },
+  {
+    "id": "C052",
+    "claveOriginal": "MARCA_CALCULADO",
+    "concepto": "Costo de marca (calculado)"
+  },
+  {
+    "id": "C053",
+    "claveOriginal": "TOTAL_INGRESOS",
+    "concepto": "Total de ingresos"
+  },
+  {
+    "id": "C054",
+    "claveOriginal": "TOTAL_GASTOS",
+    "concepto": "Total de gastos"
+  },
+  {
+    "id": "C055",
+    "claveOriginal": "TOTAL_RESTA_INGRESOS_GASTOS",
+    "concepto": "Ingresos menos gastos"
+  },
+  {
+    "id": "C056",
+    "claveOriginal": "TUR_TOTAL_RESTA_INGRESOS_GASTOS",
+    "concepto": "Tasa unitaria — margen"
+  },
+  {
+    "id": "C057",
+    "claveOriginal": "COSTO_PERSONALIZACION_ADHOC",
+    "concepto": "Costo de personalización adhoc"
+  },
+  {
+    "id": "C058",
+    "claveOriginal": "PESO%_MES_SUMATORIA",
+    "concepto": "Peso % mensual (sumatoria)"
+  },
+  {
+    "id": "C059",
+    "claveOriginal": "EMISION_TARJETAS",
+    "concepto": "Emisión de tarjetas"
+  },
+  {
+    "id": "C060",
+    "claveOriginal": "TIPO_REBATE",
+    "concepto": "Tipo de rebate"
+  },
+  {
+    "id": "C061",
+    "claveOriginal": "CALCULO_REBATE",
+    "concepto": "Cálculo de rebate"
+  },
+  {
+    "id": "C062",
+    "claveOriginal": "RATIO_REPOSICION",
+    "concepto": "Ratio de reposición"
+  },
+  {
+    "id": "C063",
+    "claveOriginal": "DISTRIBUCION",
+    "concepto": "Distribución"
+  },
+  {
+    "id": "C064",
+    "claveOriginal": "DISTRIBUCION_LIMA",
+    "concepto": "Distribución — Lima"
+  },
+  {
+    "id": "C065",
+    "claveOriginal": "DISTRIBUCION_PROVINCIA",
+    "concepto": "Distribución — provincia"
+  }
+]

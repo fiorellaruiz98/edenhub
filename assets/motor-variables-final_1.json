@@ -2,6 +2,7 @@
   {
     "id": "C001",
     "concepto": "Personalización adhoc",
+    "claveOriginal": "PERSONALIZACION_ADHOC",
     "categoria": "Tarjetas y emisión",
     "clase": "Insumo de cálculo — ingreso",
     "valorNominal": null,
@@ -14,6 +15,7 @@
   {
     "id": "C002",
     "concepto": "Welcome kit",
+    "claveOriginal": "WELCOME_KIT",
     "categoria": "Tarjetas y emisión",
     "clase": "Computada",
     "valorNominal": 0.18,
@@ -26,6 +28,7 @@
   {
     "id": "C003",
     "concepto": "Embozado",
+    "claveOriginal": "EMBOZADO",
     "categoria": "Tarjetas y emisión",
     "clase": "Computada",
     "valorNominal": null,
@@ -38,6 +41,7 @@
   {
     "id": "C004",
     "concepto": "Emisión de tarjetas con afinidad",
+    "claveOriginal": "EMISION_TARJETAS_CON_AFINIDAD",
     "categoria": "Tarjetas y emisión",
     "clase": "Computada",
     "valorNominal": 0.1,
@@ -50,6 +54,7 @@
   {
     "id": "C005",
     "concepto": "Costo del plástico de tarjetas",
+    "claveOriginal": "COSTO_PLASTICO_DE_TARJETAS",
     "categoria": "Tarjetas y emisión",
     "clase": "Computada",
     "valorNominal": null,
@@ -62,6 +67,7 @@
   {
     "id": "C006",
     "concepto": "Envío de tarjetas a provincia",
+    "claveOriginal": "ENVIO_TARJETAS_PROVINCIA",
     "categoria": "Logística y entrega",
     "clase": "Computada",
     "valorNominal": 18,
@@ -74,6 +80,7 @@
   {
     "id": "C007",
     "concepto": "Envío de tarjetas a Lima",
+    "claveOriginal": "ENVIO_TARJETAS_LIMA",
     "categoria": "Logística y entrega",
     "clase": "Computada",
     "valorNominal": 10,
@@ -86,6 +93,7 @@
   {
     "id": "C008",
     "concepto": "Reposición por pérdida o robo",
+    "claveOriginal": "REPOSICION_POR_PERDIDA/ROBO",
     "categoria": "Tarjetas y emisión",
     "clase": "Ingreso",
     "valorNominal": 16.95,
@@ -98,6 +106,7 @@
   {
     "id": "C009",
     "concepto": "Transacciones aprobadas",
+    "claveOriginal": "TRANSACCIONES_APROBADAS_",
     "categoria": "Transaccional y procesamiento",
     "clase": "Computada",
     "valorNominal": 0.06,
@@ -110,6 +119,7 @@
   {
     "id": "C010",
     "concepto": "Cuenta activa",
+    "claveOriginal": "CUENTA_ACTIVA",
     "categoria": "Transaccional y procesamiento",
     "clase": "Computada",
     "valorNominal": 0.12,
@@ -122,6 +132,7 @@
   {
     "id": "C011",
     "concepto": "Procesamiento (otros costos)",
+    "claveOriginal": "PROCESAMIENTO (OTROS COSTOS)",
     "categoria": "Transaccional y procesamiento",
     "clase": "Computada",
     "valorNominal": 0.105,
@@ -134,6 +145,7 @@
   {
     "id": "C012",
     "concepto": "Procesamiento de transacción de marca",
+    "claveOriginal": "PROCESAMIENTO_TX_MARCA",
     "categoria": "Transaccional y procesamiento",
     "clase": "Computada",
     "valorNominal": null,
@@ -141,11 +153,12 @@
     "unidad": "Business Volume",
     "moneda": "SOLES",
     "estado": "Activo",
-    "formula": "(PROPUESTA.PROCESAMIENTO_TX_MARCA.VALOR NOMINAL)"
+    "formula": "(VALOR NOMINAL)"
   },
   {
     "id": "C013",
     "concepto": "Interchange fee",
+    "claveOriginal": "INTERCHANGE_FEE",
     "categoria": "Comisiones e ingresos",
     "clase": "Computada",
     "valorNominal": null,
@@ -153,11 +166,12 @@
     "unidad": "Business Volume",
     "moneda": "SOLES",
     "estado": "Activo",
-    "formula": "(PROPUESTA.INTERCHANGE_FEE.VALOR NOMINAL)"
+    "formula": "(VALOR NOMINAL)"
   },
   {
     "id": "C014",
     "concepto": "MDR adicional",
+    "claveOriginal": "MDR_ADICIONAL",
     "categoria": "Comisiones e ingresos",
     "clase": "Computada",
     "valorNominal": null,
@@ -165,11 +179,12 @@
     "unidad": "Business Volume",
     "moneda": "SOLES",
     "estado": "Activo",
-    "formula": "(PROPUESTA.MDR_ADICIONAL.VALOR NOMINAL)"
+    "formula": "(VALOR NOMINAL)"
   },
   {
     "id": "C015",
     "concepto": "Ratio de consumo sobre la carga",
+    "claveOriginal": "RATIO_DE_CONSUMO_SOBRE_LA_CARGA",
     "categoria": "Transaccional y procesamiento",
     "clase": "Computada",
     "valorNominal": 98,
@@ -182,6 +197,7 @@
   {
     "id": "C016",
     "concepto": "Logística y envíos (L&E)",
+    "claveOriginal": "L&E",
     "categoria": "Comisiones e ingresos",
     "clase": "Computada",
     "valorNominal": null,
@@ -189,11 +205,12 @@
     "unidad": "Business Volume",
     "moneda": "SOLES",
     "estado": "Activo",
-    "formula": "(PROPUESTA.L&E.VALOR NOMINAL)"
+    "formula": "(VALOR NOMINAL)"
   },
   {
     "id": "C017",
     "concepto": "Costo promedio de mantenimiento",
+    "claveOriginal": "COSTO_PROMEDIO_DE_MANTENIMIENTO",
     "categoria": "Comisiones e ingresos",
     "clase": "Computada",
     "valorNominal": 0.5,
@@ -206,6 +223,7 @@
   {
     "id": "C018",
     "concepto": "Carta fianza (tasa)",
+    "claveOriginal": "CARTA_FIANZA(TASA)",
     "categoria": "Carta fianza y garantías",
     "clase": "Computada",
     "valorNominal": 5.2,
@@ -218,6 +236,7 @@
   {
     "id": "C019",
     "concepto": "Comisión al cliente",
+    "claveOriginal": "COMISION_CLIENTE",
     "categoria": "Comisiones e ingresos",
     "clase": "Ingreso",
     "valorNominal": null,
@@ -230,6 +249,7 @@
   {
     "id": "C020",
     "concepto": "Tasa unitaria — comisión cliente",
+    "claveOriginal": "TUR_COMISION_CLIENTE",
     "categoria": "Comisiones e ingresos",
     "clase": "Insumo de cálculo — ingreso",
     "valorNominal": null,
@@ -242,6 +262,7 @@
   {
     "id": "C021",
     "concepto": "Comisión merchant",
+    "claveOriginal": "COMISION_MERCHANT",
     "categoria": "Comisiones e ingresos",
     "clase": "Ingreso",
     "valorNominal": null,
@@ -254,6 +275,7 @@
   {
     "id": "C022",
     "concepto": "Tasa unitaria — comisión merchant",
+    "claveOriginal": "TUR_COMISION_MERCHANT",
     "categoria": "Comisiones e ingresos",
     "clase": "Insumo de cálculo — ingreso",
     "valorNominal": null,
@@ -266,6 +288,7 @@
   {
     "id": "C023",
     "concepto": "Otros ingresos (calculado)",
+    "claveOriginal": "OTROS_INGRESOS(CALCULADO)",
     "categoria": "Comisiones e ingresos",
     "clase": "Ingreso",
     "valorNominal": null,
@@ -278,6 +301,7 @@
   {
     "id": "C024",
     "concepto": "Tasa unitaria — otros ingresos",
+    "claveOriginal": "TUR_OTROS_INGRESOS",
     "categoria": "Comisiones e ingresos",
     "clase": "Insumo de cálculo — ingreso",
     "valorNominal": null,
@@ -290,6 +314,7 @@
   {
     "id": "C025",
     "concepto": "Logística y envíos (calculado)",
+    "claveOriginal": "L&E_CALCULADO",
     "categoria": "Comisiones e ingresos",
     "clase": "Insumo de cálculo — ingreso",
     "valorNominal": null,
@@ -302,6 +327,7 @@
   {
     "id": "C026",
     "concepto": "Mantenimiento",
+    "claveOriginal": "MANTENIMIENTO",
     "categoria": "Comisiones e ingresos",
     "clase": "Insumo de cálculo — ingreso",
     "valorNominal": null,
@@ -314,6 +340,7 @@
   {
     "id": "C027",
     "concepto": "Tasa unitaria — mantenimiento",
+    "claveOriginal": "TUR__MANTENIMIENTO",
     "categoria": "Comisiones e ingresos",
     "clase": "Insumo de cálculo — ingreso",
     "valorNominal": null,
@@ -326,6 +353,7 @@
   {
     "id": "C028",
     "concepto": "Tasa unitaria — personalización adhoc",
+    "claveOriginal": "TUR_PERSONALIZACION_ADHOC",
     "categoria": "Comisiones e ingresos",
     "clase": "Insumo de cálculo — ingreso",
     "valorNominal": null,
@@ -338,6 +366,7 @@
   {
     "id": "C029",
     "concepto": "Distribución (costo)",
+    "claveOriginal": "DISTRIBUCION_COSTO",
     "categoria": "Logística y entrega",
     "clase": "Insumo de cálculo — costo",
     "valorNominal": null,
@@ -350,6 +379,7 @@
   {
     "id": "C030",
     "concepto": "Tasa unitaria — distribución",
+    "claveOriginal": "TUR_DISTRIBUCION",
     "categoria": "Logística y entrega",
     "clase": "Insumo de cálculo — costo",
     "valorNominal": null,
@@ -362,6 +392,7 @@
   {
     "id": "C031",
     "concepto": "Costo de venta",
+    "claveOriginal": "COSTO_VENTA",
     "categoria": "Costos y gastos",
     "clase": "Costo",
     "valorNominal": null,
@@ -374,6 +405,7 @@
   {
     "id": "C032",
     "concepto": "Tasa unitaria — costo de venta",
+    "claveOriginal": "TUR_COSTO_VENTA",
     "categoria": "Costos y gastos",
     "clase": "Insumo de cálculo — costo",
     "valorNominal": null,
@@ -386,6 +418,7 @@
   {
     "id": "C033",
     "concepto": "Insumos, personalización y ensobrado",
+    "claveOriginal": "INSUMOS_PERZ_ENSOBRADO",
     "categoria": "Tarjetas y emisión",
     "clase": "Insumo de cálculo — costo",
     "valorNominal": null,
@@ -398,6 +431,7 @@
   {
     "id": "C034",
     "concepto": "Tasa unitaria — insumos y ensobrado",
+    "claveOriginal": "TUR_INSUMOS_PERZ_ENSOBRADO",
     "categoria": "Tarjetas y emisión",
     "clase": "Insumo de cálculo — costo",
     "valorNominal": null,
@@ -410,6 +444,7 @@
   {
     "id": "C035",
     "concepto": "Procesamiento",
+    "claveOriginal": "PROCESAMIENTO",
     "categoria": "Transaccional y procesamiento",
     "clase": "Insumo de cálculo — costo",
     "valorNominal": null,
@@ -422,6 +457,7 @@
   {
     "id": "C036",
     "concepto": "Tasa unitaria — procesamiento",
+    "claveOriginal": "TUR_PROCESAMIENTO",
     "categoria": "Transaccional y procesamiento",
     "clase": "Insumo de cálculo — costo",
     "valorNominal": null,
@@ -434,6 +470,7 @@
   {
     "id": "C037",
     "concepto": "Otros gastos",
+    "claveOriginal": "OTROS_GASTOS",
     "categoria": "Costos y gastos",
     "clase": "Gasto",
     "valorNominal": null,
@@ -446,6 +483,7 @@
   {
     "id": "C038",
     "concepto": "Tasa unitaria — otros gastos",
+    "claveOriginal": "TUR_OTROS_GASTOS",
     "categoria": "Costos y gastos",
     "clase": "Insumo de cálculo — gasto",
     "valorNominal": null,
@@ -458,6 +496,7 @@
   {
     "id": "C039",
     "concepto": "Payroll comercial",
+    "claveOriginal": "PAYROLL",
     "categoria": "Costos y gastos",
     "clase": "Insumo de cálculo — gasto",
     "valorNominal": null,
@@ -470,6 +509,7 @@
   {
     "id": "C040",
     "concepto": "Tasa unitaria — payroll",
+    "claveOriginal": "TUR_PAYROLL",
     "categoria": "Costos y gastos",
     "clase": "Insumo de cálculo — gasto",
     "valorNominal": null,
@@ -482,6 +522,7 @@
   {
     "id": "C041",
     "concepto": "Comisión variable del ejecutivo",
+    "claveOriginal": "COMISION_VARIABLE_EJECUTIVO",
     "categoria": "Costos y gastos",
     "clase": "Insumo de cálculo — gasto",
     "valorNominal": null,
@@ -494,6 +535,7 @@
   {
     "id": "C042",
     "concepto": "Bono por large deal",
+    "claveOriginal": "BONO_LARGE_DEAL",
     "categoria": "Costos y gastos",
     "clase": "Insumo de cálculo — gasto",
     "valorNominal": 3500,
@@ -506,6 +548,7 @@
   {
     "id": "C043",
     "concepto": "Carta fianza",
+    "claveOriginal": "CARTA_FIANZA",
     "categoria": "Carta fianza y garantías",
     "clase": "Insumo de cálculo — gasto",
     "valorNominal": null,
@@ -518,6 +561,7 @@
   {
     "id": "C044",
     "concepto": "Tasa unitaria — carta fianza",
+    "claveOriginal": "TUR_CARTA_FIANZA",
     "categoria": "Carta fianza y garantías",
     "clase": "Insumo de cálculo — gasto",
     "valorNominal": null,
@@ -530,6 +574,7 @@
   {
     "id": "C045",
     "concepto": "Gastos financieros",
+    "claveOriginal": "GASTOS_FINANCIEROS",
     "categoria": "Costos y gastos",
     "clase": "Insumo de cálculo — gasto",
     "valorNominal": null,
@@ -542,6 +587,7 @@
   {
     "id": "C046",
     "concepto": "Tasa unitaria — gastos financieros",
+    "claveOriginal": "TUR_GASTOS_FINANCIEROS",
     "categoria": "Costos y gastos",
     "clase": "Insumo de cálculo — gasto",
     "valorNominal": null,
@@ -554,6 +600,7 @@
   {
     "id": "C047",
     "concepto": "Rentabilidad",
+    "claveOriginal": "RENTABILIDAD",
     "categoria": "Rentabilidad total",
     "clase": "Resultante",
     "valorNominal": null,
@@ -566,6 +613,7 @@
   {
     "id": "C048",
     "concepto": "Número de transacciones promedio",
+    "claveOriginal": "NUMERO_TRANSACCIONES_PROMEDIO",
     "categoria": "Transaccional y procesamiento",
     "clase": "Computada",
     "valorNominal": null,
@@ -578,6 +626,7 @@
   {
     "id": "C049",
     "concepto": "Ticket promedio",
+    "claveOriginal": "TICKET_PROMEDIO",
     "categoria": "Transaccional y procesamiento",
     "clase": "Computada",
     "valorNominal": null,
@@ -585,11 +634,12 @@
     "unidad": null,
     "moneda": "SOLES",
     "estado": "Activo",
-    "formula": "(PROPUESTA.TICKET_PROMEDIO.VALOR NOMINAL)"
+    "formula": "(VALOR NOMINAL)"
   },
   {
     "id": "C050",
     "concepto": "Reembolso",
+    "claveOriginal": "REEMBOLSO",
     "categoria": "Transaccional y procesamiento",
     "clase": "Computada",
     "valorNominal": null,
@@ -602,6 +652,7 @@
   {
     "id": "C051",
     "concepto": "Monto de carta fianza",
+    "claveOriginal": "MONTO_CARTA_FIANZA",
     "categoria": "Carta fianza y garantías",
     "clase": "Insumo de cálculo — gasto",
     "valorNominal": null,
@@ -614,6 +665,7 @@
   {
     "id": "C052",
     "concepto": "Costo de marca (calculado)",
+    "claveOriginal": "MARCA_CALCULADO",
     "categoria": "Transaccional y procesamiento",
     "clase": "Insumo de cálculo — costo",
     "valorNominal": null,
@@ -626,6 +678,7 @@
   {
     "id": "C053",
     "concepto": "Total de ingresos",
+    "claveOriginal": "TOTAL_INGRESOS",
     "categoria": "Rentabilidad total",
     "clase": "Resultante",
     "valorNominal": null,
@@ -638,6 +691,7 @@
   {
     "id": "C054",
     "concepto": "Total de gastos",
+    "claveOriginal": "TOTAL_GASTOS",
     "categoria": "Rentabilidad total",
     "clase": "Resultante",
     "valorNominal": null,
@@ -650,6 +704,7 @@
   {
     "id": "C055",
     "concepto": "Ingresos menos gastos",
+    "claveOriginal": "TOTAL_RESTA_INGRESOS_GASTOS",
     "categoria": "Rentabilidad total",
     "clase": "Resultante",
     "valorNominal": null,
@@ -662,6 +717,7 @@
   {
     "id": "C056",
     "concepto": "Tasa unitaria — margen",
+    "claveOriginal": "TUR_TOTAL_RESTA_INGRESOS_GASTOS",
     "categoria": "Rentabilidad total",
     "clase": "Resultante",
     "valorNominal": null,
@@ -674,6 +730,7 @@
   {
     "id": "C057",
     "concepto": "Costo de personalización adhoc",
+    "claveOriginal": "COSTO_PERSONALIZACION_ADHOC",
     "categoria": "Tarjetas y emisión",
     "clase": "Insumo de cálculo — costo",
     "valorNominal": null,
@@ -686,6 +743,7 @@
   {
     "id": "C058",
     "concepto": "Peso % mensual (sumatoria)",
+    "claveOriginal": "PESO%_MES_SUMATORIA",
     "categoria": "Parámetros de tiempo",
     "clase": "Computada",
     "valorNominal": null,
@@ -698,6 +756,7 @@
   {
     "id": "C059",
     "concepto": "Emisión de tarjetas",
+    "claveOriginal": "EMISION_TARJETAS",
     "categoria": "Tarjetas y emisión",
     "clase": "Ingreso",
     "valorNominal": null,
@@ -705,11 +764,12 @@
     "unidad": null,
     "moneda": null,
     "estado": "Activo",
-    "formula": "(PROPUESTA.EMISION_TARJETAS.VALOR NOMINAL* PROPUESTA.QTARJETAS)"
+    "formula": "(VALOR NOMINAL* PROPUESTA.QTARJETAS)"
   },
   {
     "id": "C060",
     "concepto": "Tipo de rebate",
+    "claveOriginal": "TIPO_REBATE",
     "categoria": "Comisiones e ingresos",
     "clase": "Computada",
     "valorNominal": null,
@@ -722,6 +782,7 @@
   {
     "id": "C061",
     "concepto": "Cálculo de rebate",
+    "claveOriginal": "CALCULO_REBATE",
     "categoria": "Comisiones e ingresos",
     "clase": "Computada",
     "valorNominal": null,
@@ -734,6 +795,7 @@
   {
     "id": "C062",
     "concepto": "Ratio de reposición",
+    "claveOriginal": "RATIO_REPOSICION",
     "categoria": "Tarjetas y emisión",
     "clase": "Computada",
     "valorNominal": null,
@@ -746,6 +808,7 @@
   {
     "id": "C063",
     "concepto": "Distribución",
+    "claveOriginal": "DISTRIBUCION",
     "categoria": "Logística y entrega",
     "clase": "Insumo de cálculo — ingreso",
     "valorNominal": null,
@@ -758,6 +821,7 @@
   {
     "id": "C064",
     "concepto": "Distribución — Lima",
+    "claveOriginal": "DISTRIBUCION_LIMA",
     "categoria": "Logística y entrega",
     "clase": "Computada",
     "valorNominal": null,
@@ -770,6 +834,7 @@
   {
     "id": "C065",
     "concepto": "Distribución — provincia",
+    "claveOriginal": "DISTRIBUCION_PROVINCIA",
     "categoria": "Logística y entrega",
     "clase": "Computada",
     "valorNominal": null,
