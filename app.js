@@ -3577,15 +3577,18 @@ const PRODUCT_LOOKUP = {
 };
 
 const SIM_DEFAULTS = {
+  solucion:'Food',
   tipoProducto:'FISICO', productoElegido:'Ticket Restaurant Clásico', recurrencia:'RECURRENTE',
   servicioLogoEmpresa:'SI', personalizacionFlyer:'NO',
-  destinoEntrega:'LIMA', destinoReposicion:'LIMA', reposicion:'AFECTO', renovacion:'EXONERADO',
+  adicionalAdhoc:'NO', costoPersonalizacionAdhoc:'NO', costoPlasticoTarjetas:0,
+  destinoEntrega:'LIMA', destinoReposicion:'LIMA', reposicion:'AFECTO', renovacion:'EXONERADO', distribucion:'AFECTO',
   bvAnual:600000, bvMensual:50000, cantidadTarjetas:500, qTarjetasNuevas:120,
   numeroPedidosAlAnio:4, puntosLima:3, puntosProvincia:2, cantidadDeRepartos:12,
   sector:'PRIVADO', cartaFianza:'NO', emitioCartaFianza:'NO',
   modalidadPago:'CREDITO', diasCredito:30,
   productoCustom:'NO', mdrNegociado:0,
   comisionClienteEjecutivo:3, rebate:0,
+  tipoRebate:'PORCENTAJE_BV', montoFijoRebate:0, pctBvRebate:0,
 };
 let SIM = Object.assign({}, SIM_DEFAULTS);
 
@@ -3692,6 +3695,11 @@ function simFormTemplate(){
   return (
   '<fieldset>'+
     '<legend>Producto &amp; recurrencia</legend>'+
+    '<div class="mv-sim-field"><label>Solución</label><select data-field="solucion">'+
+      '<option value="Gift" '+(P.solucion==='Gift'?'selected':'')+'>Gift</option>'+
+      '<option value="Food" '+(P.solucion==='Food'?'selected':'')+'>Food</option>'+
+      '<option value="Mobility" '+(P.solucion==='Mobility'?'selected':'')+'>Mobility</option>'+
+    '</select></div>'+
     '<div class="mv-sim-field"><label>Tipo de producto</label>'+toggle('tipoProducto',[{v:'FISICO',t:'Físico'},{v:'VIRTUAL',t:'Virtual'}])+'</div>'+
     '<div class="mv-sim-field"><label>Producto elegido</label><select data-field="productoElegido">'+productos.map(p=>'<option value="'+esc(p)+'" '+(P.productoElegido===p?'selected':'')+'>'+esc(p)+'</option>').join('')+'</select></div>'+
     '<div class="mv-sim-field"><label>Recurrencia</label><select data-field="recurrencia">'+
@@ -3701,6 +3709,16 @@ function simFormTemplate(){
     '</select></div>'+
     '<div class="mv-sim-field"><label>¿Incluye logo de la empresa?</label>'+toggle('servicioLogoEmpresa',[{v:'SI',t:'Sí'},{v:'NO',t:'No'}])+'</div>'+
     '<div class="mv-sim-field"><label>Personalización flyer sobre otros</label>'+toggle('personalizacionFlyer',[{v:'SI',t:'Sí'},{v:'NO',t:'No'}])+'</div>'+
+  '</fieldset>'+
+  '<fieldset>'+
+    '<legend>Personalización y tarjetas</legend>'+
+    '<div class="mv-sim-field"><label>Adicional adhoc</label><select data-field="adicionalAdhoc">'+
+      '<option value="SI" '+(P.adicionalAdhoc==='SI'?'selected':'')+'>Sí</option>'+
+      '<option value="NO" '+(P.adicionalAdhoc==='NO'?'selected':'')+'>No</option>'+
+      '<option value="EXONERADO" '+(P.adicionalAdhoc==='EXONERADO'?'selected':'')+'>Exonerado</option>'+
+    '</select></div>'+
+    '<div class="mv-sim-field"><label>¿Costo de personalización adhoc?</label>'+toggle('costoPersonalizacionAdhoc',[{v:'SI',t:'Sí'},{v:'NO',t:'No'}])+'</div>'+
+    '<div class="mv-sim-field"><label>Costo del plástico de tarjetas (S/)</label><input type="number" min="0" step="0.01" data-field="costoPlasticoTarjetas" value="'+P.costoPlasticoTarjetas+'"></div>'+
   '</fieldset>'+
   '<fieldset>'+
     '<legend>Logística &amp; entrega</legend>'+
@@ -3720,6 +3738,10 @@ function simFormTemplate(){
       '<option value="EXONERADO" '+(P.renovacion==='EXONERADO'?'selected':'')+'>Exonerado</option>'+
       '<option value="AFECTO" '+(P.renovacion==='AFECTO'?'selected':'')+'>Afecto a cobro</option>'+
     '</select></div>'+
+    '<div class="mv-sim-field"><label>Distribución</label><select data-field="distribucion">'+
+      '<option value="AFECTO" '+(P.distribucion==='AFECTO'?'selected':'')+'>Afecto a cobro</option>'+
+      '<option value="EXONERADO" '+(P.distribucion==='EXONERADO'?'selected':'')+'>Exonerado</option>'+
+    '</select></div>'+
     '<div class="mv-sim-field"><label>Puntos de entrega — Lima</label><input type="number" min="0" data-field="puntosLima" value="'+P.puntosLima+'"></div>'+
     '<div class="mv-sim-field"><label>Puntos de entrega — Provincia</label><input type="number" min="0" data-field="puntosProvincia" value="'+P.puntosProvincia+'"></div>'+
     '<div class="mv-sim-field"><label>Cantidad de repartos / año</label><input type="number" min="0" data-field="cantidadDeRepartos" value="'+P.cantidadDeRepartos+'"></div>'+
@@ -3732,7 +3754,13 @@ function simFormTemplate(){
     '<div class="mv-sim-field"><label>Tarjetas nuevas (Q)</label><input type="number" min="0" data-field="qTarjetasNuevas" value="'+P.qTarjetasNuevas+'"></div>'+
     '<div class="mv-sim-field"><label>N.º pedidos al año</label><input type="number" min="0" data-field="numeroPedidosAlAnio" value="'+P.numeroPedidosAlAnio+'"></div>'+
     '<div class="mv-sim-field"><label>Comisión cliente ejecutivo (%)</label><input type="number" min="0" step="0.1" data-field="comisionClienteEjecutivo" value="'+P.comisionClienteEjecutivo+'"></div>'+
+    '<div class="mv-sim-field"><label>Tipo de rebate</label><select data-field="tipoRebate">'+
+      '<option value="MONTO_FIJO" '+(P.tipoRebate==='MONTO_FIJO'?'selected':'')+'>Monto fijo</option>'+
+      '<option value="PORCENTAJE_BV" '+(P.tipoRebate==='PORCENTAJE_BV'?'selected':'')+'>% de BV</option>'+
+    '</select></div>'+
     '<div class="mv-sim-field"><label>Rebate (S/)</label><input type="number" min="0" data-field="rebate" value="'+P.rebate+'"></div>'+
+    '<div class="mv-sim-field"><label>Monto fijo de rebate (S/)</label><input type="number" min="0" data-field="montoFijoRebate" value="'+P.montoFijoRebate+'"></div>'+
+    '<div class="mv-sim-field"><label>Rebate (% de BV)</label><input type="number" min="0" step="0.1" data-field="pctBvRebate" value="'+P.pctBvRebate+'"></div>'+
   '</fieldset>'+
   '<fieldset>'+
     '<legend>Financiero &amp; legal</legend>'+
