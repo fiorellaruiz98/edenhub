@@ -2548,7 +2548,9 @@ var errBox = document.getElementById("loginError");
 document.addEventListener("DOMContentLoaded", function(){
   var sidebarLogo = document.querySelector(".sidebar-logo .logo-full");
   var loginLogo = document.getElementById("loginLogoImg");
+  var loginLogoLarge = document.getElementById("loginLogoImgLarge");
   if(sidebarLogo && loginLogo) loginLogo.src = sidebarLogo.src;
+  if(sidebarLogo && loginLogoLarge) loginLogoLarge.src = sidebarLogo.src;
   document.body.style.overflow = "hidden";           /* bloquea scroll del fondo */
   document.querySelector(".app-shell").setAttribute("aria-hidden","true");
   setTimeout(function(){ userIn.focus(); }, 60);
@@ -2568,21 +2570,45 @@ function hideLogin(){
   if(window.goToInicio) window.goToInicio();
 }
 
+var userGroup = userIn.closest(".field-group");
+var passGroup = passIn.closest(".field-group");
+
 form.addEventListener("submit", function(e){
   e.preventDefault();
   var okUser = userIn.value.trim().toLowerCase() === LOGIN_USER;
   var okPass = passIn.value === LOGIN_PASS;
   if(okUser && okPass){
     errBox.hidden = true;
+    userGroup.classList.remove("field-error");
+    passGroup.classList.remove("field-error");
     hideLogin();
     return;
   }
   errBox.hidden = false;
   passIn.value = "";
+  userGroup.classList.toggle("field-error", !okUser);
+  passGroup.classList.add("field-error");
   card.classList.remove("shake");
   void card.offsetWidth;                              /* reinicia la animación */
   card.classList.add("shake");
   (okUser ? passIn : userIn).focus();
+});
+
+/* Quita el borde de error apenas el usuario retoma el campo */
+userIn.addEventListener("input", function(){ userGroup.classList.remove("field-error"); });
+passIn.addEventListener("input", function(){ passGroup.classList.remove("field-error"); });
+
+/* "¿Olvidaste tu contraseña?" — entorno de demo, sin flujo real */
+document.getElementById("loginForgotBtn").addEventListener("click", function(){
+  document.getElementById("loginForgotText").hidden = false;
+});
+
+/* SSO simulado — mismo flujo de éxito que usuario/contraseña */
+document.getElementById("loginSsoBtn").addEventListener("click", function(){
+  errBox.hidden = true;
+  userGroup.classList.remove("field-error");
+  passGroup.classList.remove("field-error");
+  hideLogin();
 });
 
 /* Mostrar / ocultar contraseña */

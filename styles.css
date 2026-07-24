@@ -499,10 +499,6 @@ main{
   align-items:end;
 }
 .field-group{display:flex;flex-direction:column;gap:5px;min-width:0;}
-.field-group label{
-  font-size:11px;font-weight:700;color:var(--grey);
-  text-transform:uppercase;letter-spacing:.03em;
-}
 .input-wrap{position:relative;}
 .input-wrap svg{
   position:absolute;left:11px;top:50%;transform:translateY(-50%);
@@ -510,7 +506,7 @@ main{
 }
 .input-wrap input{padding-left:32px;}
 
-input[type=text],input[type=search],input[type=date],input[type=number],select,textarea{
+input[type=text],input[type=search],input[type=date],input[type=number],input[type=password],select,textarea{
   width:100%;
   border:1px solid var(--light-grey);
   background:var(--white);
@@ -1634,8 +1630,6 @@ table.approval-table{width:100%;border-collapse:collapse;}
     #view-pricebook .pb-filters-grid{ grid-template-columns: 1.6fr repeat(4, 1fr); align-items: end; }
     #view-pricebook .pb-filters-grid .field-search{ grid-column: span 1; }
 
-    #view-pricebook .field{ display: flex; flex-direction: column; gap: 6px; }
-    #view-pricebook .field label{ font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.03em; }
     #view-pricebook .field-search{ flex: 1 1 260px; min-width: 220px; }
     #view-pricebook .input, #view-pricebook .select{
     border: 1px solid var(--border); background: var(--surface); border-radius: var(--radius-sm);
@@ -1721,12 +1715,6 @@ table.approval-table{width:100%;border-collapse:collapse;}
     #view-pricebook .pb-icon-btn.dup:hover{ background: var(--bg-app); color: var(--text); border-color: var(--border); }
     #view-pricebook .pb-icon-btn.active{ background: var(--bg-app); color: var(--text); border-color: var(--border); }
 
-    #view-pricebook .pagination{ display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-top: 1px solid var(--border); font-size: 12.5px; color: var(--text-secondary); }
-    #view-pricebook .pager{ display: flex; gap: 4px; }
-    #view-pricebook .pager button{ min-width: 30px; height: 30px; border-radius: var(--radius-pill); border: 1px solid var(--border); background: var(--surface); color: var(--text-secondary); font-size: 12.5px; font-weight: 500; transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease; }
-    #view-pricebook .pager button:hover{ border-color: var(--primary); color: var(--primary); }
-    #view-pricebook .pager button.active{ background: var(--primary); border-color: var(--primary); color: #fff; }
-    #view-pricebook .pager button:disabled{ opacity: 0.4; cursor: not-allowed; }
 
   /* ============================================================
      SLIDE-OVER DRAWER (Servicio — maestro)
@@ -1920,7 +1908,6 @@ table.approval-table{width:100%;border-collapse:collapse;}
         #view-pricebook .table-toolbar-actions .btn-ribbon{ flex: 1; justify-content: center; }
         #view-pricebook .export-dropdown{ flex: 1; }
         #view-pricebook .export-dropdown .btn-ribbon-outline{ width: 100%; justify-content: center; }
-        #view-pricebook .pagination{ flex-direction: column; gap: 10px; align-items: flex-start; }
         #view-pricebook #tarifa-modal{ width: calc(100vw - 32px); }
     
     
@@ -1950,32 +1937,25 @@ table.approval-table{width:100%;border-collapse:collapse;}
   transition:opacity .35s ease, visibility .35s ease;
 }
 .login-screen.closing{opacity:0;visibility:hidden;pointer-events:none;}
-/* Cintas decorativas del Brandpad (radius 9999, proporción >2:3) */
-.login-screen::before,
-.login-screen::after{
-  content:'';position:absolute;border-radius:var(--radius-ribbon);pointer-events:none;
-}
-.login-screen::before{
-  width:520px;height:170px;background:var(--red-hero);
-  top:-60px;right:-140px;transform:rotate(-18deg);opacity:.92;
-}
-.login-screen::after{
-  width:420px;height:140px;background:var(--light-pink);
-  bottom:-50px;left:-120px;transform:rotate(-18deg);
-}
-.login-card{
+.login-shell{
   position:relative;z-index:1;
+  display:flex;
   width:100%;max-width:400px;
   background:var(--white);
   border:1px solid var(--border-soft);
   border-radius:16px;
   box-shadow:var(--shadow-pop);
-  padding:34px 32px 26px;
+  overflow:hidden;
   animation:loginIn .4s cubic-bezier(.32,.72,0,1) both;
 }
 @keyframes loginIn{from{opacity:0;transform:translateY(16px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
-.login-card.shake{animation:loginShake .4s ease;}
+.login-shell.shake{animation:loginShake .4s ease;}
 @keyframes loginShake{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-8px);}40%,80%{transform:translateX(8px);}}
+.login-form-col{
+  width:100%;
+  padding:34px 32px 26px;
+  display:flex;flex-direction:column;justify-content:center;
+}
 .login-brand{display:flex;justify-content:center;margin-bottom:20px;}
 .login-brand img{height:30px;width:auto;display:block;}
 .login-card h1{
@@ -1984,7 +1964,7 @@ table.approval-table{width:100%;border-collapse:collapse;}
   letter-spacing:-0.01em;
 }
 .login-sub{margin:0 0 22px;text-align:center;font-size:12.5px;color:var(--grey);line-height:1.5;}
-.login-card form{display:flex;flex-direction:column;gap:14px;}
+.login-form-col form{display:flex;flex-direction:column;gap:14px;}
 .login-pass-wrap{position:relative;}
 .login-pass-wrap input{padding-right:42px;}
 .login-pass-wrap .toggle-pass{
@@ -1994,6 +1974,18 @@ table.approval-table{width:100%;border-collapse:collapse;}
   border-radius:8px;transition:all .2s ease;
 }
 .login-pass-wrap .toggle-pass:hover{background:var(--surface-muted);color:var(--black);}
+.login-forgot{margin-top:-6px;text-align:right;}
+.login-forgot-link{
+  background:none;border:none;cursor:pointer;
+  font-family:var(--font-body);font-size:12px;font-weight:700;
+  color:var(--grey);padding:2px 0;
+}
+.login-forgot-link:hover{color:var(--red-hero);}
+.login-forgot-text{
+  margin:6px 0 0;text-align:right;
+  font-size:11.5px;color:var(--grey);line-height:1.5;
+}
+.login-forgot-text[hidden]{display:none;}
 .login-error{
   display:flex;align-items:flex-start;gap:9px;
   background:var(--light-pink);
@@ -2004,7 +1996,56 @@ table.approval-table{width:100%;border-collapse:collapse;}
 .login-error[hidden]{display:none;}
 .login-error svg{flex:0 0 auto;margin-top:1px;}
 .login-submit{width:100%;justify-content:center;margin-top:4px;font-size:14px;padding:12px 20px;}
+.login-divider{
+  display:flex;align-items:center;gap:10px;
+  margin:18px 0;
+  font-size:11px;color:var(--grey);text-transform:uppercase;letter-spacing:.04em;
+}
+.login-divider::before,.login-divider::after{content:'';flex:1 1 auto;height:1px;background:var(--border-soft);}
+.login-sso-btn{
+  width:100%;display:flex;align-items:center;justify-content:center;gap:10px;
+  background:var(--white);border:1px solid var(--light-grey);border-radius:var(--radius-s);
+  padding:10px 16px;font-family:var(--font-body);font-size:13px;font-weight:700;color:var(--black);
+  cursor:pointer;transition:all .2s ease;
+}
+.login-sso-btn:hover{background:var(--surface-muted);border-color:var(--grey);}
 .login-foot{margin:20px 0 0;text-align:center;font-size:10.5px;color:var(--grey);}
+
+.login-brand-col{
+  display:none;
+  position:relative;
+  flex:0 0 340px;
+  overflow:hidden;
+  background:var(--cold-white);
+  align-items:center;justify-content:center;
+  flex-direction:column;
+  gap:22px;
+  padding:40px 32px;
+  text-align:center;
+  border-left:1px solid var(--border-soft);
+}
+.login-brand-col::before,
+.login-brand-col::after{
+  content:'';position:absolute;border-radius:var(--radius-ribbon);pointer-events:none;
+}
+.login-brand-col::before{
+  width:420px;height:150px;background:var(--red-hero);
+  top:-50px;right:-160px;transform:rotate(-18deg);opacity:.92;
+}
+.login-brand-col::after{
+  width:360px;height:130px;background:var(--benefits-pink);
+  bottom:-40px;left:-150px;transform:rotate(-18deg);opacity:.85;
+}
+.login-brand-col-logo{position:relative;z-index:1;width:96px;height:96px;display:block;}
+.login-brand-col-msg{
+  position:relative;z-index:1;margin:0;max-width:230px;
+  font-family:var(--font-title);font-size:16px;font-weight:600;color:var(--black);line-height:1.4;
+}
+@media (min-width:861px){
+  .login-shell{max-width:820px;}
+  .login-form-col{flex:0 0 480px;padding:48px 56px;}
+  .login-brand-col{display:flex;}
+}
 
 /* ===== INTEGRACIÓN: Módulo Motor de Variables y Fórmulas (view-motor-variables) ===== */
 
