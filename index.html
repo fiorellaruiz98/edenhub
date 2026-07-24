@@ -990,30 +990,37 @@
         </div>
       </div>
 
-      <!-- Crear / editar variable -->
-      <div class="mv-modal" id="mvEditModal" role="dialog" aria-modal="true" aria-labelledby="mv-edit-title">
-        <div class="modal-card w-xl">
-          <div class="modal-header">
-            <div>
-              <span class="mv-modal-eyebrow" id="mv-edit-eyebrow">Nueva variable</span>
-              <h3 id="mv-edit-title">Agregar concepto</h3>
-            </div>
-            <button type="button" class="close-x" data-mv-close="mvEditModal" aria-label="Cerrar">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      <!-- Crear / editar variable — drawer lateral derecho (mismo patrón que
+           "Editar servicio" en Servicios y Tarifas: overlay + aside fijo a la
+           derecha, header con expandir/cerrar, body con section-label, footer
+           con acciones) -->
+      <div class="mv-drawer-overlay" id="mv-drawer-overlay"></div>
+      <aside class="mv-drawer" id="mv-edit-drawer" aria-hidden="true" aria-label="Formulario de concepto">
+        <div class="mv-drawer-header">
+          <div>
+            <h2 id="mv-edit-title">Agregar concepto</h2>
+            <p id="mv-edit-subtitle">Se generará un ID automáticamente al guardar.</p>
+          </div>
+          <div class="mv-drawer-header-actions">
+            <button type="button" class="drawer-expand" id="mv-drawer-expand-btn" title="Ampliar panel" aria-label="Ampliar panel">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M21 16v3a2 2 0 0 1-2 2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+            </button>
+            <button type="button" class="drawer-close" id="mv-drawer-close-btn" aria-label="Cerrar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
           </div>
-          <form class="modal-body" id="mv-edit-form" novalidate><!-- generado por MotorVariablesModule --></form>
-          <div class="modal-footer">
-            <div class="mv-discard-bar" id="mv-discard-bar">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
-              Tienes cambios sin guardar.
-              <button type="button" class="btn-text" id="mv-discard-confirm" style="color:var(--red-hero-dark);padding:4px 6px;">Descartar cambios</button>
-            </div>
-            <button type="button" class="btn-secondary" id="mv-edit-cancel">Cancelar</button>
-            <button type="submit" form="mv-edit-form" class="btn-ribbon" id="mv-edit-save">Guardar cambios</button>
-          </div>
         </div>
-      </div>
+        <form class="mv-drawer-body" id="mv-edit-form" novalidate><!-- generado por MotorVariablesModule --></form>
+        <div class="mv-drawer-footer">
+          <div class="mv-discard-bar" id="mv-discard-bar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+            Tienes cambios sin guardar.
+            <button type="button" class="btn-text" id="mv-discard-confirm" style="color:var(--red-hero-dark);padding:4px 6px;">Descartar cambios</button>
+          </div>
+          <button type="button" class="btn-ribbon-neutral" id="mv-edit-cancel">Cancelar</button>
+          <button type="submit" form="mv-edit-form" class="btn-ribbon" id="mv-edit-save">Guardar cambios</button>
+        </div>
+      </aside>
 
       <!-- Confirmación de eliminación (con análisis de dependencias) -->
       <div class="mv-modal" id="mvDeleteModal" role="alertdialog" aria-modal="true" aria-labelledby="mv-delete-title">

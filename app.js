@@ -2856,6 +2856,7 @@ const collapsedCrudCats = loadCollapsedCats();
 const collapsedSimCats  = {intermediate:new Set(), output:new Set()};
 let wired = false, rendered = false, activeTab = 'crud';
 let mvLastFocus = null, simInputTimer = null;
+let mvDrawerExpanded = false;
 
 /* -------------------------------------------------------------------------
    2) HELPERS (con scope en la vista del módulo)
@@ -3283,33 +3284,24 @@ function buildHistoryDiff(oldRec, newVals){
 const DRIVER_OPTIONS = ['Hora','Tarjeta','Punto de entrega','Transacción','%','—'];
 
 function editFormTemplate(d){
+  const activo = !d || d.estado==='Activo';
   return (
+  '<div class="section-label">'+
+    '<div class="left"><span class="chip"></span><span class="title">Datos del concepto</span></div>'+
+  '</div>'+
   '<div class="form-grid">'+
-    '<div class="field-group">'+
-      '<label>ID técnico <span class="req">*</span></label>'+
-      '<input type="text" name="id" value="'+(d?esc(d.id):'')+'" '+(d?'readonly':'')+' placeholder="Ej. MC062">'+
-      '<span class="field-hint">Identificador único del registro (no editable tras crearse).</span>'+
-      '<span class="mv-field-msg" data-msg-for="id">Ingresa un ID único, ej. MC062.</span>'+
-    '</div>'+
-    '<div class="field-group">'+
-      '<label>Idconcepto <span class="req">*</span></label>'+
-      '<input type="text" name="idc" value="'+(d?esc(d.idc):'')+'" placeholder="Ej. C062">'+
-      '<span class="mv-field-msg" data-msg-for="idc">Ingresa el código de concepto.</span>'+
-    '</div>'+
     '<div class="field-group field-full">'+
       '<label>Nombre del concepto <span class="req">*</span></label>'+
       '<input type="text" name="label" value="'+(d?esc(d.label||d.nombre):'')+'" placeholder="Ej. Costo promedio de envío">'+
-      '<span class="field-hint">Nombre en lenguaje de negocio, tal como lo verá el usuario. El código técnico ('+(d?esc(d.nombre):'ej. COSTO_PROMEDIO_DE_ENVIO')+') se genera automáticamente.</span>'+
       '<span class="mv-field-msg" data-msg-for="label">El nombre del concepto es obligatorio.</span>'+
     '</div>'+
-    '<div class="field-group">'+
+    '<div class="field-group field-full">'+
       '<label>Categoría</label>'+
       '<select name="categoria">'+CATEGORY_ORDER.map(c=>'<option value="'+esc(c)+'" '+(d&&d.categoria===c?'selected':'')+'>'+esc(c)+'</option>').join('')+'</select>'+
     '</div>'+
     '<div class="field-group">'+
       '<label>Valor nominal</label>'+
       '<input type="number" step="0.01" name="nominal" value="'+(d&&d.nominal!==null?d.nominal:'')+'" placeholder="Dejar vacío si es calculado">'+
-      '<span class="field-hint">Solo aplica a variables de ingreso manual con valor fijo.</span>'+
     '</div>'+
     '<div class="field-group">'+
       '<label>Moneda</label>'+
@@ -3320,27 +3312,6 @@ function editFormTemplate(d){
       '</select>'+
     '</div>'+
     '<div class="field-group field-full">'+
-      '<label>Resumen en lenguaje simple</label>'+
-      '<input type="text" name="resumen" value="'+(d?esc(d.resumen||''):'')+'" placeholder="Ej. Aplica si el destino de entrega es Lima">'+
-      '<span class="field-hint">Frase corta que se muestra en la tabla en lugar de la fórmula técnica.</span>'+
-    '</div>'+
-    '<div class="field-group field-full">'+
-      '<label>Fórmula técnica</label>'+
-      '<textarea name="formula" placeholder="Ej. PROPUESTA.DESTINO_DE_ENTREGA = LIMA">'+(d?esc(d.formula||''):'')+'</textarea>'+
-      '<span class="field-hint">Puedes referenciar otros nombres técnicos de concepto o variables PROPUESTA.*</span>'+
-    '</div>'+
-    '<div class="field-group">'+
-      '<label>Estado</label>'+
-      '<select name="estado">'+
-        '<option value="Activo" '+((!d||d.estado==='Activo')?'selected':'')+'>Activo</option>'+
-        '<option value="Inactivo" '+(d&&d.estado==='Inactivo'?'selected':'')+'>Inactivo</option>'+
-      '</select>'+
-    '</div>'+
-    '<div class="field-group">'+
-      '<label>Unidad de medida</label>'+
-      '<select name="driver">'+DRIVER_OPTIONS.map(o=>'<option value="'+esc(o)+'" '+(d&&d.driver===o?'selected':'')+'>'+esc(o)+'</option>').join('')+'</select>'+
-    '</div>'+
-    '<div class="field-group">'+
       '<label>Clase <span class="req">*</span></label>'+
       '<select name="rent">'+
         '<option value="Ingreso" '+((!d||d.rent==='Ingreso')?'selected':'')+'>Ingreso</option>'+
@@ -3355,6 +3326,26 @@ function editFormTemplate(d){
       '<span class="field-hint">A qué grupo del estado de resultados pertenece este concepto.</span>'+
     '</div>'+
     '<div class="field-group field-full">'+
+      '<label>Unidad de medida</label>'+
+      '<select name="driver">'+DRIVER_OPTIONS.map(o=>'<option value="'+esc(o)+'" '+(d&&d.driver===o?'selected':'')+'>'+esc(o)+'</option>').join('')+'</select>'+
+    '</div>'+
+    '<div class="field-group field-full">'+
+      '<div class="pb-toggle-row simple">'+
+        '<span class="toggle-label">Estado</span>'+
+        '<div class="toggle-control">'+
+          '<label class="pb-switch"><input type="checkbox" id="mv-f-activo" '+(activo?'checked':'')+'><span class="track"></span></label>'+
+          '<span class="toggle-state" id="mv-f-activo-state">'+(activo?'Activo':'Inactivo')+'</span>'+
+        '</div>'+
+      '</div>'+
+      '<input type="hidden" name="estado" value="'+(activo?'Activo':'Inactivo')+'">'+
+    '</div>'+
+  '</div>'+
+  '<div class="divider"></div>'+
+  '<div class="section-label">'+
+    '<div class="left"><span class="chip"></span><span class="title">Cálculo</span></div>'+
+  '</div>'+
+  '<div class="form-grid">'+
+    '<div class="field-group field-full">'+
       '<label>¿Cómo se obtiene el valor? <span class="req">*</span></label>'+
       '<div class="mv-class-toggle" id="mv-class-toggle">'+
         '<button type="button" class="sel-input '+((!d||d.clase==='INPUT')?'active':'')+'" data-clase="INPUT">'+
@@ -3368,6 +3359,11 @@ function editFormTemplate(d){
       '</div>'+
       '<input type="hidden" name="clase" value="'+(d?d.clase:'INPUT')+'">'+
     '</div>'+
+    '<div class="field-group field-full">'+
+      '<label>Fórmula técnica</label>'+
+      '<textarea name="formula" placeholder="Ej. PROPUESTA.DESTINO_DE_ENTREGA = LIMA">'+(d?esc(d.formula||''):'')+'</textarea>'+
+      '<span class="field-hint">Puedes referenciar otros nombres técnicos de concepto o variables PROPUESTA.*</span>'+
+    '</div>'+
   '</div>');
 }
 
@@ -3376,21 +3372,32 @@ function setDirty(v){
   if(!v) $('#mv-discard-bar').classList.remove('visible');
 }
 
+/* Próximo ID disponible (C001, C002, ...) — ya no lo escribe el usuario,
+   se genera al guardar un concepto nuevo. */
+function nextConceptId(){
+  const nums = DATA.map(d=>{
+    const m = /^C(\d+)$/.exec(d.id);
+    return m ? parseInt(m[1],10) : 0;
+  });
+  const next = (nums.length ? Math.max.apply(null,nums) : 0) + 1;
+  return 'C'+String(next).padStart(3,'0');
+}
+
 function openEditModal(id){
   editingId = id || null;
   const d = id ? byId(id) : null;
-  $('#mv-edit-eyebrow').textContent = d ? 'Editar concepto' : 'Nueva variable';
   $('#mv-edit-title').textContent = d ? (d.label||d.nombre) : 'Agregar concepto';
+  $('#mv-edit-subtitle').textContent = d ? ('ID: '+d.id) : 'Se generará un ID automáticamente al guardar.';
   $('#mv-edit-save').textContent = d ? 'Guardar cambios' : 'Crear variable';
   $('#mv-edit-form').innerHTML = editFormTemplate(d);
   $$('.field-group', $('#mv-edit-form')).forEach(f=>f.classList.remove('field-error'));
   setDirty(false);
-  openModal('mvEditModal');
+  openMvDrawer();
 }
 function closeEditModal(){
   setDirty(false);
   editingId = null;
-  closeModal('mvEditModal');
+  closeMvDrawer();
 }
 function attemptCloseEdit(){
   if(!editDirty){ closeEditModal(); return; }
@@ -3399,6 +3406,35 @@ function attemptCloseEdit(){
   const btn = $('#mv-discard-confirm');
   if(btn) btn.focus();
 }
+
+/* ---------- Drawer lateral: apertura/cierre/expandir (mismo patrón que
+   el drawer "Editar servicio" de Servicios y Tarifas) ---------- */
+function openMvDrawer(){
+  mvLastFocus = document.activeElement;
+  $('#mv-drawer-overlay').classList.add('show');
+  $('#mv-edit-drawer').classList.add('show');
+  $('#mv-edit-drawer').setAttribute('aria-hidden','false');
+  const target = $('#mv-edit-form').querySelector('input:not([type=hidden]), select, textarea');
+  if(target) setTimeout(()=>{ try{ target.focus(); }catch(e){} }, 30);
+}
+function closeMvDrawer(){
+  $('#mv-drawer-overlay').classList.remove('show');
+  $('#mv-edit-drawer').classList.remove('show');
+  $('#mv-edit-drawer').setAttribute('aria-hidden','true');
+  if(mvDrawerExpanded) toggleMvDrawerExpand();
+  if(mvLastFocus && typeof mvLastFocus.focus==='function'){ try{ mvLastFocus.focus(); }catch(e){} }
+  mvLastFocus = null;
+}
+function toggleMvDrawerExpand(){
+  mvDrawerExpanded = !mvDrawerExpanded;
+  $('#mv-edit-drawer').classList.toggle('expanded', mvDrawerExpanded);
+  const btn = $('#mv-drawer-expand-btn');
+  btn.classList.toggle('active', mvDrawerExpanded);
+  const label = mvDrawerExpanded ? 'Contraer panel' : 'Ampliar panel';
+  btn.setAttribute('title', label);
+  btn.setAttribute('aria-label', label);
+}
+function isMvDrawerOpen(){ return $('#mv-edit-drawer').classList.contains('show'); }
 
 function handleEditSubmit(e){
   e.preventDefault();
@@ -3419,9 +3455,6 @@ function handleEditSubmit(e){
       if(msgEl) msgEl.textContent = msg;
     }
   }
-  if(!vals.id || !vals.id.trim()) markError('id');
-  else if(!editingId && byId(vals.id.trim())) markError('id','Este ID ya existe en el catálogo. Usa uno distinto.');
-  if(!vals.idc || !vals.idc.trim()) markError('idc');
   if(!vals.label || !vals.label.trim()) markError('label');
   if(hasError){
     mvToast('Revisa los campos marcados en rojo','danger');
@@ -3438,13 +3471,15 @@ function handleEditSubmit(e){
     .replace(/\bDEL\b/g,' ').replace(/\bDE\b/g,' ')
     .replace(/[^A-Z0-9]+/g,'_').replace(/^_+|_+$/g,'');
 
+  const id = editingId || nextConceptId();
+  const idc = editingId ? byId(editingId).idc : id;
+
   const record = {
-    id: vals.id.trim(),
-    idc: vals.idc.trim(),
+    id: id,
+    idc: idc,
     label: vals.label.trim(),
     nombre: technicalName,
     categoria: vals.categoria,
-    resumen: (vals.resumen||'').trim(),
     nominal: vals.nominal!=='' ? parseFloat(vals.nominal) : null,
     formula: (vals.formula||'').trim(),
     estado: vals.estado,
@@ -3944,8 +3979,7 @@ function wireStatic(){
     if(viewBtn){ openFormulaModal(viewBtn.dataset.mvView); return; }
     const closeBtn = e.target.closest('[data-mv-close]');
     if(closeBtn){
-      const id = closeBtn.dataset.mvClose;
-      if(id==='mvEditModal') attemptCloseEdit(); else closeModal(id);
+      closeModal(closeBtn.dataset.mvClose);
       return;
     }
   });
@@ -3967,19 +4001,28 @@ function wireStatic(){
     $('#mv-edit-form [name="clase"]').value = btn.dataset.clase;
     editDirty = true;
   });
+  $('#mv-edit-form').addEventListener('change', (e)=>{
+    if(e.target.id!=='mv-f-activo') return;
+    syncToggleState('mv-f-activo','Activo','Inactivo');
+    $('#mv-edit-form [name="estado"]').value = e.target.checked ? 'Activo' : 'Inactivo';
+    editDirty = true;
+  });
   $('#mv-edit-cancel').addEventListener('click', attemptCloseEdit);
   $('#mv-discard-confirm').addEventListener('click', closeEditModal);
+  $('#mv-drawer-close-btn').addEventListener('click', attemptCloseEdit);
+  $('#mv-drawer-expand-btn').addEventListener('click', toggleMvDrawerExpand);
+  $('#mv-drawer-overlay').addEventListener('click', attemptCloseEdit);
 
   /* Modal de eliminación */
   $('#mv-delete-cancel').addEventListener('click', closeDeleteModal);
   $('#mv-delete-confirm').addEventListener('click', confirmConceptDelete);
 
-  /* Clic en el backdrop de cada modal del módulo */
+  /* Clic en el backdrop de cada modal del módulo (el drawer de edición
+     usa su propio overlay, cableado arriba) */
   $$('.mv-modal').forEach(m=>{
     m.addEventListener('click', (e)=>{
       if(e.target!==m) return;
-      if(m.id==='mvEditModal') attemptCloseEdit();
-      else if(m.id==='mvDeleteModal') closeDeleteModal();
+      if(m.id==='mvDeleteModal') closeDeleteModal();
       else closeModal(m.id);
     });
   });
@@ -3988,10 +4031,10 @@ function wireStatic(){
      del módulo para no interferir con el resto de la plataforma) */
   document.addEventListener('keydown', (e)=>{
     if(e.key!=='Escape') return;
+    if(isMvDrawerOpen()){ attemptCloseEdit(); return; }
     if(!anyMvModalOpen()){ closeExportMenu(); return; }
     const open = root.querySelector('.mv-modal.open');
-    if(open.id==='mvEditModal') attemptCloseEdit();
-    else if(open.id==='mvDeleteModal') closeDeleteModal();
+    if(open.id==='mvDeleteModal') closeDeleteModal();
     else closeModal(open.id);
   });
   document.addEventListener('click', (e)=>{

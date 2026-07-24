@@ -2447,6 +2447,87 @@ table.approval-table{width:100%;border-collapse:collapse;}
   color:var(--benefits-pink);margin-bottom:4px;
 }
 
+/* ---------- Drawer de edición de conceptos — mismo patrón que .pb-drawer
+   ("Editar servicio", Servicios y Tarifas): overlay dedicado + aside fijo
+   a la derecha, header con expandir/cerrar, body con section-label,
+   footer con acciones. Valores idénticos, usando los tokens globales de
+   la plataforma en vez de los alias locales de #view-pricebook. ---------- */
+#view-motor-variables .mv-drawer-overlay{
+  position:fixed;inset:0;
+  background:rgba(20,20,30,.46);
+  opacity:0;pointer-events:none;
+  transition:opacity .3s ease;
+  z-index:78;
+}
+#view-motor-variables .mv-drawer-overlay.show{opacity:1;pointer-events:auto;}
+#view-motor-variables .mv-drawer{
+  position:fixed;top:0;right:0;bottom:0;width:640px;max-width:100vw;
+  background:var(--white);box-shadow:var(--shadow-drawer);
+  transform:translateX(100%);
+  transition:transform .35s cubic-bezier(.22,.9,.32,1), width .3s ease;
+  z-index:80;display:flex;flex-direction:column;
+}
+#view-motor-variables .mv-drawer.show{transform:translateX(0);}
+#view-motor-variables .mv-drawer.expanded{width:min(980px,96vw);}
+#view-motor-variables .mv-drawer-header{
+  padding:20px 26px;border-bottom:1px solid var(--border-soft);
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+}
+#view-motor-variables .mv-drawer-header h2{font-family:var(--font-title);font-size:18px;font-weight:700;color:var(--black);}
+#view-motor-variables .mv-drawer-header p{font-size:12.5px;color:var(--grey);margin-top:3px;}
+#view-motor-variables .mv-drawer-header-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+#view-motor-variables .mv-drawer .drawer-close,
+#view-motor-variables .mv-drawer .drawer-expand{
+  appearance:none;border:none;cursor:pointer;font-family:var(--font-body);
+  width:32px;height:32px;flex-shrink:0;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--grey);background:var(--surface-muted);
+  transition:background-color .2s ease, color .2s ease;
+}
+#view-motor-variables .mv-drawer .drawer-close:hover{background:var(--light-pink);color:var(--red-hero-dark);}
+#view-motor-variables .mv-drawer .drawer-expand:hover,
+#view-motor-variables .mv-drawer .drawer-expand.active{background:var(--light-pink);color:var(--red-hero);}
+#view-motor-variables .mv-drawer .drawer-close svg,
+#view-motor-variables .mv-drawer .drawer-expand svg{width:15px;height:15px;}
+#view-motor-variables .mv-drawer-body{padding:22px 26px;overflow-y:auto;flex:1;}
+#view-motor-variables .mv-drawer-body .section-label{display:flex;align-items:center;justify-content:space-between;gap:9px;margin:6px 0 16px;}
+#view-motor-variables .mv-drawer-body .section-label .left{display:flex;align-items:center;gap:9px;}
+#view-motor-variables .mv-drawer-body .section-label .chip{width:8px;height:20px;border-radius:var(--radius-ribbon);background:var(--red-hero);flex-shrink:0;}
+#view-motor-variables .mv-drawer-body .section-label span.title{font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--black);}
+#view-motor-variables .mv-drawer-body .divider{height:1px;background:var(--border-soft);margin:6px 0 22px;}
+#view-motor-variables .mv-drawer-footer{
+  padding:16px 26px;border-top:1px solid var(--border-soft);
+  display:flex;align-items:center;justify-content:flex-end;gap:10px;
+  background:var(--surface-muted);
+}
+
+/* Toggle Estado — mismo componente .pb-switch que ya usa el drawer
+   "Editar servicio" (Servicios y Tarifas), reutilizado tal cual. */
+#view-motor-variables .pb-toggle-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 14px;background:var(--surface-muted);
+  border:1px solid var(--border-soft);border-radius:var(--radius-m);
+}
+#view-motor-variables .pb-toggle-row .toggle-label{font-size:13px;font-weight:500;color:var(--black);}
+#view-motor-variables .toggle-control{display:flex;align-items:center;gap:9px;}
+#view-motor-variables .toggle-state{font-size:12.5px;font-weight:700;color:var(--black);min-width:46px;text-align:right;}
+#view-motor-variables .pb-switch{position:relative;width:40px;height:22px;flex-shrink:0;}
+#view-motor-variables .pb-switch input{opacity:0;width:0;height:0;}
+#view-motor-variables .pb-switch .track{position:absolute;inset:0;background:var(--border-soft);border-radius:var(--radius-ribbon);transition:background-color .3s ease;cursor:pointer;}
+#view-motor-variables .pb-switch .track::before{
+  content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff center/9px no-repeat;border-radius:50%;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236D7787' stroke-width='3' stroke-linecap='round'><line x1='18' y1='6' x2='6' y2='18'/><line x1='6' y1='6' x2='18' y2='18'/></svg>");
+  transition:transform .3s ease;box-shadow:0 1px 3px rgba(0,0,0,.25);
+}
+#view-motor-variables .pb-switch input:checked + .track{background:var(--benefits-pink);}
+#view-motor-variables .pb-switch input:checked + .track::before{
+  transform:translateX(18px);
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FF5978' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'/></svg>");
+}
+@media (max-width:960px){
+  #view-motor-variables .mv-drawer{width:100%;}
+}
+
 /* Detalle de fórmula */
 #view-motor-variables .mv-tech-line{
   display:flex;align-items:center;gap:10px;flex-wrap:wrap;
