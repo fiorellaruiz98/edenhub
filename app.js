@@ -2665,9 +2665,7 @@ var errBox = document.getElementById("loginError");
 document.addEventListener("DOMContentLoaded", function(){
   var sidebarLogo = document.querySelector(".sidebar-logo .logo-full");
   var loginLogo = document.getElementById("loginLogoImg");
-  var loginLogoLarge = document.getElementById("loginLogoImgLarge");
   if(sidebarLogo && loginLogo) loginLogo.src = sidebarLogo.src;
-  if(sidebarLogo && loginLogoLarge) loginLogoLarge.src = sidebarLogo.src;
   document.body.style.overflow = "hidden";           /* bloquea scroll del fondo */
   document.querySelector(".app-shell").setAttribute("aria-hidden","true");
   setTimeout(function(){ userIn.focus(); }, 60);
