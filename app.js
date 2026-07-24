@@ -3755,7 +3755,7 @@ function simFormTemplate(){
     '<div class="mv-sim-field"><label>N.º pedidos al año</label><input type="number" min="0" data-field="numeroPedidosAlAnio" value="'+P.numeroPedidosAlAnio+'"></div>'+
     '<div class="mv-sim-field"><label>Comisión cliente ejecutivo (%)</label><input type="number" min="0" step="0.1" data-field="comisionClienteEjecutivo" value="'+P.comisionClienteEjecutivo+'"></div>'+
     '<div class="mv-sim-field"><label>Tipo de rebate</label><select data-field="tipoRebate">'+
-      '<option value="MONTO_FIJO" '+(P.tipoRebate==='MONTO_FIJO'?'selected':'')+'>Monto fijo</option>'+
+      '<option value="MONTO_FIJO_REBATE" '+(P.tipoRebate==='MONTO_FIJO_REBATE'?'selected':'')+'>Monto fijo</option>'+
       '<option value="PORCENTAJE_BV" '+(P.tipoRebate==='PORCENTAJE_BV'?'selected':'')+'>% de BV</option>'+
     '</select></div>'+
     '<div class="mv-sim-field"><label>Rebate (S/)</label><input type="number" min="0" data-field="rebate" value="'+P.rebate+'"></div>'+
