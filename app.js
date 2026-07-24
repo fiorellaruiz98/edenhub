@@ -301,7 +301,7 @@ function renderInicioDashboard(){
 
   const select = document.getElementById('inicioPeriodo');
   if(!select.dataset.wired){
-    select.addEventListener('change', renderInicioKpis);
+    select.addEventListener('change', ()=>{ renderInicioKpis(); renderInicioDistribucion(); });
     select.dataset.wired = '1';
   }
   renderInicioKpis();
@@ -348,7 +348,9 @@ function renderInicioDistribucion(){
   ];
   document.getElementById('inicioCanalBars').innerHTML = canalMock.map(c => inicioBarRow(c.label, c.pct, c.color)).join('');
 
-  const aprobadas = proposals.filter(p => p.estado === 'Aprobada');
+  const periodo = document.getElementById('inicioPeriodo').value;
+  const hoy = new Date();
+  const aprobadas = proposals.filter(p => p.estado === 'Aprobada' && fechaEnRango(p.fecha, periodoRange(periodo, hoy)));
   const bvSumaAprobadas = aprobadas.reduce((s,p)=>s+bvTotalFor(p), 0);
   const SOLUCION_COLORS = {Food:'var(--red-hero)', Gift:'var(--benefits-pink)', Mobility:'#2554A6'};
   const bySolucion = {Food:0, Gift:0, Mobility:0};
