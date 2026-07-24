@@ -2154,11 +2154,17 @@ table.approval-table{width:100%;border-collapse:collapse;}
 #view-motor-variables .empty-state.hidden{display:none;}
 
 /* ---------- Cabecera de vista: acciones contextuales por pestaña ---------- */
-/* Ahora solo contiene las acciones del Simulador (siempre oculto): sin
-   margen para no dejar un espacio vacío arriba de las pestañas. */
-#view-motor-variables .mv-actions-bar{justify-content:flex-end;margin-bottom:0;}
+/* Contiene solo las acciones del Simulador (Exportar/Agregar variable
+   viven en el toolbar de la tabla). Vacía en la pestaña de catálogo,
+   con contenido real en la del Simulador — por eso mantiene margen. */
+#view-motor-variables .mv-actions-bar{justify-content:flex-end;margin-bottom:14px;}
 #view-motor-variables .mv-head-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 #view-motor-variables .mv-head-actions.hidden{display:none;}
+#view-motor-variables .mv-sub-lede{
+  margin:-6px 0 16px;
+  font-size:13px;color:var(--grey);
+  max-width:760px;line-height:1.5;
+}
 
 /* ---------- Tabs internas (sub-navegación del módulo) ----------
    Patrón segmentado con el lenguaje del host: pills radius-ribbon,

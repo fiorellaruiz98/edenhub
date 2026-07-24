@@ -2869,6 +2869,16 @@ const CATEGORY_ORDER = ['Tarjetas y emisión','Logística y entrega','Transaccio
 
 function byId(id){ return DATA.find(d=>d.id===id); }
 
+function stripAccents(s){ return s.normalize('NFD').replace(/[̀-ͯ]/g,''); }
+/* Generador de nombre técnico compartido: usado al crear/editar un
+   concepto a mano y por el motor de fórmulas para resolver referencias
+   cruzadas por nombre de negocio (ver findDependencies/resolveConceptToken). */
+function technicalName(label){
+  return stripAccents(label.trim().toUpperCase())
+    .replace(/\bDEL\b/g,' ').replace(/\bDE\b/g,' ')
+    .replace(/[^A-Z0-9]+/g,'_').replace(/^_+|_+$/g,'');
+}
+
 function fmtMoney(v,moneda){
   if(v===null||v===undefined||Number.isNaN(v)) return '—';
   const sym = monedaSymbol(moneda);
@@ -3480,14 +3490,6 @@ function handleEditSubmit(e){
     return;
   }
 
-  /* Mismo generador usado para los 65 conceptos cargados en RAW_DATA \u2014
-     se quitan "DE"/"DEL" porque las f\u00f3rmulas del cat\u00e1logo fuente suelen
-     omitirlos en sus referencias cruzadas (ver findDependencies). */
-  const technicalName = vals.label.trim().toUpperCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-    .replace(/\bDEL\b/g,' ').replace(/\bDE\b/g,' ')
-    .replace(/[^A-Z0-9]+/g,'_').replace(/^_+|_+$/g,'');
-
   const id = editingId || nextConceptId();
   const idc = editingId ? byId(editingId).idc : id;
 
@@ -3495,7 +3497,7 @@ function handleEditSubmit(e){
     id: id,
     idc: idc,
     label: vals.label.trim(),
-    nombre: technicalName,
+    nombre: technicalName(vals.label),
     categoria: vals.categoria,
     nominal: vals.nominal!=='' ? parseFloat(vals.nominal) : null,
     formula: (vals.formula||'').trim(),
@@ -3591,6 +3593,314 @@ const SIM_DEFAULTS = {
   tipoRebate:'PORCENTAJE_BV', montoFijoRebate:0, pctBvRebate:0,
 };
 let SIM = Object.assign({}, SIM_DEFAULTS);
+
+/* =============================================================================
+   MOTOR DE FÓRMULAS DINÁMICO (Fase 2 — aritmética + Fase 3 — condicionales)
+   Interpreta en vivo el campo "formula" de cada concepto del catálogo, en vez
+   de depender de las líneas hardcodeadas de computeAll(). Validado en varias
+   sesiones anteriores contra las 65 fórmulas (55 OK, 10 "pendiente" por un
+   solo dato de negocio sin confirmar — ver findPendingRootCauses).
+
+   MV_ENGINE decide cuál motor corre: 'NEW' (este) o 'LEGACY' (computeAll(),
+   que se conserva intacto como red de seguridad). Cambiar esta única línea
+   revierte todo el Simulador al motor viejo sin tocar nada más.
+   ============================================================================= */
+const MV_ENGINE = 'NEW'; // 'NEW' | 'LEGACY'
+
+const MV_PENDING = 'PENDIENTE_POR_DATO_FALTANTE';
+function mvSafeAdd(a,b){ return (a===MV_PENDING||b===MV_PENDING) ? MV_PENDING : a+b; }
+function mvSafeSub(a,b){ return (a===MV_PENDING||b===MV_PENDING) ? MV_PENDING : a-b; }
+function mvSafeMul(a,b){ return (a===MV_PENDING||b===MV_PENDING) ? MV_PENDING : a*b; }
+function mvSafeDiv(a,b){
+  if(a===MV_PENDING||b===MV_PENDING) return MV_PENDING;
+  if(b===0) return MV_PENDING; /* nunca Infinity/NaN: se trata como cualquier otro dato pendiente */
+  return a/b;
+}
+function mvSafePow(a,b){ return (a===MV_PENDING||b===MV_PENDING) ? MV_PENDING : Math.pow(a,b); }
+function mvSafeNeg(a){ return a===MV_PENDING ? MV_PENDING : -a; }
+
+/* Mapeo "PROPUESTA.X" (tal como aparece en las fórmulas) -> campo real del
+   panel de inputs del Simulador (SIM_DEFAULTS). */
+const MV_PROPUESTA_MAP = {
+  'PROPUESTA.BV_ANUAL':'bvAnual', 'PROPUESTA.BV_MENSUAL':'bvMensual',
+  'PROPUESTA.QTARJETA':'cantidadTarjetas', 'PROPUESTA.QTARJETAS':'cantidadTarjetas',
+  'PROPUESTA.Q_TARJETAS_NUEVAS':'qTarjetasNuevas', 'PROPUESTA.NUMERO_PEDIDOS_AL_ANIO':'numeroPedidosAlAnio',
+  'PROPUESTA.CONDCOMERCIAL.QDESTINOS_LIMA':'puntosLima', 'PROPUESTA.CONDCOMERCIAL.QDESTINOS_PROVINCIA':'puntosProvincia',
+  'PROPUESTA.MDR_NEGOCIADO':'mdrNegociado', 'PROPUESTA.COMISION_CLIENTE_EJECUTIVO':'comisionClienteEjecutivo',
+  'PROPUESTA.ADICIONAL_ADHOC':'adicionalAdhoc', 'PROPUESTA.COSTO_PERSONALIZACION_ADHOC':'costoPersonalizacionAdhoc',
+  'PROPUESTA.COSTO_PLASTICO_DE_TARJETAS':'costoPlasticoTarjetas', 'PROPUESTA.DISTRIBUCION':'distribucion',
+  'PROPUESTA.MONTO_FIJO_REBATE':'montoFijoRebate', 'PROPUESTA.TIPO_REBATE':'tipoRebate',
+  'PROPUESTA.%BV_REBATE':'pctBvRebate', 'PROPUESTA.SOLUCION':'solucion',
+  'PROPUESTA.RECURRENCIA':'recurrencia', 'PROPUESTA.REPOSICION':'reposicion',
+  'PROPUESTA.SECTOR':'sector', 'PROPUESTA.CARTA_FIANZA':'cartaFianza',
+  'PROPUESTA.PRODUCTO_CUSTOM':'productoCustom', 'PROPUESTA.MODALIDAD_DE_PAGO':'modalidadPago',
+  'PROPUESTA.DIAS_CRÉDITO':'diasCredito', 'PROPUESTA.DIAS_CREDITO':'diasCredito',
+};
+
+function mvGetSelfValue(d){ return d.nominal!==null ? d.nominal : 0; }
+
+/* Resuelve un token de fórmula contra otro concepto: usa nameMap(), que ya
+   prioriza claveOriginal sobre el nombre técnico normalizado (ver más abajo). */
+function resolveConceptToken(tok){
+  const map = nameMap();
+  const upper = tok.toUpperCase();
+  if(map[upper]) return map[upper];
+  const norm = technicalName(tok);
+  if(map[norm]) return map[norm];
+  return null;
+}
+
+/* Regla puntual (no una gramática general de tablas de búsqueda): el único
+   caso en las 65 fórmulas con el patrón "FACTOR CORRESPONDIENTE
+   (CATEGORIA=numero, ...)" (C041) — se resuelve contra PROPUESTA.RECURRENCIA,
+   único campo cuyas opciones calzan con las categorías del texto. */
+function resolveFactorCorrespondiente(formula){
+  const m = /FACTOR\s+CORRESPONDIENTE\s*\(([^)]+)\)/i.exec(formula);
+  if(!m) return formula;
+  const table = {};
+  m[1].split(',').forEach(pair=>{
+    const parts = pair.split('=').map(s=>s.trim());
+    table[stripAccents(parts[0].toUpperCase())] = parseFloat(parts[1]);
+  });
+  const key = stripAccents(String(SIM.recurrencia).toUpperCase());
+  const val = Object.prototype.hasOwnProperty.call(table,key) ? table[key] : 0;
+  return formula.slice(0,m.index) + val + formula.slice(m.index+m[0].length);
+}
+
+function mvNormalizeFormula(formula){
+  let s = resolveFactorCorrespondiente(formula);
+  s = s.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-');
+  s = s.replace(/S\/\s*([\d,]+)\.?/g,(mm,num)=>num.replace(/,/g,''));            /* S/200,000. -> 200000 */
+  s = s.replace(/(\d+(?:\.\d+)?)%/g,(mm,num)=>'('+num+'/100)');                 /* 5.2% -> (5.2/100) */
+  s = s.replace(/=!/g,'!=');                                                    /* typo de C001 */
+  return s;
+}
+
+function mvClassifyFormula(rawFormula){
+  const formula = mvNormalizeFormula(rawFormula);
+  if(!formula || !formula.trim()) return 'EMPTY';
+  if(/\bSI\b/.test(formula) && /\bENTONCES\b/i.test(formula)) return 'CONDITIONAL';
+  if(/\bSI\b/.test(formula)) return 'CONDITIONAL_MAYBE';
+  return 'ARITHMETIC';
+}
+
+function mvTokenize(formula, ctxId, issues){
+  const combined = /VALOR\s+NOMINAL|PROPUESTA\.[A-ZÁÉÍÓÚÑ0-9_&%]+(?:\.[A-ZÁÉÍÓÚÑ0-9_&%]+)*|[A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑ0-9_%]*(?:\s*&\s*[A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑ0-9_%]*)*\s*\([A-ZÁÉÍÓÚÑ0-9_% ]+\)|[A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑ0-9_%]*(?:\s*&\s*[A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑ0-9_%]*)*|&|\([A-ZÁÉÍÓÚÑ0-9_% ]+\)/gi;
+  return formula.replace(combined, (tok)=>{
+    const bare = tok.replace(/^\(|\)$/g,'').trim();
+    if(/^VALOR\s+NOMINAL$/i.test(bare)) return ' @@SELF@@ ';
+    if(/^PROPUESTA\./i.test(tok)){
+      const key = tok.toUpperCase();
+      if(Object.prototype.hasOwnProperty.call(MV_PROPUESTA_MAP,key)) return ' @@PROP:'+MV_PROPUESTA_MAP[key]+'@@ ';
+      issues.push({id:ctxId,type:'PROPUESTA_NO_MAPEADO',token:tok});
+      return ' @@UNRESOLVED@@ ';
+    }
+    if(tok==='&') return ' @@UNRESOLVED@@ ';
+    const rec = resolveConceptToken(tok.replace(/\s+/g,' ').trim());
+    if(rec) return ' @@REF:'+rec.id+'@@ ';
+    issues.push({id:ctxId,type:'IDENTIFICADOR_NO_RESUELTO',token:tok});
+    return ' @@UNRESOLVED@@ ';
+  });
+}
+
+function mvParseArithmetic(str, resolveRef){
+  let pos = 0;
+  const clean = str.trim();
+  function skipWs(){ while(pos<clean.length && /\s/.test(clean[pos])) pos++; }
+  function peekPh(){ return /^@@(SELF|UNRESOLVED)@@|^@@PROP:([a-zA-Z0-9]+)@@|^@@REF:(C\d+)@@/.exec(clean.slice(pos)); }
+  function parseFactor(){
+    skipWs();
+    if(clean[pos]==='('){ pos++; const v=parseLevel(); skipWs(); if(clean[pos]===')') pos++; return v; }
+    if(clean[pos]==='-'){ pos++; return mvSafeNeg(parseFactor()); }
+    if(clean[pos]==='+'){ pos++; return parseFactor(); }
+    const ph = peekPh();
+    if(ph){
+      pos += ph[0].length;
+      if(ph[1]==='SELF') return resolveRef('SELF',null);
+      if(ph[1]==='UNRESOLVED') throw new Error('UNRESOLVED');
+      if(ph[2]) return resolveRef('PROP',ph[2]);
+      if(ph[3]) return resolveRef('REF',ph[3]);
+    }
+    const numMatch = /^-?\d+(\.\d+)?/.exec(clean.slice(pos));
+    if(numMatch){ pos+=numMatch[0].length; return parseFloat(numMatch[0]); }
+    throw new Error('SYNTAX:'+clean.slice(pos,pos+20));
+  }
+  function parsePower(){ let v=parseFactor(); skipWs(); while(clean[pos]==='^'){ pos++; const rhs=parseFactor(); v=mvSafePow(v,rhs); skipWs(); } return v; }
+  function parseTerm(){ let v=parsePower(); skipWs(); while(clean[pos]==='*'||clean[pos]==='/'){ const op=clean[pos]; pos++; const rhs=parsePower(); v = op==='*'?mvSafeMul(v,rhs):mvSafeDiv(v,rhs); skipWs(); } return v; }
+  function parseLevel(){ let v=parseTerm(); skipWs(); while(clean[pos]==='+'||clean[pos]==='-'){ const op=clean[pos]; pos++; const rhs=parseTerm(); v = op==='+'?mvSafeAdd(v,rhs):mvSafeSub(v,rhs); skipWs(); } return v; }
+  const result = parseLevel(); skipWs();
+  if(pos<clean.length) throw new Error('TRAILING:'+clean.slice(pos));
+  return result;
+}
+
+function mvSplitConditional(rawFormula){
+  const formula = mvNormalizeFormula(rawFormula);
+  const siMatch = /\bSI\b/.exec(formula);
+  if(!siMatch) return null;
+  const prefixDefault = formula.slice(0,siMatch.index).trim(); /* estructura invertida, ej. C033 */
+  let rest = formula.slice(siMatch.index+siMatch[0].length);
+  const entoncesRe = /\bENTONCES\b\s*:?/i, sinoRe = /\bSINO\b\s*:?/i;
+  const eMatch = entoncesRe.exec(rest);
+  let conditionStr, entoncesExpr, sinoExpr;
+  if(eMatch){
+    conditionStr = rest.slice(0,eMatch.index);
+    const afterE = rest.slice(eMatch.index+eMatch[0].length);
+    const sMatch = sinoRe.exec(afterE);
+    if(sMatch){ entoncesExpr = afterE.slice(0,sMatch.index); sinoExpr = afterE.slice(sMatch.index+sMatch[0].length); }
+    else { entoncesExpr = afterE; sinoExpr = prefixDefault||'0'; }
+  } else {
+    /* ENTONCES implícito (C018, C051): condición = LHS OP RHS (un solo token) */
+    const m = /^(.*?)\s*(!=|>|=)\s*([A-ZÁÉÍÓÚÑ0-9_%]+)/i.exec(rest);
+    if(!m) return {error:'NO_SE_PUDO_DIVIDIR'};
+    conditionStr = m[1]+m[2]+m[3];
+    entoncesExpr = rest.slice(m[0].length);
+    sinoExpr = prefixDefault||'0';
+  }
+  conditionStr = conditionStr.replace(/[,:]\s*$/,'').trim();
+  entoncesExpr = entoncesExpr.trim().replace(/^[,:]/,'').trim();
+  sinoExpr = (sinoExpr||'0').trim();
+  if(!entoncesExpr) entoncesExpr = '0';
+  if(!sinoExpr) sinoExpr = '0';
+  return {conditionStr, entoncesExpr, sinoExpr};
+}
+
+function mvResolveConditionOperand(text, issues, ctxId){
+  text = text.trim();
+  if(/^PROPUESTA\./i.test(text)){
+    const key = text.toUpperCase();
+    if(Object.prototype.hasOwnProperty.call(MV_PROPUESTA_MAP,key)) return SIM[MV_PROPUESTA_MAP[key]];
+    issues.push({id:ctxId,type:'PROPUESTA_NO_MAPEADO',token:text});
+    return undefined;
+  }
+  if(/^-?\d+(\.\d+)?$/.test(text)) return parseFloat(text);
+  return text; /* literal de texto: FOOD, SI, NO, EXONERADO, CREDITO, PUBLICO... */
+}
+
+function mvEvalConditionTerm(term, issues, ctxId){
+  const m = /^(.*?)\s*(!=|>|=)\s*(.+)$/.exec(term.trim());
+  if(!m){
+    /* verdad implícita (C047): se evalúa la expresión, verdadero si != 0 */
+    const tokenized = mvTokenize(term.trim(), ctxId, issues);
+    const val = mvParseArithmetic(tokenized, (kind,arg)=>{
+      if(kind==='SELF') return mvGetSelfValue(byId(ctxId));
+      if(kind==='PROP') return SIM[arg];
+      if(kind==='REF') return mvEvalFormula(arg, issues);
+    });
+    return val!==0 && val!==MV_PENDING;
+  }
+  const lhs = mvResolveConditionOperand(m[1], issues, ctxId);
+  const rhs = mvResolveConditionOperand(m[3], issues, ctxId);
+  if(m[2]==='>') return parseFloat(lhs) > parseFloat(rhs);
+  const eq = String(lhs).toUpperCase() === String(rhs).toUpperCase();
+  return m[2]==='=' ? eq : !eq;
+}
+
+function mvEvalCondition(conditionStr, issues, ctxId){
+  let terms, op;
+  if(/&&/.test(conditionStr)){ terms = conditionStr.split('&&'); op='AND'; }
+  else if(/\bo\b/i.test(conditionStr)){ terms = conditionStr.split(/\bo\b/i); op='OR'; }
+  else if(/\by\b/i.test(conditionStr)){ terms = conditionStr.split(/\by\b/i); op='AND'; }
+  else { terms = [conditionStr]; op='AND'; }
+  const results = terms.map(t=>mvEvalConditionTerm(t, issues, ctxId));
+  return op==='AND' ? results.every(Boolean) : results.some(Boolean);
+}
+
+let mvEvalMemo = {}, mvEvalStack = [];
+/* Evaluador principal: recursivo, memoizado por corrida, nunca lanza — ante
+   cualquier fórmula no resoluble (ciclo, referencia rota, división entre
+   cero) devuelve MV_PENDING en vez de romper el render. */
+function mvEvalFormula(id, issues){
+  if(mvEvalMemo[id]!==undefined) return mvEvalMemo[id];
+  if(mvEvalStack.includes(id)) return MV_PENDING;
+  const d = byId(id);
+  if(!d){ mvEvalMemo[id] = MV_PENDING; return MV_PENDING; }
+  const cls = mvClassifyFormula(d.formula);
+  if(cls==='EMPTY'){ mvEvalMemo[id] = MV_PENDING; return MV_PENDING; }
+  mvEvalStack.push(id);
+  let val;
+  try {
+    if(cls==='CONDITIONAL' || cls==='CONDITIONAL_MAYBE'){
+      const split = mvSplitConditional(d.formula);
+      if(!split || split.error){ val = MV_PENDING; }
+      else {
+        const condTrue = mvEvalCondition(split.conditionStr, issues, id);
+        const branchExpr = condTrue ? split.entoncesExpr : split.sinoExpr;
+        const tokenized = mvTokenize(branchExpr, id, issues);
+        val = mvParseArithmetic(tokenized, (kind,arg)=>{
+          if(kind==='SELF') return mvGetSelfValue(d);
+          if(kind==='PROP') return SIM[arg];
+          if(kind==='REF') return mvEvalFormula(arg, issues);
+        });
+      }
+    } else {
+      const tokenized = mvTokenize(mvNormalizeFormula(d.formula), id, issues);
+      val = mvParseArithmetic(tokenized, (kind,arg)=>{
+        if(kind==='SELF') return mvGetSelfValue(d);
+        if(kind==='PROP') return SIM[arg];
+        if(kind==='REF') return mvEvalFormula(arg, issues);
+      });
+    }
+  } catch(e){
+    val = MV_PENDING; /* cualquier fórmula sin resolver -> pendiente, jamás rompe la UI */
+  }
+  mvEvalStack.pop();
+  if(typeof val==='number' && !isFinite(val)) val = MV_PENDING;
+  mvEvalMemo[id] = val;
+  return val;
+}
+
+/* Corre el motor nuevo contra los 65 conceptos; se llama una vez por
+   simulación (runSimulation), con memo/stack limpios en cada corrida. */
+function computeAllNew(){
+  mvEvalMemo = {}; mvEvalStack = [];
+  const v = {};
+  const issues = [];
+  DATA.forEach(d=>{ v[d.id] = mvEvalFormula(d.id, issues); });
+  return v;
+}
+
+/* Un "bloqueador hoja" es un concepto que se autoreferencia ((VALOR
+   NOMINAL), sin más cálculo) y no tiene valor confirmado — a diferencia
+   de un concepto derivado, que también puede tener esSupuesto:true pero
+   sí calcula desde otros conceptos. Solo el bloqueador hoja es la causa
+   de negocio real (ej. C049 Ticket promedio), no el concepto intermedio
+   que simplemente lo divide (ej. C048). */
+function mvIsLeafBlocker(d){
+  if(!d.esSupuesto || d.nominal!==null) return false;
+  const normalized = mvNormalizeFormula(d.formula||'').trim();
+  return /^\(?\s*VALOR\s+NOMINAL\s*\)?$/i.test(normalized);
+}
+/* Para un concepto "pendiente", encuentra el/los bloqueador(es) hoja que
+   realmente causan el cálculo roto -- reutiliza findDependencies(), no
+   duplica esa lógica. */
+function findPendingRootCauses(id, values, visited){
+  visited = visited || new Set();
+  if(visited.has(id)) return [];
+  visited.add(id);
+  const d = byId(id);
+  if(!d) return [];
+  const deps = findDependencies(d);
+  const causes = [];
+  deps.forEach(depId=>{
+    const depD = byId(depId);
+    if(!depD) return;
+    if(mvIsLeafBlocker(depD)){
+      causes.push(depD);
+    } else if(values[depId]===MV_PENDING){
+      const sub = findPendingRootCauses(depId, values, visited);
+      if(sub.length) causes.push(...sub);
+      else causes.push(depD);
+    }
+  });
+  return causes;
+}
+function mvPendingMessage(id, values){
+  const causes = findPendingRootCauses(id, values);
+  if(!causes.length) return 'Pendiente — falta un dato de negocio en esta fórmula.';
+  const uniq = Array.from(new Set(causes.map(c=>c.id))).map(cid=>byId(cid));
+  const names = uniq.map(c=>(c.label||c.nombre)+' ('+c.id+')').join(', ');
+  return 'Pendiente — depende de '+names+', sin valor confirmado todavía.';
+}
 
 function getVal(id){
   const d = byId(id);
@@ -3781,7 +4091,6 @@ function simFormTemplate(){
 
 function wireSimForm(){
   const form = $('#mv-sim-form');
-  if(!form) return; /* Simulador deshabilitado temporalmente (ver mv-sub-sim) */
   form.innerHTML = simFormTemplate();
 }
 function handleSimChange(e){
@@ -3812,23 +4121,21 @@ function handleSimToggleClick(e){
 }
 
 /* ---------- Columnas 2 y 3: listas agrupadas ---------- */
-function calcRowHtml(d, value, opts){
-  opts = opts || {};
+function calcRowHtml(d, value, pendingMsg){
   const isPct = d.driver==='%';
   let display;
-  if(value===null||value===undefined||Number.isNaN(value)){
+  if(value===MV_PENDING){
+    display = '<span class="mv-cr-value pending"><span class="mv-assumed-warn" data-tooltip="'+esc(pendingMsg)+'">'+ICONS.warning+'</span>Pendiente</span>';
+  } else if(value===null||value===undefined||Number.isNaN(value)){
     display = '<span class="mv-cr-value pending">pendiente</span>';
   } else {
     const formatted = isPct ? fmtPct(value) : fmtMoney(value,d.moneda);
     display = '<span class="mv-cr-value '+(value<0?'neg':'')+'">'+formatted+'</span>';
   }
-  const flag = d.estado==='Pendiente'
-    ? '<span class="mv-cr-flag" title="Variable pendiente de definir: el cálculo usa un valor supuesto de referencia."></span>'
-    : '';
   return (
   '<div class="mv-calc-row" data-mv-view="'+d.id+'" role="button" tabindex="0" title="Ver cómo se calcula">'+
     '<div class="mv-cr-left">'+
-      '<span class="mv-cr-name">'+flag+esc(d.label||d.nombre)+'</span>'+
+      '<span class="mv-cr-name">'+esc(d.label||d.nombre)+'</span>'+
       '<span class="mv-cr-formula">'+(d.resumen?esc(d.resumen):esc(d.id))+'</span>'+
     '</div>'+
     '<div class="mv-cr-right">'+display+'</div>'+
@@ -3851,16 +4158,19 @@ function renderGroupedList(rows, valueMap, colKey){
     const groupRows = groups[cat];
     const header = groupHeaderHtml(cat, groupRows.length, colKey);
     if(collapsedSimCats[colKey].has(cat)) return header;
-    return header + groupRows.map(d=>calcRowHtml(d, valueMap[d.id])).join('');
+    return header + groupRows.map(d=>{
+      const val = valueMap[d.id];
+      const msg = val===MV_PENDING ? mvPendingMessage(d.id, valueMap) : null;
+      return calcRowHtml(d, val, msg);
+    }).join('');
   }).join('');
 }
 
 function heroTone(id, value){
   /* Rentabilidad (C047) e Ingresos menos gastos (C055): color según signo.
-     Total de ingresos (C053) / Total de gastos (C054): tono informativo.
-     IDs remapeados al catálogo nuevo (antes MC050/MC058/MC056/MC057). */
+     Total de ingresos (C053) / Total de gastos (C054): tono informativo. */
   if(id==='C047' || id==='C055'){
-    if(value===null||Number.isNaN(value)) return 'tone-neutral';
+    if(value===null||value===undefined||Number.isNaN(value)) return 'tone-neutral';
     return value>=0 ? 'tone-pos' : 'tone-neg';
   }
   if(id==='C053') return 'tone-income';
@@ -3870,38 +4180,48 @@ function heroTone(id, value){
 
 function runSimulation(){
   if(!rendered) return;
-  if(!$('#mv-sim-form')) return; /* Simulador deshabilitado temporalmente (ver mv-sub-sim) */
-  const v = computeAll();
+  if(!$('#mv-sim-form')) return;
+  const v = MV_ENGINE==='NEW' ? computeAllNew() : computeAll();
 
-  /* Columna 2 — conceptos INPUT (derivados de la PROPUESTA), agrupados */
-  const inputRows = DATA.filter(d=>d.clase==='INPUT');
-  const pendingCount = DATA.filter(d=>d.estado==='Pendiente').length;
+  /* Columna 2 — conceptos "intermedios": todo lo que no es un resultado
+     final (rent==='Resultante'; clase INPUT/OUTPUT no aplica al catálogo
+     nuevo, nunca se pobló — ver Hallazgo 1 de la sesión de migración). */
+  const heroIds = ['C047','C053','C054','C055'];
+  const intermediateRows = DATA.filter(d=>d.rent!=='Resultante');
+  const pendingCount = MV_ENGINE==='NEW' ? Object.values(v).filter(x=>x===MV_PENDING).length : 0;
   $('#mv-sim-intermediate').innerHTML =
     '<div class="mv-note">'+
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>'+
       '<span>'+(pendingCount
-        ? '<strong>'+pendingCount+' variable'+(pendingCount===1?'':'s')+' pendiente'+(pendingCount===1?'':'s')+' de definir</strong> (marcadas con un punto ámbar) usan valores supuestos de un catálogo de referencia por producto, aún sin parametrización real.'
-        : 'Los valores marcados como <strong>supuesto</strong> provienen de un catálogo de referencia por producto (pendiente de parametrización real).')+
+        ? '<strong>'+pendingCount+' concepto'+(pendingCount===1?'':'s')+' pendiente'+(pendingCount===1?'':'s')+'</strong> (ícono ⚠ junto al valor) dependen de un dato de negocio sin confirmar todavía en el catálogo — pasa el cursor sobre el ícono para ver de cuál.'
+        : 'Todos los conceptos calculan con los datos disponibles del catálogo.')+
       '</span>'+
     '</div>'+
-    renderGroupedList(inputRows, v, 'intermediate');
+    renderGroupedList(intermediateRows, v, 'intermediate');
 
-  /* Columna 3 — métricas hero + resto de OUTPUTs agrupados */
-  const heroIds = ['C047','C053','C054','C055'];
+  /* Columna 3 — métricas hero + resto de "Resultante" agrupados */
   const heroHtml = heroIds.map(id=>{
     const d = byId(id);
     if(!d) return '';
     const val = v[id];
-    const formatted = (val===null||val===undefined||Number.isNaN(val)) ? 'pendiente' : (d.driver==='%' ? fmtPct(val) : fmtMoney(val,d.moneda));
-    const tone = heroTone(id,val);
+    let formatted, warnHtml = '';
+    if(val===MV_PENDING){
+      formatted = 'Pendiente';
+      warnHtml = '<span class="mv-assumed-warn" data-tooltip="'+esc(mvPendingMessage(id, v))+'">'+ICONS.warning+'</span>';
+    } else if(val===null||val===undefined||Number.isNaN(val)){
+      formatted = 'pendiente';
+    } else {
+      formatted = d.driver==='%' ? fmtPct(val) : fmtMoney(val,d.moneda);
+    }
+    const tone = heroTone(id, val===MV_PENDING?null:val);
     return '<div class="mv-hero '+tone+'" data-mv-view="'+id+'" role="button" tabindex="0">'+
       '<div class="mv-hm-label">'+esc(d.label||d.nombre)+'</div>'+
-      '<div class="mv-hm-value">'+formatted+'</div>'+
+      '<div class="mv-hm-value">'+warnHtml+formatted+'</div>'+
       '<div class="mv-hm-sub">'+esc(d.id)+' · clic para ver la fórmula</div>'+
     '</div>';
   }).join('');
 
-  const outputRows = DATA.filter(d=>d.clase==='OUTPUT' && !heroIds.includes(d.id));
+  const outputRows = DATA.filter(d=>d.rent==='Resultante' && !heroIds.includes(d.id));
   $('#mv-sim-output').innerHTML = '<div class="mv-hero-grid">'+heroHtml+'</div>' + renderGroupedList(outputRows, v, 'output');
 }
 
@@ -3920,10 +4240,11 @@ function switchTab(key){
   });
   $('#mv-sub-crud').classList.toggle('active', key==='crud');
   $('#mv-sub-sim').classList.toggle('active', key==='sim');
-  /* Los botones Exportar/Agregar variable viven ahora en el toolbar de la
-     tabla (dentro de #mv-sub-crud) y se ocultan solos junto con esa
-     sub-vista — ya no necesitan su propio toggle aquí. */
-  $('#mv-actions-sim').classList.add('hidden'); /* Simulador deshabilitado temporalmente — sin acciones */
+  /* Los botones Exportar/Agregar variable viven en el toolbar de la tabla
+     (dentro de #mv-sub-crud) y se ocultan solos junto con esa sub-vista.
+     #mv-actions-sim (Restaurar valores/Refrescar cálculo) sí necesita su
+     propio toggle, porque vive en la barra superior compartida. */
+  $('#mv-actions-sim').classList.toggle('hidden', key!=='sim');
   closeExportMenu();
   if(key==='sim') runSimulation(); /* refleja al instante ediciones del catálogo */
 }
@@ -3948,8 +4269,6 @@ function wireStatic(){
   /* Tabs */
   $$('.mv-tab').forEach(t=>t.addEventListener('click', ()=>switchTab(t.dataset.mvTab)));
   root.querySelector('.mv-tabs').addEventListener('keydown', handleTabsKeydown);
-  const simBackBtn = $('#mv-sim-back-btn');
-  if(simBackBtn) simBackBtn.addEventListener('click', ()=>switchTab('crud'));
 
   /* Filtros del catálogo */
   $('#mv-crud-search').addEventListener('input', renderConceptosTable);
@@ -3992,7 +4311,7 @@ function wireStatic(){
     simForm.addEventListener('input', handleSimInput);
     simForm.addEventListener('click', handleSimToggleClick);
     simForm.addEventListener('submit', e=>e.preventDefault());
-  } /* Simulador deshabilitado temporalmente (ver mv-sub-sim) */
+  }
 
   /* Delegación de clics del módulo (acotada a la vista, no a document) */
   root.addEventListener('click', (e)=>{
