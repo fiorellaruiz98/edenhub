@@ -1226,23 +1226,23 @@
           </div>
         </div>
 
-        <div class="form-grid" style="margin-top:14px;">
-          <div class="field-group field-full">
-            <div class="toggle-row">
-              <div class="toggle-row-text">
-                <strong>Rebate</strong>
-                <span>Se habilita únicamente si aplica una regla de negocio vigente</span>
-              </div>
-              <label class="switch"><input type="checkbox" id="f_rebateToggle"><span class="track"></span><span class="thumb"></span></label>
+        <div class="toggle-row" style="margin-top:14px;">
+          <div class="toggle-row-text">
+            <strong>Rebate</strong>
+            <span>Se habilita únicamente si aplica una regla de negocio vigente</span>
+          </div>
+          <label class="switch"><input type="checkbox" id="f_rebateToggle"><span class="track"></span><span class="thumb"></span></label>
+        </div>
+        <div class="conditional-field" id="rebateFieldsWrap">
+          <div class="form-grid">
+            <div class="field-group">
+              <label for="f_rebateTipo">Tipo de rebate</label>
+              <select id="f_rebateTipo" disabled><option value="monto">Monto fijo</option><option value="porcentaje">% de BV</option></select>
             </div>
-          </div>
-          <div class="field-group">
-            <label for="f_rebateTipo">Tipo de rebate</label>
-            <select id="f_rebateTipo" disabled><option value="monto">Monto fijo</option><option value="porcentaje">% de BV</option></select>
-          </div>
-          <div class="field-group">
-            <label for="f_rebateValor">Valor de rebate</label>
-            <div class="input-currency" id="rebateValorWrap"><input type="number" id="f_rebateValor" min="0" placeholder="0.00" disabled></div>
+            <div class="field-group">
+              <label for="f_rebateValor">Valor de rebate</label>
+              <div class="input-currency" id="rebateValorWrap"><input type="number" id="f_rebateValor" min="0" placeholder="0.00" disabled></div>
+            </div>
           </div>
         </div>
       </section>
@@ -1337,16 +1337,14 @@
           <span class="sec-num">7</span>
           <h4>MDR adicional</h4>
         </div>
-        <div class="form-grid">
-          <div class="field-group field-full">
-            <div class="toggle-row">
-              <div class="toggle-row-text">
-                <strong>Producto custom</strong>
-                <span>Habilita una negociación de MDR distinta a la estándar</span>
-              </div>
-              <label class="switch"><input type="checkbox" id="f_productoCustom"><span class="track"></span><span class="thumb"></span></label>
-            </div>
+        <div class="toggle-row">
+          <div class="toggle-row-text">
+            <strong>Producto custom</strong>
+            <span>Habilita una negociación de MDR distinta a la estándar</span>
           </div>
+          <label class="switch"><input type="checkbox" id="f_productoCustom"><span class="track"></span><span class="thumb"></span></label>
+        </div>
+        <div class="conditional-field" id="productoCustomMdrWrap">
           <div class="field-group">
             <label for="f_mdrNegociado">MDR negociado</label>
             <div class="input-percent"><input type="number" id="f_mdrNegociado" min="0" max="100" step="0.01" placeholder="0.00" disabled></div>

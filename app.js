@@ -759,27 +759,34 @@ function renderDistribucionTable(){
   });
 }
 
+/* Patrón "toggle -> campo condicional": el campo se colapsa (oculto, sin
+   ocupar espacio, con transición de altura/opacidad vía .conditional-field)
+   cuando el toggle está en "No", y se deshabilita para que tampoco sea
+   editable — la validación real de que no se envíe ocurre en
+   collectFormData(), no aquí. El valor NUNCA se borra al colapsar: si el
+   usuario reactiva el toggle, reaparece con lo que había escrito antes. */
+function syncConditionalField(toggleId, wrapId, fieldIds){
+  const on = document.getElementById(toggleId).checked;
+  (Array.isArray(fieldIds) ? fieldIds : [fieldIds]).forEach(fieldId=>{
+    document.getElementById(fieldId).disabled = !on;
+  });
+  document.getElementById(wrapId).classList.toggle("open", on);
+}
+
 function updateConditionalFields(){
   const modalidad = document.getElementById("f_modalidadPago").value;
   const diasCredito = document.getElementById("f_diasCredito");
   diasCredito.disabled = modalidad !== "Crédito";
   if(diasCredito.disabled) diasCredito.value = "0";
 
-  const rebateOn = document.getElementById("f_rebateToggle").checked;
-  document.getElementById("f_rebateTipo").disabled = !rebateOn;
-  document.getElementById("f_rebateValor").disabled = !rebateOn;
+  syncConditionalField("f_rebateToggle", "rebateFieldsWrap", ["f_rebateTipo","f_rebateValor"]);
   const rebateTipo = document.getElementById("f_rebateTipo").value;
   const rebateWrap = document.getElementById("rebateValorWrap");
   rebateWrap.classList.toggle("input-currency", rebateTipo==="monto");
   rebateWrap.classList.toggle("input-percent", rebateTipo==="porcentaje");
 
-  const customOn = document.getElementById("f_productoCustom").checked;
-  document.getElementById("f_mdrNegociado").disabled = !customOn;
-  if(!customOn) document.getElementById("f_mdrNegociado").value = "0";
-
-  const cartaFianzaOn = document.getElementById("f_cartaFianza").checked;
-  document.getElementById("f_montoCartaFianza").disabled = !cartaFianzaOn;
-  document.getElementById("cartaFianzaMontoWrap").classList.toggle("open", cartaFianzaOn);
+  syncConditionalField("f_productoCustom", "productoCustomMdrWrap", "f_mdrNegociado");
+  syncConditionalField("f_cartaFianza", "cartaFianzaMontoWrap", "f_montoCartaFianza");
 }
 
 function fillForm(p){
@@ -882,7 +889,8 @@ function collectFormData(){
     rebate:{
       activo: document.getElementById("f_rebateToggle").checked,
       tipo: document.getElementById("f_rebateTipo").value,
-      valor: +document.getElementById("f_rebateValor").value || 0
+      valor: document.getElementById("f_rebateToggle").checked
+        ? (+document.getElementById("f_rebateValor").value || 0) : 0
     },
     comisionCliente: cond.comisionCliente,
     facturaMinima: cond.facturaMinima,
@@ -894,7 +902,8 @@ function collectFormData(){
     montoCartaFianza: document.getElementById("f_cartaFianza").checked
       ? (+document.getElementById("f_montoCartaFianza").value || 0) : 0,
     productoCustom: document.getElementById("f_productoCustom").checked,
-    mdrNegociado: +document.getElementById("f_mdrNegociado").value || 0
+    mdrNegociado: document.getElementById("f_productoCustom").checked
+      ? (+document.getElementById("f_mdrNegociado").value || 0) : 0
   };
 }
 
@@ -2795,7 +2804,7 @@ const RAW_DATA = [
 {id:'C016',idc:'C016',nombre:'LOGISTICA_Y_ENVIOS_L_E',claveOriginal:'L&E',label:'Logística y envíos (L&E)',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
 {id:'C017',idc:'C017',nombre:'COSTO_PROMEDIO_MANTENIMIENTO',claveOriginal:'COSTO_PROMEDIO_DE_MANTENIMIENTO',label:'Costo promedio de mantenimiento',categoria:'Comisiones e ingresos',nominal:0.5,esSupuesto:false,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
 {id:'C018',idc:'C018',nombre:'CARTA_FIANZA_TASA',claveOriginal:'CARTA_FIANZA(TASA)',label:'Carta fianza (tasa)',categoria:'Carta fianza y garantías',nominal:0.052,esSupuesto:false,formula:'SI PROPUESTA.CARTA_FIANZA= SI (VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
-{id:'C019',idc:'C019',nombre:'COMISION_AL_CLIENTE',claveOriginal:'COMISION_CLIENTE',label:'Comisión al cliente',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'(PROPUESTA.COMISION_CLIENTE_EJECUTIVO* PROPUESTA.BV_ANUAL )- CALCULO_REBATE',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Ingreso',history:[]},
+{id:'C019',idc:'C019',nombre:'COMISION_AL_CLIENTE',claveOriginal:'COMISION_CLIENTE',label:'Comisión al cliente',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'(PROPUESTA.COMISION_CLIENTE_EJECUTIVO/100* PROPUESTA.BV_ANUAL )- CALCULO_REBATE',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Ingreso',history:[]},
 {id:'C020',idc:'C020',nombre:'TASA_UNITARIA_COMISION_CLIENTE',claveOriginal:'TUR_COMISION_CLIENTE',label:'Tasa unitaria — comisión cliente',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'(COMISION_CLIENTE /PROPUESTA.BV_ANUAL)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — ingreso',history:[]},
 {id:'C021',idc:'C021',nombre:'COMISION_MERCHANT',claveOriginal:'COMISION_MERCHANT',label:'Comisión merchant',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'(TUR_COMISION_MERCHANT* REEMBOLSO)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Ingreso',history:[]},
 {id:'C022',idc:'C022',nombre:'TASA_UNITARIA_COMISION_MERCHANT',claveOriginal:'TUR_COMISION_MERCHANT',label:'Tasa unitaria — comisión merchant',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'SI PROPUESTA.PRODUCTO_CUSTOM !=SI, ENTONCES:(INTERCHANGE_FEE + MDR_ADICIONAL) SINO: (INTERCHANGE_FEE + PROPUESTA.MDR_NEGOCIADO)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — ingreso',history:[]},
