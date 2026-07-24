@@ -2783,10 +2783,10 @@ const RAW_DATA = [
 {id:'C012',idc:'C012',nombre:'PROCESAMIENTO_TRANSACCION_MARCA',claveOriginal:'PROCESAMIENTO_TX_MARCA',label:'Procesamiento de transacción de marca',categoria:'Transaccional y procesamiento',nominal:null,esSupuesto:true,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
 {id:'C013',idc:'C013',nombre:'INTERCHANGE_FEE',claveOriginal:'INTERCHANGE_FEE',label:'Interchange fee',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
 {id:'C014',idc:'C014',nombre:'MDR_ADICIONAL',claveOriginal:'MDR_ADICIONAL',label:'MDR adicional',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
-{id:'C015',idc:'C015',nombre:'RATIO_CONSUMO_SOBRE_LA_CARGA',claveOriginal:'RATIO_DE_CONSUMO_SOBRE_LA_CARGA',label:'Ratio de consumo sobre la carga',categoria:'Transaccional y procesamiento',nominal:98,esSupuesto:false,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C015',idc:'C015',nombre:'RATIO_CONSUMO_SOBRE_LA_CARGA',claveOriginal:'RATIO_DE_CONSUMO_SOBRE_LA_CARGA',label:'Ratio de consumo sobre la carga',categoria:'Transaccional y procesamiento',nominal:0.98,esSupuesto:false,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
 {id:'C016',idc:'C016',nombre:'LOGISTICA_Y_ENVIOS_L_E',claveOriginal:'L&E',label:'Logística y envíos (L&E)',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
 {id:'C017',idc:'C017',nombre:'COSTO_PROMEDIO_MANTENIMIENTO',claveOriginal:'COSTO_PROMEDIO_DE_MANTENIMIENTO',label:'Costo promedio de mantenimiento',categoria:'Comisiones e ingresos',nominal:0.5,esSupuesto:false,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
-{id:'C018',idc:'C018',nombre:'CARTA_FIANZA_TASA',claveOriginal:'CARTA_FIANZA(TASA)',label:'Carta fianza (tasa)',categoria:'Carta fianza y garantías',nominal:5.2,esSupuesto:false,formula:'SI PROPUESTA.CARTA_FIANZA= SI (VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C018',idc:'C018',nombre:'CARTA_FIANZA_TASA',claveOriginal:'CARTA_FIANZA(TASA)',label:'Carta fianza (tasa)',categoria:'Carta fianza y garantías',nominal:0.052,esSupuesto:false,formula:'SI PROPUESTA.CARTA_FIANZA= SI (VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
 {id:'C019',idc:'C019',nombre:'COMISION_AL_CLIENTE',claveOriginal:'COMISION_CLIENTE',label:'Comisión al cliente',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'(PROPUESTA.COMISION_CLIENTE_EJECUTIVO* PROPUESTA.BV_ANUAL )- CALCULO_REBATE',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Ingreso',history:[]},
 {id:'C020',idc:'C020',nombre:'TASA_UNITARIA_COMISION_CLIENTE',claveOriginal:'TUR_COMISION_CLIENTE',label:'Tasa unitaria — comisión cliente',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'(COMISION_CLIENTE /PROPUESTA.BV_ANUAL)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — ingreso',history:[]},
 {id:'C021',idc:'C021',nombre:'COMISION_MERCHANT',claveOriginal:'COMISION_MERCHANT',label:'Comisión merchant',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'(TUR_COMISION_MERCHANT* REEMBOLSO)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Ingreso',history:[]},
@@ -4128,6 +4128,8 @@ function calcRowHtml(d, value, pendingMsg){
     display = '<span class="mv-cr-value pending"><span class="mv-assumed-warn" data-tooltip="'+esc(pendingMsg)+'">'+ICONS.warning+'</span>Pendiente</span>';
   } else if(value===null||value===undefined||Number.isNaN(value)){
     display = '<span class="mv-cr-value pending">pendiente</span>';
+  } else if(typeof value==='string'){
+    display = '<span class="mv-cr-value">'+esc(value)+'</span>';
   } else {
     const formatted = isPct ? fmtPct(value) : fmtMoney(value,d.moneda);
     display = '<span class="mv-cr-value '+(value<0?'neg':'')+'">'+formatted+'</span>';
@@ -4210,6 +4212,8 @@ function runSimulation(){
       warnHtml = '<span class="mv-assumed-warn" data-tooltip="'+esc(mvPendingMessage(id, v))+'">'+ICONS.warning+'</span>';
     } else if(val===null||val===undefined||Number.isNaN(val)){
       formatted = 'pendiente';
+    } else if(typeof val==='string'){
+      formatted = esc(val);
     } else {
       formatted = d.driver==='%' ? fmtPct(val) : fmtMoney(val,d.moneda);
     }
