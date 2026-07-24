@@ -746,12 +746,12 @@
     "claveOriginal": "PESO%_MES_SUMATORIA",
     "categoria": "Parámetros de tiempo",
     "clase": "Computada",
-    "valorNominal": null,
-    "esSupuesto": true,
+    "valorNominal": 3.87,
+    "esSupuesto": false,
     "unidad": null,
     "moneda": "SOLES",
     "estado": "Activo",
-    "formula": "(MES%_1+MES%_2+MES%_3+MES%_4+MES%_5+MES%_6+MES%_7+MES%_8+MES%_9+MES%_10+MES%_11+MES%_12)"
+    "formula": "(VALOR NOMINAL)"
   },
   {
     "id": "C059",
