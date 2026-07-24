@@ -129,7 +129,7 @@
     "unidad": "Transacción",
     "moneda": "SOLES",
     "estado": "Activo",
-    "formula": "(VALOR NOMINAL* PROPUESTA.QTARJETAS)*PROPUESTA.NUMERO_PEDIDOS_AL_ANIO)"
+    "formula": "(VALOR NOMINAL* PROPUESTA.QTARJETAS)*PROPUESTA.NUMERO_PEDIDOS_AL_ANIO"
   },
   {
     "id": "C012",
@@ -525,7 +525,7 @@
     "unidad": null,
     "moneda": "SOLES",
     "estado": "Activo",
-    "formula": "(+)CARTA_FIANZA / PROPUESTA.BV_ANUAL"
+    "formula": "CARTA_FIANZA / PROPUESTA.BV_ANUAL"
   },
   {
     "id": "C045",
@@ -621,7 +621,7 @@
     "unidad": null,
     "moneda": "SOLES",
     "estado": "Activo",
-    "formula": "(-)(PROCESAMIENTO_TX_MARCA)*REEMBOLSO"
+    "formula": "-(PROCESAMIENTO_TX_MARCA)*REEMBOLSO"
   },
   {
     "id": "C053",
