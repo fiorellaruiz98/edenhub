@@ -1066,6 +1066,21 @@ input:disabled,select:disabled,textarea:disabled,input[readonly]{
 }
 .input-percent input{padding-right:28px;}
 
+/* Campo condicional que depende de un toggle (ej. Monto de carta fianza,
+   bajo el toggle "Carta fianza"): colapsado por defecto, se expande con
+   una transición de altura + opacidad en vez de un salto abrupto. El
+   borde izquierdo + indentación lo conectan visualmente a su toggle. */
+.conditional-field{
+  max-height:0;opacity:0;overflow:hidden;
+  margin-top:0;padding-left:14px;margin-left:2px;
+  border-left:2px solid transparent;
+  transition:max-height .3s ease, opacity .25s ease, margin-top .3s ease, border-color .25s ease;
+}
+.conditional-field.open{
+  max-height:80px;opacity:1;margin-top:12px;
+  border-left-color:var(--border-soft);
+}
+
 /* Toggle switch */
 .toggle-row{
   display:flex;align-items:center;justify-content:space-between;

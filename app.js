@@ -776,6 +776,10 @@ function updateConditionalFields(){
   const customOn = document.getElementById("f_productoCustom").checked;
   document.getElementById("f_mdrNegociado").disabled = !customOn;
   if(!customOn) document.getElementById("f_mdrNegociado").value = "0";
+
+  const cartaFianzaOn = document.getElementById("f_cartaFianza").checked;
+  document.getElementById("f_montoCartaFianza").disabled = !cartaFianzaOn;
+  document.getElementById("cartaFianzaMontoWrap").classList.toggle("open", cartaFianzaOn);
 }
 
 function fillForm(p){
@@ -810,6 +814,7 @@ function fillForm(p){
 
   document.getElementById("f_logoEmpresa").checked = !!p.logoEmpresa;
   document.getElementById("f_cartaFianza").checked = !!p.cartaFianza;
+  document.getElementById("f_montoCartaFianza").value = p.montoCartaFianza || 0;
   document.getElementById("f_productoCustom").checked = !!p.productoCustom;
   document.getElementById("f_mdrNegociado").value = p.mdrNegociado;
 
@@ -848,7 +853,7 @@ function blankTemplate(){
     expenses: makeExpenses([0,0,0,0,0,0,0,0], []),
     condicionesExtra: [],
     distribucion:[{destino:"Lima",cantidadPuntos:0}],
-    logoEmpresa:false, cartaFianza:false, productoCustom:false, mdrNegociado:0,
+    logoEmpresa:false, cartaFianza:false, montoCartaFianza:0, productoCustom:false, mdrNegociado:0,
     producto:"Producto por definir", estado:"Borrador", version:1, fecha: new Date().toISOString().slice(0,10),
     solicitudes:[]
   };
@@ -886,6 +891,8 @@ function collectFormData(){
     distribucion: workingDistribucion,
     logoEmpresa: document.getElementById("f_logoEmpresa").checked,
     cartaFianza: document.getElementById("f_cartaFianza").checked,
+    montoCartaFianza: document.getElementById("f_cartaFianza").checked
+      ? (+document.getElementById("f_montoCartaFianza").value || 0) : 0,
     productoCustom: document.getElementById("f_productoCustom").checked,
     mdrNegociado: +document.getElementById("f_mdrNegociado").value || 0
   };
@@ -1632,6 +1639,7 @@ document.addEventListener("DOMContentLoaded", function(){
   document.getElementById("f_rebateToggle").addEventListener("change", updateConditionalFields);
   document.getElementById("f_rebateTipo").addEventListener("change", updateConditionalFields);
   document.getElementById("f_productoCustom").addEventListener("change", updateConditionalFields);
+  document.getElementById("f_cartaFianza").addEventListener("change", updateConditionalFields);
 
   // Distribución add row
   document.getElementById("btnAddDestino").addEventListener("click", ()=>{
