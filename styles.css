@@ -1699,7 +1699,6 @@ table.approval-table{width:100%;border-collapse:collapse;}
     #view-pricebook .tarifario-summary{ display: flex; flex-direction: column; gap: 3px; }
     #view-pricebook .tarifario-count{ display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 500; color: var(--text); }
     #view-pricebook .tarifario-count svg{ width: 14px; height: 14px; color: var(--text-secondary); }
-    #view-pricebook .tarifario-currencies{ font-size: 11.5px; color: var(--text-secondary); }
 
     #view-pricebook .pb-badge{ display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; padding: 4px 11px; border-radius: var(--radius-pill); border: 1px solid transparent; }
     #view-pricebook .pb-badge .dot{ width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
@@ -1876,6 +1875,8 @@ table.approval-table{width:100%;border-collapse:collapse;}
     #view-pricebook .pb-modal.show{ opacity: 1; pointer-events: auto; transform: translate(-50%, -50%); }
 
     #view-pricebook #delete-modal{ width: 390px; max-width: calc(100vw - 32px); }
+    #view-pricebook #detalle-modal{ width: 420px; max-width: calc(100vw - 32px); }
+    #view-pricebook #detalle-modal .pb-modal-header{ display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 18px; }
     #view-pricebook .modal-icon{ width: 44px; height: 44px; border-radius: 50%; background: var(--danger-bg); color: var(--danger); display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
     #view-pricebook .modal-icon svg{ width: 20px; height: 20px; }
     #view-pricebook .pb-modal h3{ font-family: var(--font-title); font-size: 16.5px; font-weight: 700; margin-bottom: 6px; }

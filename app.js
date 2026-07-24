@@ -1711,16 +1711,36 @@ function initSidebarNav(){
   };
 
   let SERVICIOS = {
-    '8F2A1C4B': { nombre:'Emisión de tarjetas', descripcion:'Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.', productoId:'uid-prod-01', estado:true,
+    /* PLACEHOLDER: tarifa inventada — sin información real de costo de plástico aún */
+    'S001': { nombre:'Costo del plástico', descripcion:'Costo del plástico de tarjetas a emitir', solucion:'Gift', productoId:'uid-prod-02', estado:true,
       marca:'visa', tecnologia:'chip_contactless', esCondicionComercial:false,
-      creadoPor:'sistema.migracion', fechaCreacion:'02/03/2026 09:14', modificadoPor:'Fio · Product Manager', fechaModificacion:'10/07/2026 16:40',
+      creadoPor:'Fio · Product Manager', fechaCreacion:'14/07/2026 09:00', modificadoPor:'Fio · Product Manager', fechaModificacion:'14/07/2026 09:00',
       tarifas:[
-        {id:'T-101', nombre:'Tarifa Estándar Nacional', tipo:'fisico', moneda:'PEN', unidad:'UNI', precio:12.00, vigenciaInicio:'2026-01-01', vigenciaFin:'',
-          historial:[{precioAnterior:10.00, precioNuevo:12.00, vigenciaInicio:'2026-01-01', vigenciaFin:'', usuario:'Fio · Product Manager', fecha:'10/07/2026 16:40'}]},
-        {id:'T-102', nombre:'Tarifa Premium Same-Day', tipo:'fisico', moneda:'PEN', unidad:'UNI', precio:22.00, vigenciaInicio:'2026-01-01', vigenciaFin:'', historial:[]},
-        {id:'T-103', nombre:'Tarifa Corporate', tipo:'fisico', moneda:'USD', unidad:'UNI', precio:6.50, vigenciaInicio:'2026-09-01', vigenciaFin:'', historial:[]},
+        {id:'T-801', nombre:'Tarifa Costo de Plástico Estándar', tipo:'fisico', moneda:'PEN', unidad:'UNI', precio:5.00, vigenciaInicio:'2026-01-01', vigenciaFin:'', historial:[]},
       ]},
-    '3D9E71AA': { nombre:'Carga de saldo', descripcion:'Recarga de saldo sobre el beneficio contratado, programada o bajo demanda.', productoId:'uid-prod-06', estado:true,
+    'S028': { nombre:'Entrega de tarjetas', descripcion:'Distribución y despacho de tarjetas físicas al domicilio o centro de trabajo del titular.', solucion:'Food', productoId:'uid-prod-01', estado:true,
+      marca:'visa', tecnologia:'banda', esCondicionComercial:false,
+      creadoPor:'sistema.migracion', fechaCreacion:'15/03/2026 08:00', modificadoPor:'Fio · Product Manager', fechaModificacion:'01/07/2026 09:30',
+      tarifas:[
+        {id:'T-301', nombre:'Tarifa Entrega Estándar', tipo:'fisico', moneda:'PEN', unidad:'UNI', precio:8.00, vigenciaInicio:'2026-01-01', vigenciaFin:'', historial:[]},
+        {id:'T-302', nombre:'Tarifa Entrega Express', tipo:'fisico', moneda:'PEN', unidad:'UNI', precio:15.00, vigenciaInicio:'2026-01-01', vigenciaFin:'', historial:[]},
+      ]},
+    'S055': { nombre:'Reposición de tarjetas', descripcion:'Emisión de tarjeta de reemplazo ante robo, pérdida o deterioro.', solucion:'Gift', productoId:'uid-prod-03', estado:true,
+      marca:'visa', tecnologia:'chip_contactless', esCondicionComercial:false,
+      creadoPor:'sistema.migracion', fechaCreacion:'22/03/2026 15:40', modificadoPor:'Fio · Product Manager', fechaModificacion:'09/07/2026 12:15',
+      tarifas:[ {id:'T-501', nombre:'Tarifa Reposición Estándar', tipo:'fisico', moneda:'PEN', unidad:'UNI', precio:25.00, vigenciaInicio:'2026-01-01', vigenciaFin:'', historial:[]} ]},
+    'S082': { nombre:'Mantenimiento de tarjetas', descripcion:'Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.', solucion:'Mobility', productoId:'uid-prod-05', estado:true,
+      marca:'visa', tecnologia:'banda', esCondicionComercial:false,
+      creadoPor:'sistema.migracion', fechaCreacion:'28/03/2026 11:30', modificadoPor:'Operaciones', fechaModificacion:'15/06/2026 17:20',
+      tarifas:[ {id:'T-701', nombre:'Tarifa Soporte N2', tipo:'otros', moneda:'PEN', unidad:'HOR', precio:0.00, vigenciaInicio:'2026-01-01', vigenciaFin:'', historial:[]} ]},
+    'S113': { nombre:'Personalización de tarjetas', descripcion:'Diseño y grabado personalizado de tarjeta física para campañas o clientes corporativos.', solucion:'Food', productoId:'uid-prod-01', estado:true,
+      marca:'mastercard', tecnologia:'chip_contactless', esCondicionComercial:true,
+      creadoPor:'sistema.migracion', fechaCreacion:'25/03/2026 09:05', modificadoPor:'Fio · Product Manager', fechaModificacion:'30/06/2026 10:50',
+      tarifas:[
+        {id:'T-601', nombre:'Tarifa Personalización Básica', tipo:'fisico', moneda:'PEN', unidad:'PRY', precio:18.00, vigenciaInicio:'2026-01-01', vigenciaFin:'', historial:[]},
+        {id:'T-602', nombre:'Tarifa Personalización Corporativa', tipo:'fisico', moneda:'USD', unidad:'PRY', precio:45.00, vigenciaInicio:'2026-08-01', vigenciaFin:'', historial:[]},
+      ]},
+    'S140': { nombre:'Carga de saldo', descripcion:'Recarga de saldo sobre el beneficio contratado, programada o bajo demanda.', solucion:'Food', productoId:'uid-prod-01', estado:false,
       marca:'mastercard', tecnologia:'banda', esCondicionComercial:true,
       creadoPor:'sistema.migracion', fechaCreacion:'02/03/2026 09:20', modificadoPor:'Fio · Product Manager', fechaModificacion:'05/07/2026 11:05',
       tarifas:[
@@ -1729,33 +1749,34 @@ function initSidebarNav(){
           historial:[{precioAnterior:3.00, precioNuevo:3.50, vigenciaInicio:'2026-07-01', vigenciaFin:'', usuario:'Fio · Product Manager', fecha:'01/07/2026 09:00'}]},
         {id:'T-203', nombre:'Tarifa Recarga Mensual EU', tipo:'otros', moneda:'EUR', unidad:'MES', precio:1.20, vigenciaInicio:'2026-01-01', vigenciaFin:'', historial:[]},
       ]},
-    '6B44E019': { nombre:'Entrega de tarjetas', descripcion:'Distribución y despacho de tarjetas físicas al domicilio o centro de trabajo del titular.', productoId:'uid-prod-05', estado:true,
-      marca:'visa', tecnologia:'banda', esCondicionComercial:false,
-      creadoPor:'sistema.migracion', fechaCreacion:'15/03/2026 08:00', modificadoPor:'Fio · Product Manager', fechaModificacion:'01/07/2026 09:30',
+    /* PLACEHOLDER: tarifa inventada — categoría "otros servicios" sin tarifario real aún */
+    'S171': { nombre:'Otros servicios', descripcion:'Otros servicios relacionados', solucion:'Food', productoId:'uid-prod-01', estado:true,
+      marca:'mastercard', tecnologia:'banda', esCondicionComercial:false,
+      creadoPor:'Fio · Product Manager', fechaCreacion:'14/07/2026 09:00', modificadoPor:'Fio · Product Manager', fechaModificacion:'14/07/2026 09:00',
       tarifas:[
-        {id:'T-301', nombre:'Tarifa Entrega Estándar', tipo:'fisico', moneda:'PEN', unidad:'UNI', precio:8.00, vigenciaInicio:'2026-01-01', vigenciaFin:'', historial:[]},
-        {id:'T-302', nombre:'Tarifa Entrega Express', tipo:'fisico', moneda:'PEN', unidad:'UNI', precio:15.00, vigenciaInicio:'2026-01-01', vigenciaFin:'', historial:[]},
+        {id:'T-802', nombre:'Tarifa Servicio Adicional', tipo:'otros', moneda:'PEN', unidad:'UNI', precio:10.00, vigenciaInicio:'2026-01-01', vigenciaFin:'', historial:[]},
       ]},
-    'C102F87D': { nombre:'Renovación de tarjetas', descripcion:'Renovación de tarjeta próxima a vencer, manteniendo saldo e historial del titular.', productoId:'uid-prod-02', estado:true,
+    'S202': { nombre:'Renovación de tarjetas', descripcion:'Renovación de tarjeta próxima a vencer.', solucion:'Mobility', productoId:'uid-prod-05', estado:true,
       marca:'mastercard', tecnologia:'chip_contactless', esCondicionComercial:false,
       creadoPor:'sistema.migracion', fechaCreacion:'20/03/2026 10:12', modificadoPor:'Operaciones', fechaModificacion:'28/06/2026 14:00',
       tarifas:[ {id:'T-401', nombre:'Tarifa Renovación Estándar', tipo:'fisico', moneda:'PEN', unidad:'UNI', precio:10.00, vigenciaInicio:'2026-01-01', vigenciaFin:'',
         historial:[{precioAnterior:8.00, precioNuevo:10.00, vigenciaInicio:'2026-01-01', vigenciaFin:'', usuario:'Operaciones', fecha:'28/06/2026 14:00'}]} ]},
-    'A93C0E2F': { nombre:'Reposición de tarjetas', descripcion:'Emisión de tarjeta de reemplazo ante robo, pérdida o deterioro.', productoId:'uid-prod-03', estado:false,
+    'S217': { nombre:'Emisión de tarjetas', descripcion:'Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.', solucion:'Gift', productoId:'uid-prod-03', estado:true,
       marca:'visa', tecnologia:'chip_contactless', esCondicionComercial:false,
-      creadoPor:'sistema.migracion', fechaCreacion:'22/03/2026 15:40', modificadoPor:'Fio · Product Manager', fechaModificacion:'09/07/2026 12:15',
-      tarifas:[ {id:'T-501', nombre:'Tarifa Reposición Estándar', tipo:'fisico', moneda:'PEN', unidad:'UNI', precio:25.00, vigenciaInicio:'2026-01-01', vigenciaFin:'', historial:[]} ]},
-    '2E7B591C': { nombre:'Personalización de tarjetas', descripcion:'Diseño y grabado personalizado de tarjeta física para campañas o clientes corporativos.', productoId:'uid-prod-04', estado:true,
-      marca:'mastercard', tecnologia:'chip_contactless', esCondicionComercial:true,
-      creadoPor:'sistema.migracion', fechaCreacion:'25/03/2026 09:05', modificadoPor:'Fio · Product Manager', fechaModificacion:'30/06/2026 10:50',
+      creadoPor:'sistema.migracion', fechaCreacion:'02/03/2026 09:14', modificadoPor:'Fio · Product Manager', fechaModificacion:'10/07/2026 16:40',
       tarifas:[
-        {id:'T-601', nombre:'Tarifa Personalización Básica', tipo:'fisico', moneda:'PEN', unidad:'PRY', precio:18.00, vigenciaInicio:'2026-01-01', vigenciaFin:'', historial:[]},
-        {id:'T-602', nombre:'Tarifa Personalización Corporativa', tipo:'fisico', moneda:'USD', unidad:'PRY', precio:45.00, vigenciaInicio:'2026-08-01', vigenciaFin:'', historial:[]},
+        {id:'T-101', nombre:'Tarifa Estándar Nacional', tipo:'fisico', moneda:'PEN', unidad:'UNI', precio:12.00, vigenciaInicio:'2026-01-01', vigenciaFin:'',
+          historial:[{precioAnterior:10.00, precioNuevo:12.00, vigenciaInicio:'2026-01-01', vigenciaFin:'', usuario:'Fio · Product Manager', fecha:'10/07/2026 16:40'}]},
+        {id:'T-102', nombre:'Tarifa Premium Same-Day', tipo:'fisico', moneda:'PEN', unidad:'UNI', precio:22.00, vigenciaInicio:'2026-01-01', vigenciaFin:'', historial:[]},
+        {id:'T-103', nombre:'Tarifa Corporate', tipo:'fisico', moneda:'USD', unidad:'UNI', precio:6.50, vigenciaInicio:'2026-09-01', vigenciaFin:'', historial:[]},
       ]},
-    '55A0D3F6': { nombre:'Mantenimiento de tarjetas', descripcion:'Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.', productoId:'uid-prod-01', estado:true,
+    /* PLACEHOLDER: tarifa inventada — Interchange Fee sin dato real aún */
+    'S248': { nombre:'Interchange Fee', descripcion:'Interchange Fee', solucion:'Gift', productoId:'uid-prod-04', estado:true,
       marca:'visa', tecnologia:'banda', esCondicionComercial:false,
-      creadoPor:'sistema.migracion', fechaCreacion:'28/03/2026 11:30', modificadoPor:'Operaciones', fechaModificacion:'15/06/2026 17:20',
-      tarifas:[ {id:'T-701', nombre:'Tarifa Soporte N2', tipo:'otros', moneda:'PEN', unidad:'HOR', precio:0.00, vigenciaInicio:'2026-01-01', vigenciaFin:'', historial:[]} ]},
+      creadoPor:'Fio · Product Manager', fechaCreacion:'14/07/2026 09:00', modificadoPor:'Fio · Product Manager', fechaModificacion:'14/07/2026 09:00',
+      tarifas:[
+        {id:'T-803', nombre:'Tarifa Interchange Estándar', tipo:'otros', moneda:'USD', unidad:'UNI', precio:0.15, vigenciaInicio:'2026-01-01', vigenciaFin:'', historial:[]},
+      ]},
   };
 
   const TODAY = new Date('2026-07-14T00:00:00');
@@ -1770,6 +1791,7 @@ function initSidebarNav(){
   const deleteModal = document.getElementById('delete-modal');
   const tarifaModal = document.getElementById('tarifa-modal');
   const unsavedModal = document.getElementById('unsaved-modal');
+  const detalleModal = document.getElementById('detalle-modal');
   const toast   = document.getElementById('toast');
 
   let currentServiceId = null;   // null = nuevo servicio
@@ -1852,6 +1874,7 @@ function initSidebarNav(){
       switch(sortState.field){
         case 'id': va = idA; vb = idB; break;
         case 'nombre': va = sa.nombre; vb = sb.nombre; break;
+        case 'solucion': va = sa.solucion || ''; vb = sb.solucion || ''; break;
         case 'producto': va = PRODUCTO_LABELS[sa.productoId]; vb = PRODUCTO_LABELS[sb.productoId]; break;
         case 'tarifas': va = sa.tarifas.length; vb = sb.tarifas.length; break;
         case 'estado': va = sa.estado ? 1 : 0; vb = sb.estado ? 1 : 0; break;
@@ -1887,11 +1910,6 @@ function initSidebarNav(){
   /* ------------------------------------------------------------
      Render de la tabla principal
      ------------------------------------------------------------ */
-  function currencyChips(tarifas){
-    const symbols = [...new Set(tarifas.map(t => MONEDA_SYMBOLS[t.moneda]))];
-    return symbols.join(' · ') || '—';
-  }
-
   function renderMainTable(ids){
     const tbody = document.getElementById('table-body');
     tbody.innerHTML = '';
@@ -1902,7 +1920,7 @@ function initSidebarNav(){
     document.getElementById('pagination-text').textContent = `Mostrando ${ids.length} de ${total} servicios`;
 
     if(ids.length === 0){
-      tbody.innerHTML = `<tr><td colspan="6">
+      tbody.innerHTML = `<tr><td colspan="7">
         <div class="table-empty">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <p>No se encontraron servicios con estos filtros.</p>
@@ -1919,16 +1937,17 @@ function initSidebarNav(){
       tr.innerHTML = `
         <td class="cell-code">#${id}</td>
         <td class="cell-name">${s.nombre}<span class="desc">${s.descripcion}</span></td>
+        <td><span class="tag-neutral">${s.solucion || '—'}</span></td>
         <td><span class="tag-product"><i class="dot"></i>${PRODUCTO_LABELS[s.productoId]}</span></td>
         <td>
           <div class="tarifario-summary">
             <span class="tarifario-count"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>${s.tarifas.length} ${s.tarifas.length === 1 ? 'tarifa' : 'tarifas'}</span>
-            <span class="tarifario-currencies">${currencyChips(s.tarifas)}</span>
           </div>
         </td>
         <td>${s.estado ? '<span class="pb-badge status-activo"><i class="dot"></i>Activo</span>' : '<span class="pb-badge status-inactivo"><i class="dot"></i>Inactivo</span>'}</td>
         <td>
           <div class="pb-row-actions">
+            <button class="pb-icon-btn" title="Ver detalle" onclick="openDetalleServicio('${id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 8v.01M12 11v5"/></svg></button>
             <button class="pb-icon-btn edit" title="Editar" onclick="openServiceDrawer('${id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg></button>
             <button class="pb-icon-btn danger" title="Eliminar" onclick="openDeleteServicio('${id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
           </div>
@@ -2359,6 +2378,21 @@ function initSidebarNav(){
   }
 
   /* ------------------------------------------------------------
+     Ver detalle — snapshot de auditoría (no es histórico de versiones)
+     ------------------------------------------------------------ */
+  function openDetalleServicio(id){
+    const s = SERVICIOS[id];
+    document.getElementById('detalle-modal-sub').textContent = `#${id} · ${s.nombre}`;
+    document.getElementById('detalle-creado-por').textContent = s.creadoPor;
+    document.getElementById('detalle-fecha-creacion').textContent = s.fechaCreacion;
+    document.getElementById('detalle-modificado-por').textContent = s.modificadoPor;
+    document.getElementById('detalle-fecha-modificacion').textContent = s.fechaModificacion;
+    overlay.classList.add('show');
+    detalleModal.classList.add('show');
+    detalleModal.setAttribute('aria-hidden', 'false');
+  }
+
+  /* ------------------------------------------------------------
      Eliminación (servicio o tarifa) — modal compartido
      ------------------------------------------------------------ */
   function openDeleteServicio(id){
@@ -2415,6 +2449,11 @@ function initSidebarNav(){
      ------------------------------------------------------------ */
   function closeTopLayer(skipDirtyCheck){
     if(isSavingService || isSavingTarifa) return;
+    if(detalleModal.classList.contains('show')){
+      detalleModal.classList.remove('show'); detalleModal.setAttribute('aria-hidden', 'true');
+      if(!drawer.classList.contains('show')) overlay.classList.remove('show');
+      return;
+    }
     if(deleteModal.classList.contains('show')){
       deleteModal.classList.remove('show'); deleteModal.setAttribute('aria-hidden', 'true');
       if(!drawer.classList.contains('show')) overlay.classList.remove('show');

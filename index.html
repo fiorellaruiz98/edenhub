@@ -336,7 +336,7 @@
 
       
 
-      <section class="panel filters-panel" aria-label="Filtros avanzados">
+      <section class="filters-panel" aria-label="Filtros avanzados">
         <div class="filters-head">
           <div class="filters-title">
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
@@ -428,8 +428,9 @@
               <tr>
                 <th class="sortable" data-field="id">ID Servicio<span class="sort-icon"></span></th>
                 <th class="sortable" data-field="nombre">Servicio<span class="sort-icon"></span></th>
+                <th class="sortable" data-field="solucion">Solución<span class="sort-icon"></span></th>
                 <th class="sortable" data-field="producto">Producto<span class="sort-icon"></span></th>
-                <th class="sortable" data-field="tarifas">Tarifario<span class="sort-icon"></span></th>
+                <th class="sortable" data-field="tarifas">Tarifario asociado<span class="sort-icon"></span></th>
                 <th class="sortable" data-field="estado">Estado<span class="sort-icon"></span></th>
                 <th class="num">Acciones</th>
               </tr>
@@ -685,6 +686,25 @@
   <div class="modal-actions">
     <button class="btn-ribbon-neutral" onclick="keepEditing()">Seguir editando</button>
     <button class="btn-ribbon-outline" onclick="discardChanges()">Descartar cambios</button>
+  </div>
+</div>
+
+<div class="pb-modal" id="detalle-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="detalle-modal-title">
+  <div class="pb-modal-header">
+    <div>
+      <h3 id="detalle-modal-title">Detalle del servicio</h3>
+      <p id="detalle-modal-sub">—</p>
+    </div>
+    <button type="button" class="drawer-close" onclick="closeTopLayer()" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="audit-box">
+    <h3>Campos de auditoría</h3>
+    <div class="audit-grid">
+      <div class="audit-item"><span class="k">Creado por</span><span class="v" id="detalle-creado-por">—</span></div>
+      <div class="audit-item"><span class="k">Fecha creación</span><span class="v" id="detalle-fecha-creacion">—</span></div>
+      <div class="audit-item"><span class="k">Modificado por</span><span class="v" id="detalle-modificado-por">—</span></div>
+      <div class="audit-item"><span class="k">Fecha modificación</span><span class="v" id="detalle-fecha-modificacion">—</span></div>
+    </div>
   </div>
 </div>
 
