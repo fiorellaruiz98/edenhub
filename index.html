@@ -815,31 +815,6 @@
     <div class="app-view" id="view-motor-variables">
       <div class="page-heading mv-actions-bar">
 
-        <!-- Acciones contextuales: catálogo -->
-        <div class="mv-head-actions" id="mv-actions-crud">
-          <div class="mv-export-wrap" id="mv-export-wrap">
-            <button type="button" class="btn-ribbon-outline" id="mv-btn-export" aria-haspopup="true" aria-expanded="false">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v13m0 0-4-4m4 4 4-4M4 21h16"/></svg>
-              Exportar
-              <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="mv-export-menu" id="mv-export-menu" hidden>
-              <button type="button" data-mv-export="csv">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2Z"/></svg>
-                <span>Exportar a CSV<em>.csv · UTF-8, separado por punto y coma</em></span>
-              </button>
-              <button type="button" data-mv-export="xls">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8l8 8M16 8l-8 8"/></svg>
-                <span>Exportar a Excel<em>.xls · se abre directo en Excel</em></span>
-              </button>
-            </div>
-          </div>
-          <button type="button" class="btn-ribbon" id="mv-btn-new">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
-            Agregar variable
-          </button>
-        </div>
-
         <!-- Acciones contextuales: simulador -->
         <div class="mv-head-actions hidden" id="mv-actions-sim">
           <button type="button" class="btn-ghost" id="mv-btn-reset">
@@ -867,8 +842,6 @@
 
       <!-- ======================= SUB-VISTA: GESTIÓN DE VARIABLES ======================= -->
       <section class="mv-subview active" id="mv-sub-crud" role="tabpanel" aria-labelledby="mv-tab-crud">
-        <p class="mv-sub-lede">Administra los conceptos y fórmulas que alimentan el modelo comercial (BV, comisiones, costos). Cada registro indica su naturaleza a nivel de rentabilidad — Ingreso, Costo, Gasto, Resultado o Parámetro.</p>
-
         <section class="filters-panel" aria-label="Filtros del catálogo de conceptos">
           <div class="filters-head">
             <div class="filters-title">
@@ -929,15 +902,36 @@
           </div>
         </section>
 
-        <section class="table-panel" aria-label="Catálogo de conceptos">
+        <section class="table-panel" aria-label="Listado de conceptos">
           <div class="table-toolbar">
             <div class="table-toolbar-left">
-              <h3>Catálogo de conceptos</h3>
+              <h3>Listado de conceptos</h3>
               <p id="mv-crud-count"><strong>0</strong> conceptos</p>
             </div>
             <div class="table-toolbar-actions">
               <button type="button" class="btn-text" id="mv-btn-expand-all">Expandir todo</button>
               <button type="button" class="btn-text" id="mv-btn-collapse-all">Colapsar todo</button>
+              <div class="mv-export-wrap" id="mv-export-wrap">
+                <button type="button" class="btn-ribbon-outline btn-sm" id="mv-btn-export" aria-haspopup="true" aria-expanded="false">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v13m0 0-4-4m4 4 4-4M4 21h16"/></svg>
+                  Exportar
+                  <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <div class="mv-export-menu" id="mv-export-menu" hidden>
+                  <button type="button" data-mv-export="csv">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2Z"/></svg>
+                    <span>Exportar a CSV<em>.csv · UTF-8, separado por punto y coma</em></span>
+                  </button>
+                  <button type="button" data-mv-export="xls">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8l8 8M16 8l-8 8"/></svg>
+                    <span>Exportar a Excel<em>.xls · se abre directo en Excel</em></span>
+                  </button>
+                </div>
+              </div>
+              <button type="button" class="btn-ribbon btn-sm" id="mv-btn-new">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+                Agregar variable
+              </button>
             </div>
           </div>
           <div class="table-scroll">

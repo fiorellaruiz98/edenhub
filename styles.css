@@ -749,7 +749,7 @@ table.data-table{
 
 .cell-empresa strong{display:block;font-size:13px;font-weight:700;}
 .cell-empresa span{display:block;font-size:11.5px;color:var(--grey);margin-top:1px;}
-.cell-codigo{font-weight:700;color:var(--red-hero-dark);font-variant-numeric:tabular-nums;}
+.cell-codigo{font-weight:700;color:var(--black);font-variant-numeric:tabular-nums;}
 .tag-neutral{
   display:inline-block;
   font-size:11px;font-weight:600;
@@ -2142,16 +2142,23 @@ table.approval-table{width:100%;border-collapse:collapse;}
    debajo del topbar (57px medidos + 1px de borde). */
 #view-motor-variables .table-scroll{max-height:calc(100vh - 320px);overflow-y:auto;}
 #view-motor-variables .data-table thead th{top:0;z-index:2;}
+/* Bug pre-existente encontrado en esta sesión: la clase "hidden" que
+   renderConceptosTable() alterna en #mv-crud-empty/.table-scroll nunca
+   tuvo una regla CSS que la respaldara, así que el estado "sin
+   resultados" quedaba siempre visible debajo de la tabla real (quedaba
+   fuera de la vista por el alto de página anterior; al quitar el
+   párrafo descriptivo y la barra de acciones vacía, subió y se hizo
+   visible). Se corrige aquí, igual que el patrón ya usado para
+   .mv-head-actions.hidden. */
+#view-motor-variables .table-scroll.hidden,
+#view-motor-variables .empty-state.hidden{display:none;}
 
 /* ---------- Cabecera de vista: acciones contextuales por pestaña ---------- */
-#view-motor-variables .mv-actions-bar{justify-content:flex-end;margin-bottom:14px;}
+/* Ahora solo contiene las acciones del Simulador (siempre oculto): sin
+   margen para no dejar un espacio vacío arriba de las pestañas. */
+#view-motor-variables .mv-actions-bar{justify-content:flex-end;margin-bottom:0;}
 #view-motor-variables .mv-head-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 #view-motor-variables .mv-head-actions.hidden{display:none;}
-#view-motor-variables .mv-sub-lede{
-  margin:-6px 0 16px;
-  font-size:13px;color:var(--grey);
-  max-width:760px;line-height:1.5;
-}
 
 /* ---------- Tabs internas (sub-navegación del módulo) ----------
    Patrón segmentado con el lenguaje del host: pills radius-ribbon,
@@ -2217,10 +2224,8 @@ table.approval-table{width:100%;border-collapse:collapse;}
 
 /* ---------- Tabla del catálogo (hereda .data-table del host) ---------- */
 #view-motor-variables table.mv-table{min-width:1080px;}
-#view-motor-variables .mv-cell-id{
-  font-family:var(--mv-font-mono);font-size:12px;font-weight:700;
-  color:var(--red-hero-dark);font-variant-numeric:tabular-nums;
-}
+/* La columna ID ahora reutiliza .cell-codigo (clase compartida con
+   Propuestas) en vez de un estilo propio del módulo. */
 #view-motor-variables .mv-concept-btn{
   appearance:none;border:none;background:none;cursor:pointer;padding:0;text-align:left;
   display:inline-flex;align-items:center;gap:7px;

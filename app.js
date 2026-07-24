@@ -2757,7 +2757,7 @@ document.addEventListener("DOMContentLoaded", function(){
 "use strict";
 
 /* -------------------------------------------------------------------------
-   1) DATASET — Catálogo de conceptos (fuente: assets/motor-variables-final_1.json)
+   1) DATASET — Listado de conceptos (fuente: assets/motor-variables-final_1.json)
    nominal:null + esSupuesto:true → valor no confirmado (sin cifra real
    provista por la fuente); se muestra "Valor supuesto" en vez de un
    número inventado. `nombre` se genera desde `label` con la misma
@@ -3062,7 +3062,7 @@ function renderConceptosTable(){
       const conceptSub = d.resumen ? '<span class="mv-concept-sub" title="'+esc(d.resumen)+'">'+esc(d.resumen)+'</span>' : '';
       return (
       '<tr id="mv-row-'+esc(d.id)+'">'+
-        '<td><span class="mv-cell-id">'+esc(d.id)+'</span></td>'+
+        '<td><span class="cell-codigo">'+esc(d.id)+'</span></td>'+
         '<td style="white-space:normal;">'+conceptMain+conceptSub+'</td>'+
         '<td>'+rentBadge(d.rent)+'</td>'+
         '<td class="num mv-cell-nominal">'+nominalCell+'</td>'+
@@ -3840,7 +3840,9 @@ function switchTab(key){
   });
   $('#mv-sub-crud').classList.toggle('active', key==='crud');
   $('#mv-sub-sim').classList.toggle('active', key==='sim');
-  $('#mv-actions-crud').classList.toggle('hidden', key!=='crud');
+  /* Los botones Exportar/Agregar variable viven ahora en el toolbar de la
+     tabla (dentro de #mv-sub-crud) y se ocultan solos junto con esa
+     sub-vista — ya no necesitan su propio toggle aquí. */
   $('#mv-actions-sim').classList.add('hidden'); /* Simulador deshabilitado temporalmente — sin acciones */
   closeExportMenu();
   if(key==='sim') runSimulation(); /* refleja al instante ediciones del catálogo */
