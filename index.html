@@ -1209,10 +1209,6 @@
             <select id="f_tipoProducto"><option>Físico</option><option>Virtual</option></select>
           </div>
           <div class="field-group">
-            <label for="f_bvMes">BV por mes</label>
-            <div class="input-currency"><input type="number" id="f_bvMes" min="0" placeholder="0.00"></div>
-          </div>
-          <div class="field-group">
             <label for="f_valorFacial">Valor facial</label>
             <div class="input-currency"><input type="number" id="f_valorFacial" min="0" placeholder="0.00"></div>
           </div>
@@ -1221,7 +1217,17 @@
             <input type="number" id="f_cantTarjetas" min="0" placeholder="0">
           </div>
           <div class="field-group">
-            <label for="f_cargasAnio">Cantidad de cargas al año</label>
+            <label for="f_bvCarga">BV por carga</label>
+            <div class="input-currency"><input type="number" id="f_bvCarga" min="0" placeholder="0.00" disabled></div>
+            <span class="field-hint">Calculado: Valor facial × Cantidad de tarjetas</span>
+          </div>
+          <div class="field-group">
+            <label for="f_bvTotal">BV total</label>
+            <div class="input-currency"><input type="number" id="f_bvTotal" min="0" placeholder="0.00" disabled></div>
+            <span class="field-hint">Calculado: BV por carga × Cantidad de cargas total</span>
+          </div>
+          <div class="field-group">
+            <label for="f_cargasAnio">Cantidad de cargas total</label>
             <input type="number" id="f_cargasAnio" min="0" placeholder="0">
           </div>
         </div>
@@ -1597,16 +1603,16 @@
               <select id="op_categoria"><option>Esencial</option><option>Estándar</option><option>No aplica</option></select>
             </div>
             <div class="field-group">
-              <label for="op_tipoProducto">Tipo de producto</label>
-              <select id="op_tipoProducto"><option>Físico</option><option>Virtual</option></select>
-            </div>
-            <div class="field-group">
               <label for="op_modalidadPago">Modalidad de pago</label>
               <select id="op_modalidadPago"><option>Crédito</option><option>Al contado</option></select>
             </div>
+            <div class="field-group" id="op_diasCreditoGroup">
+              <label for="op_diasCredito">Días de crédito <span class="req">*</span></label>
+              <input type="number" id="op_diasCredito" min="0" step="1" placeholder="0">
+            </div>
             <div class="field-group">
-              <label for="op_bvMes">BV por mes <span class="req">*</span></label>
-              <div class="input-currency"><input type="number" id="op_bvMes" min="0" step="0.01" placeholder="0.00"></div>
+              <label for="op_tipoProducto">Tipo de producto</label>
+              <select id="op_tipoProducto"><option>Físico</option><option>Virtual</option></select>
             </div>
             <div class="field-group">
               <label for="op_valorFacial">Valor facial <span class="req">*</span></label>
@@ -1617,12 +1623,18 @@
               <input type="number" id="op_cantTarjetas" min="0" step="1" placeholder="0">
             </div>
             <div class="field-group">
-              <label for="op_cargasAnio">Cantidad de cargas al año <span class="req">*</span></label>
-              <input type="number" id="op_cargasAnio" min="0" step="1" placeholder="0">
+              <label for="op_bvCarga">BV por carga</label>
+              <div class="input-currency"><input type="number" id="op_bvCarga" min="0" step="0.01" placeholder="0.00" disabled></div>
+              <span class="field-hint">Calculado: Valor facial × Cantidad de tarjetas</span>
             </div>
-            <div class="field-group" id="op_diasCreditoGroup">
-              <label for="op_diasCredito">Días de crédito <span class="req">*</span></label>
-              <input type="number" id="op_diasCredito" min="0" step="1" placeholder="0">
+            <div class="field-group">
+              <label for="op_bvTotal">BV total</label>
+              <div class="input-currency"><input type="number" id="op_bvTotal" min="0" step="0.01" placeholder="0.00" disabled></div>
+              <span class="field-hint">Calculado: BV por carga × Cantidad de cargas total</span>
+            </div>
+            <div class="field-group">
+              <label for="op_cargasAnio">Cantidad de cargas total <span class="req">*</span></label>
+              <input type="number" id="op_cargasAnio" min="0" step="1" placeholder="0">
             </div>
           </div>
         </section>

@@ -315,8 +315,8 @@ function renderInicioKpis(){
   const aprobadasActual = proposals.filter(p => p.estado === 'Aprobada' && fechaEnRango(p.fecha, periodoRange(periodo, hoy)));
   const aprobadasAnterior = proposals.filter(p => p.estado === 'Aprobada' && fechaEnRango(p.fecha, periodoRangeAnterior(periodo, hoy)));
 
-  const bvActual = aprobadasActual.reduce((s,p)=>s+p.bvMes, 0);
-  const bvAnterior = aprobadasAnterior.reduce((s,p)=>s+p.bvMes, 0);
+  const bvActual = aprobadasActual.reduce((s,p)=>s+bvTotalFor(p), 0);
+  const bvAnterior = aprobadasAnterior.reduce((s,p)=>s+bvTotalFor(p), 0);
   document.getElementById('inicioKpiBV').textContent = money(bvActual);
   document.getElementById('inicioKpiBVSub').textContent = bvAnterior > 0
     ? (bvActual>=bvAnterior?'+':'') + (((bvActual-bvAnterior)/bvAnterior)*100).toFixed(1) + '% vs. periodo anterior'
@@ -349,12 +349,12 @@ function renderInicioDistribucion(){
   document.getElementById('inicioCanalBars').innerHTML = canalMock.map(c => inicioBarRow(c.label, c.pct, c.color)).join('');
 
   const aprobadas = proposals.filter(p => p.estado === 'Aprobada');
-  const bvTotal = aprobadas.reduce((s,p)=>s+p.bvMes, 0);
+  const bvSumaAprobadas = aprobadas.reduce((s,p)=>s+bvTotalFor(p), 0);
   const SOLUCION_COLORS = {Food:'var(--red-hero)', Gift:'var(--benefits-pink)', Mobility:'#2554A6'};
   const bySolucion = {Food:0, Gift:0, Mobility:0};
-  aprobadas.forEach(p => { if(bySolucion[p.solucion]!==undefined) bySolucion[p.solucion] += p.bvMes; });
+  aprobadas.forEach(p => { if(bySolucion[p.solucion]!==undefined) bySolucion[p.solucion] += bvTotalFor(p); });
   document.getElementById('inicioSolucionBars').innerHTML = Object.keys(bySolucion).map(sol => {
-    const pct = bvTotal > 0 ? (bySolucion[sol]/bvTotal*100) : 0;
+    const pct = bvSumaAprobadas > 0 ? (bySolucion[sol]/bvSumaAprobadas*100) : 0;
     return inicioBarRow(sol, pct, SOLUCION_COLORS[sol]);
   }).join('');
 }
@@ -364,7 +364,7 @@ function renderInicioTopClientes(){
   const porCliente = {};
   aprobadas.forEach(p => {
     if(!porCliente[p.ruc]) porCliente[p.ruc] = {razonSocial:p.razonSocial, bv:0, solucionCount:{}};
-    porCliente[p.ruc].bv += p.bvMes;
+    porCliente[p.ruc].bv += bvTotalFor(p);
     porCliente[p.ruc].solucionCount[p.solucion] = (porCliente[p.ruc].solucionCount[p.solucion]||0) + 1;
   });
   const top = Object.values(porCliente).sort((a,b)=>b.bv-a.bv).slice(0,5);
@@ -442,8 +442,8 @@ function renderKPIs(){
   const abiertas = proposals.filter(p=>p.estado==="Creada"||p.estado==="Borrador");
   const cerradasMes = proposals.filter(p=>p.estado==="Aprobada" && p.fecha.slice(0,7)==="2026-07");
 
-  const bvAbiertas = abiertas.reduce((s,p)=>s+Number(p.bvMes||0),0);
-  const bvCerradas = cerradasMes.reduce((s,p)=>s+Number(p.bvMes||0),0);
+  const bvAbiertas = abiertas.reduce((s,p)=>s+bvTotalFor(p),0);
+  const bvCerradas = cerradasMes.reduce((s,p)=>s+bvTotalFor(p),0);
 
   document.getElementById("kpiTotal").textContent = activas.length;
   document.getElementById("kpiTotalDelta").textContent = "+" + Math.max(1, Math.round(activas.length*0.18));
@@ -526,7 +526,7 @@ function renderProposalsTable(){
         <td><span class="tag-neutral">${esc(p.solucion)}</span></td>
         <td>${esc(p.producto)}</td>
         <td>${esc(p.tipoProducto)}</td>
-        <td class="num">${money(p.bvMes)}</td>
+        <td class="num">${money(bvTotalFor(p))}</td>
         <td class="num">${intFmt(p.cantTarjetas)}</td>
         <td>${esc(p.modalidadPago)}</td>
         <td class="center"><span class="version-chip">v${p.version}</span></td>
@@ -789,6 +789,14 @@ function updateConditionalFields(){
   syncConditionalField("f_cartaFianza", "cartaFianzaMontoWrap", "f_montoCartaFianza");
 }
 
+function recalcDrawerBv(){
+  const valorFacial = +document.getElementById("f_valorFacial").value || 0;
+  const cantTarjetas = +document.getElementById("f_cantTarjetas").value || 0;
+  const cargas = +document.getElementById("f_cargasAnio").value || 0;
+  document.getElementById("f_bvCarga").value = calcBvCarga(valorFacial, cantTarjetas).toFixed(2);
+  document.getElementById("f_bvTotal").value = calcBvTotal(valorFacial, cantTarjetas, cargas).toFixed(2);
+}
+
 function fillForm(p){
   setLockedValue("f_ruc", p.ruc || "Pendiente de selección de cliente");
   setLockedValue("f_razonSocial", p.razonSocial);
@@ -802,11 +810,12 @@ function fillForm(p){
   setLockedValue("f_marca", p.marca);
   setLockedValue("f_sector", p.sector);
   setLockedValue("f_categoria", p.categoria);
-  document.getElementById("f_bvMes").value = p.bvMes;
   document.getElementById("f_cantTarjetas").value = p.cantTarjetas;
   document.getElementById("f_cargasAnio").value = p.cargasAnio;
   document.getElementById("f_tipoProducto").value = p.tipoProducto;
   document.getElementById("f_valorFacial").value = p.valorFacial;
+  document.getElementById("f_bvCarga").value = calcBvCarga(p.valorFacial, p.cantTarjetas).toFixed(2);
+  document.getElementById("f_bvTotal").value = calcBvTotal(p.valorFacial, p.cantTarjetas, p.cargasAnio).toFixed(2);
   document.getElementById("f_modalidadPago").value = p.modalidadPago;
   document.getElementById("f_diasCredito").value = p.diasCredito;
   document.getElementById("f_rebateToggle").checked = !!p.rebate.activo;
@@ -829,6 +838,18 @@ function fillForm(p){
 
   updateConditionalFields();
 }
+
+/* BV por carga / BV total: campos calculados y no editables (ver
+   sección "Oportunidad" del drawer y el modal de Nueva oportunidad).
+   Se recalculan en vivo a partir de Valor facial, Cantidad de tarjetas
+   y Cantidad de cargas total — nunca se guardan como un número aparte. */
+function calcBvCarga(valorFacial, cantTarjetas){ return (+valorFacial||0) * (+cantTarjetas||0); }
+function calcBvTotal(valorFacial, cantTarjetas, cargas){ return calcBvCarga(valorFacial, cantTarjetas) * (+cargas||0); }
+/* "Business Volume" mostrado en listado/dashboards: bookings — el BV
+   total de la propuesta se atribuye al periodo en que se aprobó, no un
+   ritmo mensual. Siempre BV total, nunca bvMes (que hoy equivale a BV
+   por carga, un cálculo distinto). */
+function bvTotalFor(p){ return calcBvTotal(p.valorFacial, p.cantTarjetas, p.cargasAnio); }
 
 function deriveProducto(data){
   return data.solucion==="Food" ? "Tarjeta Alimentación " + (data.categoria!=="No aplica"?data.categoria:"Estándar")
@@ -879,11 +900,14 @@ function collectFormData(){
     marca: getLockedValue("f_marca"),
     sector: getLockedValue("f_sector"),
     categoria: getLockedValue("f_categoria"),
-    bvMes: +document.getElementById("f_bvMes").value || 0,
     cantTarjetas: +document.getElementById("f_cantTarjetas").value || 0,
     cargasAnio: +document.getElementById("f_cargasAnio").value || 0,
     tipoProducto: document.getElementById("f_tipoProducto").value,
     valorFacial: +document.getElementById("f_valorFacial").value || 0,
+    /* bvMes es internamente "BV por carga" (usado solo por computeRentabilidad).
+       El "Business Volume" mostrado en listado/dashboards es BV total —
+       ver bvTotalFor(), un cálculo distinto que no depende de este campo. */
+    bvMes: calcBvCarga(+document.getElementById("f_valorFacial").value || 0, +document.getElementById("f_cantTarjetas").value || 0),
     modalidadPago: document.getElementById("f_modalidadPago").value,
     diasCredito: +document.getElementById("f_diasCredito").value || 0,
     rebate:{
@@ -1364,8 +1388,17 @@ function resetOportunidadForm(){
   document.getElementById("rucLookupStatus").textContent = "";
   document.getElementById("rucLookupStatus").className = "ruc-lookup-status";
   updateDiasCreditoVisibility();
+  recalcOportunidadBv();
   document.querySelectorAll("#oportunidadForm .field-group.field-error").forEach(g=>g.classList.remove("field-error"));
   document.getElementById("oportunidadForm").scrollTop = 0;
+}
+
+function recalcOportunidadBv(){
+  const valorFacial = +document.getElementById("op_valorFacial").value || 0;
+  const cantTarjetas = +document.getElementById("op_cantTarjetas").value || 0;
+  const cargas = +document.getElementById("op_cargasAnio").value || 0;
+  document.getElementById("op_bvCarga").value = calcBvCarga(valorFacial, cantTarjetas).toFixed(2);
+  document.getElementById("op_bvTotal").value = calcBvTotal(valorFacial, cantTarjetas, cargas).toFixed(2);
 }
 
 function setStaticValue(id, text, empty){
@@ -1431,9 +1464,6 @@ function validateOportunidadForm(){
   const ruc = document.getElementById("op_ruc").value.trim();
   if(!/^\d{11}$/.test(ruc)){ errors.push("El RUC debe tener 11 dígitos numéricos."); markError("op_ruc"); }
 
-  const bvMes = document.getElementById("op_bvMes").value;
-  if(bvMes === "" || +bvMes <= 0){ errors.push("Ingresa un BV por mes válido."); markError("op_bvMes"); }
-
   const valorFacial = document.getElementById("op_valorFacial").value;
   if(valorFacial === "" || +valorFacial <= 0){ errors.push("Ingresa un valor facial válido."); markError("op_valorFacial"); }
 
@@ -1441,7 +1471,7 @@ function validateOportunidadForm(){
   if(cantTarjetas === "" || +cantTarjetas <= 0 || !Number.isInteger(+cantTarjetas)){ errors.push("Ingresa una cantidad de tarjetas válida."); markError("op_cantTarjetas"); }
 
   const cargasAnio = document.getElementById("op_cargasAnio").value;
-  if(cargasAnio === "" || +cargasAnio <= 0 || !Number.isInteger(+cargasAnio)){ errors.push("Ingresa una cantidad de cargas al año válida."); markError("op_cargasAnio"); }
+  if(cargasAnio === "" || +cargasAnio <= 0 || !Number.isInteger(+cargasAnio)){ errors.push("Ingresa una cantidad de cargas total válida."); markError("op_cargasAnio"); }
 
   const modalidad = document.getElementById("op_modalidadPago").value;
   if(modalidad==="Crédito"){
@@ -1474,11 +1504,11 @@ function saveOportunidad(){
     marca: document.getElementById("op_marca").value,
     sector: document.getElementById("op_sector").value,
     categoria: document.getElementById("op_categoria").value,
-    bvMes: +document.getElementById("op_bvMes").value || 0,
     cantTarjetas: +document.getElementById("op_cantTarjetas").value || 0,
     cargasAnio: +document.getElementById("op_cargasAnio").value || 0,
     tipoProducto: document.getElementById("op_tipoProducto").value,
     valorFacial: +document.getElementById("op_valorFacial").value || 0,
+    bvMes: calcBvCarga(+document.getElementById("op_valorFacial").value || 0, +document.getElementById("op_cantTarjetas").value || 0),
     modalidadPago: document.getElementById("op_modalidadPago").value,
     diasCredito: document.getElementById("op_modalidadPago").value==="Crédito" ? (+document.getElementById("op_diasCredito").value || 0) : 0,
     rebate:{activo:false, tipo:"monto", valor:0},
@@ -1606,6 +1636,9 @@ document.addEventListener("DOMContentLoaded", function(){
   document.getElementById("btnSaveOportunidad").addEventListener("click", saveOportunidad);
   document.getElementById("op_ruc").addEventListener("input", ()=>{ oportunidadDirty = true; handleRucLookup(); });
   document.getElementById("op_modalidadPago").addEventListener("change", ()=>{ oportunidadDirty = true; updateDiasCreditoVisibility(); });
+  document.getElementById("op_valorFacial").addEventListener("input", recalcOportunidadBv);
+  document.getElementById("op_cantTarjetas").addEventListener("input", recalcOportunidadBv);
+  document.getElementById("op_cargasAnio").addEventListener("input", recalcOportunidadBv);
   document.getElementById("oportunidadForm").addEventListener("input", ()=>{ oportunidadDirty = true; });
   document.getElementById("oportunidadForm").addEventListener("change", ()=>{ oportunidadDirty = true; });
   document.getElementById("btnGoToPropuesta").addEventListener("click", ()=>{
@@ -1649,6 +1682,11 @@ document.addEventListener("DOMContentLoaded", function(){
   document.getElementById("f_rebateTipo").addEventListener("change", updateConditionalFields);
   document.getElementById("f_productoCustom").addEventListener("change", updateConditionalFields);
   document.getElementById("f_cartaFianza").addEventListener("change", updateConditionalFields);
+
+  // BV por carga / BV total: recalculo en vivo, campos siempre calculados
+  document.getElementById("f_valorFacial").addEventListener("input", recalcDrawerBv);
+  document.getElementById("f_cantTarjetas").addEventListener("input", recalcDrawerBv);
+  document.getElementById("f_cargasAnio").addEventListener("input", recalcDrawerBv);
 
   // Distribución add row
   document.getElementById("btnAddDestino").addEventListener("click", ()=>{
