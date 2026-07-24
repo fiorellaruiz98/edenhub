@@ -3334,7 +3334,6 @@ function editFormTemplate(d){
       '<select name="estado">'+
         '<option value="Activo" '+((!d||d.estado==='Activo')?'selected':'')+'>Activo</option>'+
         '<option value="Inactivo" '+(d&&d.estado==='Inactivo'?'selected':'')+'>Inactivo</option>'+
-        '<option value="Pendiente" '+(d&&d.estado==='Pendiente'?'selected':'')+'>Pendiente de definir</option>'+
       '</select>'+
     '</div>'+
     '<div class="field-group">'+
