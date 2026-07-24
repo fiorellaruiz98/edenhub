@@ -524,7 +524,13 @@ main{
   text-transform:uppercase;
   letter-spacing:.04em;
 }
-.filters-title svg{color:var(--red-hero);}
+/* Ícono único de "sliders" en CSS (no inline SVG) para que sea imposible
+   que un módulo nuevo diverja al ícono de embudo por copiar/pegar mal. */
+.filters-title::before{
+  content:'';flex:0 0 auto;
+  width:15px;height:15px;
+  background:no-repeat center/contain url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F72717' stroke-width='2.2' stroke-linecap='round'><path d='M4 6h16M7 12h10M10 18h4'/></svg>");
+}
 .filters-clear{
   background:none;border:none;
   color:var(--grey);
