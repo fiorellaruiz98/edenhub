@@ -266,6 +266,119 @@ function esc(s){
 }
 function findProposal(id){ return proposals.find(p=>p.id===id); }
 
+/* ------------------------------------------------------------
+   INICIO — dashboard de negocio (mismo contenido para todos los
+   perfiles de usuario, calculado en vivo desde `proposals`)
+   ------------------------------------------------------------ */
+function periodoRange(periodo, today){
+  const y = today.getFullYear(), m = today.getMonth();
+  if(periodo === 'trimestre'){
+    const q = Math.floor(m/3);
+    return { start: new Date(y, q*3, 1), end: new Date(y, q*3+3, 1) };
+  }
+  if(periodo === 'anio') return { start: new Date(y, 0, 1), end: new Date(y+1, 0, 1) };
+  return { start: new Date(y, m, 1), end: new Date(y, m+1, 1) };
+}
+function periodoRangeAnterior(periodo, today){
+  const y = today.getFullYear(), m = today.getMonth();
+  if(periodo === 'trimestre'){
+    const q = Math.floor(m/3);
+    return { start: new Date(y, q*3-3, 1), end: new Date(y, q*3, 1) };
+  }
+  if(periodo === 'anio') return { start: new Date(y-1, 0, 1), end: new Date(y, 0, 1) };
+  return { start: new Date(y, m-1, 1), end: new Date(y, m, 1) };
+}
+function fechaEnRango(fechaStr, rango){
+  const d = new Date(fechaStr+"T00:00:00");
+  return d >= rango.start && d < rango.end;
+}
+
+function renderInicioDashboard(){
+  const nombreEl = document.querySelector('.user-chip strong');
+  const nombre = nombreEl ? nombreEl.textContent.trim().split(' ')[0] : 'Usuario';
+  const fechaTexto = new Date().toLocaleDateString('es-PE', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+  document.getElementById('inicioGreeting').textContent = 'Hola, ' + nombre + ' — ' + fechaTexto;
+
+  const select = document.getElementById('inicioPeriodo');
+  if(!select.dataset.wired){
+    select.addEventListener('change', renderInicioKpis);
+    select.dataset.wired = '1';
+  }
+  renderInicioKpis();
+  renderInicioDistribucion();
+  renderInicioTopClientes();
+}
+
+function renderInicioKpis(){
+  const periodo = document.getElementById('inicioPeriodo').value;
+  const hoy = new Date();
+  const aprobadasActual = proposals.filter(p => p.estado === 'Aprobada' && fechaEnRango(p.fecha, periodoRange(periodo, hoy)));
+  const aprobadasAnterior = proposals.filter(p => p.estado === 'Aprobada' && fechaEnRango(p.fecha, periodoRangeAnterior(periodo, hoy)));
+
+  const bvActual = aprobadasActual.reduce((s,p)=>s+p.bvMes, 0);
+  const bvAnterior = aprobadasAnterior.reduce((s,p)=>s+p.bvMes, 0);
+  document.getElementById('inicioKpiBV').textContent = money(bvActual);
+  document.getElementById('inicioKpiBVSub').textContent = bvAnterior > 0
+    ? (bvActual>=bvAnterior?'+':'') + (((bvActual-bvAnterior)/bvAnterior)*100).toFixed(1) + '% vs. periodo anterior'
+    : aprobadasActual.length + (aprobadasActual.length===1 ? ' propuesta aprobada' : ' propuestas aprobadas');
+
+  const rucsAprobados = new Set(aprobadasActual.map(p=>p.ruc));
+  const rucsTotales = new Set(proposals.map(p=>p.ruc));
+  document.getElementById('inicioKpiClientes').textContent = intFmt(rucsAprobados.size);
+  const tasaConversion = rucsTotales.size ? (rucsAprobados.size/rucsTotales.size*100) : 0;
+  document.getElementById('inicioKpiClientesSub').textContent = tasaConversion.toFixed(1) + '% tasa de conversión';
+
+  document.getElementById('inicioKpiTarjetas').textContent = intFmt(aprobadasActual.reduce((s,p)=>s+p.cantTarjetas, 0));
+  document.getElementById('inicioKpiTarjetasSub').textContent = aprobadasActual.length + (aprobadasActual.length===1 ? ' propuesta aprobada' : ' propuestas aprobadas');
+}
+
+function inicioBarRow(label, pct, color){
+  return '<div class="inicio-bar-row"><span class="k">'+esc(label)+'</span>'+
+    '<div class="inicio-bar-track"><div class="inicio-bar-fill" style="width:'+pct+'%;background:'+color+';"></div></div>'+
+    '<span class="v">'+pct.toFixed(0)+'%</span></div>';
+}
+
+function renderInicioDistribucion(){
+  // MOCK: campo Canal aún no existe en el modelo de datos de Propuestas — reemplazar cuando se agregue
+  const canalMock = [
+    {label:'Hunter', pct:35, color:'var(--red-hero)'},
+    {label:'Farmer', pct:28, color:'var(--benefits-pink)'},
+    {label:'Telesales', pct:22, color:'#2554A6'},
+    {label:'Sector Público', pct:15, color:'var(--grey)'}
+  ];
+  document.getElementById('inicioCanalBars').innerHTML = canalMock.map(c => inicioBarRow(c.label, c.pct, c.color)).join('');
+
+  const aprobadas = proposals.filter(p => p.estado === 'Aprobada');
+  const bvTotal = aprobadas.reduce((s,p)=>s+p.bvMes, 0);
+  const SOLUCION_COLORS = {Food:'var(--red-hero)', Gift:'var(--benefits-pink)', Mobility:'#2554A6'};
+  const bySolucion = {Food:0, Gift:0, Mobility:0};
+  aprobadas.forEach(p => { if(bySolucion[p.solucion]!==undefined) bySolucion[p.solucion] += p.bvMes; });
+  document.getElementById('inicioSolucionBars').innerHTML = Object.keys(bySolucion).map(sol => {
+    const pct = bvTotal > 0 ? (bySolucion[sol]/bvTotal*100) : 0;
+    return inicioBarRow(sol, pct, SOLUCION_COLORS[sol]);
+  }).join('');
+}
+
+function renderInicioTopClientes(){
+  const aprobadas = proposals.filter(p => p.estado === 'Aprobada');
+  const porCliente = {};
+  aprobadas.forEach(p => {
+    if(!porCliente[p.ruc]) porCliente[p.ruc] = {razonSocial:p.razonSocial, bv:0, solucionCount:{}};
+    porCliente[p.ruc].bv += p.bvMes;
+    porCliente[p.ruc].solucionCount[p.solucion] = (porCliente[p.ruc].solucionCount[p.solucion]||0) + 1;
+  });
+  const top = Object.values(porCliente).sort((a,b)=>b.bv-a.bv).slice(0,5);
+  const tbody = document.getElementById('inicioTopClientes');
+  if(top.length === 0){
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--grey);padding:20px;">Todavía no hay propuestas aprobadas.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = top.map(c => {
+    const solucionPrincipal = Object.keys(c.solucionCount).sort((a,b)=>c.solucionCount[b]-c.solucionCount[a])[0];
+    return '<tr><td>'+esc(c.razonSocial)+'</td><td><span class="tag-neutral">'+esc(solucionPrincipal)+'</span></td><td class="num">'+money(c.bv)+'</td></tr>';
+  }).join('');
+}
+
 /* Campos "No editable" ahora son <div class="locked-value"> en vez de
    inputs/selects deshabilitados — estos helpers leen/escriben su texto. */
 function setLockedValue(id, text){
@@ -1601,7 +1714,6 @@ document.addEventListener("DOMContentLoaded", function(){
    NAVEGACIÓN LATERAL (Sidebar) — cambio de vista y responsive
    ============================================================ */
 const PLACEHOLDER_COPY = {
-  "inicio": {crumb:"Inicio", title:"Inicio", heading:"Inicio", body:"Próximamente verás aquí un resumen de tu actividad, accesos directos y novedades del sistema."},
   "cotizaciones": {crumb:"Gestión comercial › Cotizaciones", title:"Cotizaciones", heading:"Cotizaciones", body:"Próximamente podrás dar seguimiento a las cotizaciones generadas a partir de propuestas rentables."},
   "orden-comercial": {crumb:"Gestión comercial › Orden Comercial", title:"Orden Comercial", heading:"Orden Comercial", body:"Próximamente podrás gestionar la orden comercial generada a partir de una propuesta o cotización aprobada."},
   "linea-credito": {crumb:"Flujos de Aprobación › Línea de Crédito", title:"Línea de Crédito", heading:"Línea de Crédito", body:"Próximamente podrás revisar de forma consolidada las solicitudes de línea de crédito de todas las propuestas."},
@@ -1637,6 +1749,11 @@ function initSidebarNav(){
      entradas del sidebar siguen usando el placeholder de siempre.
      Cada vista real declara su copy de topbar y un hook opcional onShow. */
   const REAL_VIEW_META = {
+    "inicio": {
+      crumb: 'Inicio',
+      title: "Inicio",
+      onShow: function(){ renderInicioDashboard(); }
+    },
     "propuestas": {
       crumb: 'Gestión comercial <b>›</b> Propuestas',
       title: "Propuestas comerciales"
@@ -1664,7 +1781,7 @@ function initSidebarNav(){
       if(meta.onShow) meta.onShow();
     } else {
       document.getElementById("view-placeholder").classList.add("active");
-      const copy = PLACEHOLDER_COPY[view] || PLACEHOLDER_COPY["inicio"];
+      const copy = PLACEHOLDER_COPY[view] || {crumb:"—", title:"Módulo", heading:"Módulo en construcción", body:"Este módulo todavía no está disponible."};
       document.getElementById("topbarCrumb").innerHTML = copy.crumb.replace("›","<b>›</b>");
       document.getElementById("topbarTitle").textContent = copy.title;
       document.getElementById("placeholderHeading").textContent = copy.heading;
@@ -2642,72 +2759,83 @@ document.addEventListener("DOMContentLoaded", function(){
 "use strict";
 
 /* -------------------------------------------------------------------------
-   1) DATASET — Catálogo de conceptos (fuente: HTML 3, tabla MC001–C061)
-   nominal:null  → valor nominal no definido en la fuente (se marca Pendiente)
-   assumed:n     → valor supuesto usado SOLO para fines de simulación/demo
+   1) DATASET — Catálogo de conceptos (fuente: assets/motor-variables-final_1.json)
+   nominal:null + esSupuesto:true → valor no confirmado (sin cifra real
+   provista por la fuente); se muestra "Valor supuesto" en vez de un
+   número inventado. `nombre` se genera desde `label` con la misma
+   normalización que usa el formulario de "Agregar variable" (ver
+   handleEditSubmit) para poder detectar dependencias en `formula`.
+   `rent` guarda el campo "clase" del JSON fuente (Ingreso/Costo/Gasto/
+   Resultante/Computada/Insumo de cálculo — X); se muestra como columna
+   "Clase" en la tabla. El campo `clase` interno (INPUT/OUTPUT) queda
+   sin usar — esa dimensión no viene en este dataset y no se renderiza.
    ------------------------------------------------------------------------- */
 const RAW_DATA = [
-{id:'MC001',idc:'C001',nombre:'CONFIGURACION_DE_AFINIDAD',nominal:70,formula:'(PROPUESTA.SERVICIO_LOGO_EMPRESA = SI) * 2',estado:'Activo',driver:'Hora',clase:'INPUT',moneda:'EURO',label:'Configuración de afinidad',categoria:'Comisiones e ingresos',resumen:'Aplica si la propuesta incluye logo de la empresa',rent:'Ingresos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC002',idc:'C002',nombre:'WELCOME_KIT',nominal:0.18,formula:'PROPUESTA.TIPO_DE_PRODUCTO = FISICO',estado:'Activo',driver:'Tarjeta',clase:'INPUT',moneda:'SOLES',label:'Welcome kit',categoria:'Tarjetas y emisión',resumen:'Aplica si el producto es físico',rent:'Costos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC003',idc:'C003',nombre:'PERSONALIZACION',nominal:null,assumed:0.25,formula:'DE ACUERDO A PROPUESTA.TIPO_DE_PRODUCTO = FISICO Y PROPUESTA.PRODUCTO_ELEGIDO',estado:'Pendiente',driver:'Tarjeta',clase:'INPUT',moneda:'SOLES',label:'Personalización de tarjeta',categoria:'Tarjetas y emisión',resumen:'Según tipo de producto y producto elegido',rent:'Costos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC004',idc:'C004',nombre:'EMISION_TARJETAS_CON_AFINIDAD',nominal:0.10,formula:'PROPUESTA.SERVICIO_LOGO_EMPRESA = SI',estado:'Activo',driver:'Tarjeta',clase:'INPUT',moneda:'EURO',label:'Emisión de tarjetas con afinidad',categoria:'Tarjetas y emisión',resumen:'Aplica si la propuesta incluye logo de la empresa',rent:'Costos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC005',idc:'C005',nombre:'EMISION_DE_TARJETAS',nominal:null,assumed:0.30,formula:'DE ACUERDO A PROPUESTA.TIPO_DE_PRODUCTO = FISICO Y PROPUESTA.PRODUCTO_ELEGIDO',estado:'Pendiente',driver:'Tarjeta',clase:'INPUT',moneda:'SOLES',label:'Emisión de tarjetas',categoria:'Tarjetas y emisión',resumen:'Según tipo de producto y producto elegido',rent:'Costos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC006',idc:'C006',nombre:'ENVIO_TARJETAS_PROVINCIA',nominal:18,formula:'PROPUESTA.DESTINO_DE_ENTREGA = PROVINCIA',estado:'Activo',driver:'Punto de entrega',clase:'INPUT',moneda:'SOLES',label:'Envío de tarjetas a provincia',categoria:'Logística y entrega',resumen:'Aplica si el destino de entrega es provincia',rent:'Ingresos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC007',idc:'C007',nombre:'ENVIO_TARJETAS_LIMA',nominal:10,formula:'PROPUESTA.DESTINO_DE_ENTREGA = LIMA',estado:'Activo',driver:'Punto de entrega',clase:'INPUT',moneda:'SOLES',label:'Envío de tarjetas a Lima',categoria:'Logística y entrega',resumen:'Aplica si el destino de entrega es Lima',rent:'Ingresos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC008',idc:'C008',nombre:'REPOSICION_POR_PERDIDA_ROBO',nominal:16.95,formula:'PROPUESTA.REPOSICION ≠ EXONERADO',estado:'Activo',driver:'Tarjeta',clase:'INPUT',moneda:'SOLES',label:'Reposición por pérdida o robo',categoria:'Tarjetas y emisión',resumen:'Aplica si la reposición no está exonerada',rent:'Ingresos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC009',idc:'C009',nombre:'ENVIO_DE_REPOSICION_PROVINCIA',nominal:18,formula:'PROPUESTA.DESTINO_DE_REPOSICION = PROVINCIA',estado:'Activo',driver:'Punto de entrega',clase:'INPUT',moneda:'SOLES',label:'Envío de reposición a provincia',categoria:'Logística y entrega',resumen:'Aplica si el destino de reposición es provincia',rent:'Ingresos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC010',idc:'C010',nombre:'ENVIO_DE_REPOSICION_LIMA',nominal:10,formula:'PROPUESTA.DESTINO_DE_REPOSICION = LIMA',estado:'Activo',driver:'Punto de entrega',clase:'INPUT',moneda:'SOLES',label:'Envío de reposición a Lima',categoria:'Logística y entrega',resumen:'Aplica si el destino de reposición es Lima',rent:'Ingresos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC011',idc:'C011',nombre:'RENOVACION_TARJETA',nominal:null,assumed:15,formula:'PROPUESTA.RENOVACION ≠ EXONERADO',estado:'Inactivo',driver:'Tarjeta',clase:'INPUT',moneda:'SOLES',label:'Renovación de tarjeta',categoria:'Tarjetas y emisión',resumen:'Aplica si la renovación no está exonerada',rent:'Ingresos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC012',idc:'C012',nombre:'TRANSACCIONES_APROBADAS',nominal:0.45,formula:'PROPUESTA.PRODUCTO_ELEGIDO',estado:'Activo',driver:'Transacción',clase:'INPUT',moneda:'SOLES',label:'Transacciones aprobadas',categoria:'Transaccional y procesamiento',resumen:'Tarifa fija según producto elegido',rent:'Costos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC013',idc:'C013',nombre:'CUENTA_ACTIVA',nominal:0.87,formula:'PROPUESTA.PRODUCTO_ELEGIDO',estado:'Activo',driver:'Transacción',clase:'INPUT',moneda:'SOLES',label:'Cuenta activa',categoria:'Transaccional y procesamiento',resumen:'Tarifa fija según producto elegido',rent:'Costos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC014',idc:'C014',nombre:'PROCESAMIENTO_BINES_ALERTAS_BLOQUEO_PARAMETRIZACIONES',nominal:0.77,formula:'PROPUESTA.PRODUCTO_ELEGIDO',estado:'Activo',driver:'Transacción',clase:'INPUT',moneda:'SOLES',label:'Procesamiento de BINes y alertas',categoria:'Transaccional y procesamiento',resumen:'Tarifa fija según producto elegido',rent:'Costos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC015',idc:'C015',nombre:'PROCESAMIENTO_TX_MARCA',nominal:null,assumed:0.012,formula:'DE ACUERDO A PROPUESTA.PRODUCTO_ELEGIDO',estado:'Pendiente',driver:'—',clase:'INPUT',moneda:'SOLES',label:'Procesamiento de transacción de marca',categoria:'Transaccional y procesamiento',resumen:'Según producto elegido',rent:'Costos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC016',idc:'C016',nombre:'INTERCHANGE_FEE',nominal:null,assumed:0.014,formula:'DE ACUERDO A PROPUESTA.PRODUCTO_ELEGIDO',estado:'Pendiente',driver:'—',clase:'INPUT',moneda:'SOLES',label:'Tasa de intercambio (interchange)',categoria:'Comisiones e ingresos',resumen:'Según producto elegido',rent:'Ingresos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC017',idc:'C017',nombre:'MDR_ADICIONAL',nominal:null,assumed:0.006,formula:'DE ACUERDO A PROPUESTA.PRODUCTO_ELEGIDO',estado:'Pendiente',driver:'—',clase:'INPUT',moneda:'SOLES',label:'MDR adicional',categoria:'Comisiones e ingresos',resumen:'Según producto elegido',rent:'Ingresos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC018',idc:'C018',nombre:'RATIO_DE_CONSUMO_SOBRE_LA_CARGA',nominal:98,formula:'PROPUESTA.PRODUCTO_ELEGIDO',estado:'Activo',driver:'%',clase:'INPUT',moneda:'SOLES',label:'Ratio de consumo sobre la carga',categoria:'Transaccional y procesamiento',resumen:'Tarifa fija según producto elegido',rent:'Parametro',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC019',idc:'C019',nombre:'L&E',nominal:null,assumed:0.05,formula:'DE ACUERDO A PROPUESTA.PRODUCTO_ELEGIDO Y PROPUESTA.RECURRENCIA',estado:'Pendiente',driver:'—',clase:'INPUT',moneda:'SOLES',label:'Logística y envíos (L&E)',categoria:'Comisiones e ingresos',resumen:'Según producto elegido y recurrencia',rent:'Ingresos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC020',idc:'C020',nombre:'COSTO_PROMEDIO_DE_MANTENIMIENTO',nominal:null,assumed:2.5,formula:'DE ACUERDO A PROPUESTA.PRODUCTO_ELEGIDO',estado:'Pendiente',driver:'Tarjeta',clase:'INPUT',moneda:'SOLES',label:'Costo promedio de mantenimiento',categoria:'Comisiones e ingresos',resumen:'Según producto elegido',rent:'Ingresos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC021',idc:'C021',nombre:'CARTA_FIANZA_TASA',nominal:5.2,formula:'PROPUESTA.EMITIO_CARTA_FIANZA = SI',estado:'Activo',driver:'%',clase:'OUTPUT',moneda:'SOLES',label:'Tasa de carta fianza',categoria:'Carta fianza y garantías',resumen:'Aplica si se emitió carta fianza',rent:'Gastos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC022',idc:'C022',nombre:'COMISION_CLIENTE',nominal:null,formula:'(COMISION_CLIENTE_EJECUTIVO * PROPUESTA.BV_ANUAL) − REBATE',estado:'Activo',driver:'—',clase:'OUTPUT',moneda:'SOLES',label:'Comisión al cliente',categoria:'Comisiones e ingresos',resumen:'Comisión del ejecutivo sobre el BV anual, menos rebate',rent:'Ingresos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC023',idc:'C023',nombre:'TUR_COMISION_CLIENTE',nominal:null,formula:'COMISION_CLIENTE / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'%',clase:'OUTPUT',moneda:'SOLES',label:'Tasa unitaria — comisión cliente',categoria:'Comisiones e ingresos',resumen:'Comisión al cliente como % del BV anual',rent:'Ingresos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC024',idc:'C024',nombre:'COMISION_MERCHANT',nominal:null,formula:'TUR_COMISION_MERCHANT * REEMBOLSO',estado:'Activo',driver:'—',clase:'OUTPUT',moneda:'SOLES',label:'Comisión merchant',categoria:'Comisiones e ingresos',resumen:'Tasa de comisión merchant aplicada al reembolso',rent:'Ingresos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC025',idc:'C025',nombre:'TUR_COMISION_MERCHANT',nominal:null,formula:'(INTERCHANGE_FEE + MDR_ADICIONAL); SI PROPUESTA.PRODUCTO_CUSTOM = SI ENTONCES + PROPUESTA.MDR_NEGOCIADO',estado:'Activo',driver:'%',clase:'OUTPUT',moneda:'SOLES',label:'Tasa unitaria — comisión merchant',categoria:'Comisiones e ingresos',resumen:'Interchange + MDR, más MDR negociado si es producto custom',rent:'Ingresos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC026',idc:'C026',nombre:'OTROS_INGRESOS_CALCULADO',nominal:null,formula:'L&E_CALCULADO + MANTENIMIENTO + CONFIGURACION_DE_AFINIDAD + DISTRIBUCION',estado:'Activo',driver:'—',clase:'OUTPUT',moneda:'SOLES',label:'Otros ingresos (calculado)',categoria:'Comisiones e ingresos',resumen:'Suma de L&E, mantenimiento, afinidad y distribución',rent:'Ingresos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC027',idc:'C027',nombre:'TUR_OTROS_INGRESOS',nominal:null,formula:'OTROS_INGRESOS_CALCULADO / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'%',clase:'OUTPUT',moneda:'SOLES',label:'Tasa unitaria — otros ingresos',categoria:'Comisiones e ingresos',resumen:'Otros ingresos como % del BV anual',rent:'Ingresos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC028',idc:'C028',nombre:'L&E_CALCULADO',nominal:null,formula:'L&E * PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',clase:'OUTPUT',moneda:'SOLES',label:'Logística y envíos (calculado)',categoria:'Comisiones e ingresos',resumen:'Tarifa de logística y envíos aplicada al BV anual',rent:'Ingresos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC029',idc:'C029',nombre:'MANTENIMIENTO',nominal:null,formula:'PROPUESTA.Q_TARJETAS_NUEVAS * COSTO_PROMEDIO_DE_MANTENIMIENTO * PESO%_MES_SUMATORIA',estado:'Activo',driver:'—',clase:'OUTPUT',moneda:'SOLES',label:'Mantenimiento',categoria:'Comisiones e ingresos',resumen:'Tarjetas nuevas × costo de mantenimiento × peso mensual',rent:'Ingresos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC030',idc:'C030',nombre:'TUR_MANTENIMIENTO',nominal:null,formula:'MANTENIMIENTO / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'%',clase:'OUTPUT',moneda:'SOLES',label:'Tasa unitaria — mantenimiento',categoria:'Comisiones e ingresos',resumen:'Mantenimiento como % del BV anual',rent:'Ingresos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC031',idc:'C031',nombre:'TUR_CONFIGURACION_DE_AFINIDAD',nominal:null,formula:'CONFIGURACION_DE_AFINIDAD / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'%',clase:'OUTPUT',moneda:'SOLES',label:'Tasa unitaria — configuración de afinidad',categoria:'Comisiones e ingresos',resumen:'Configuración de afinidad como % del BV anual',rent:'Ingresos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC032',idc:'C032',nombre:'DISTRIBUCION',nominal:null,formula:'((PROPUESTA.PUNTOS_LIMA * ENVIO_TARJETAS_LIMA) + (PROPUESTA.PUNTOS_PROVINCIA * ENVIO_TARJETAS_PROVINCIA)) * PROPUESTA.CANTIDAD_DE_REPARTOS * 1.1',estado:'Activo',driver:'—',clase:'OUTPUT',moneda:'SOLES',label:'Distribución',categoria:'Logística y entrega',resumen:'Costo de envío por puntos de entrega × repartos al año',rent:'Ingresos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC033',idc:'C033',nombre:'TUR_DISTRIBUCION',nominal:null,formula:'DISTRIBUCION / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'%',clase:'OUTPUT',moneda:'SOLES',label:'Tasa unitaria — distribución',categoria:'Logística y entrega',resumen:'Distribución como % del BV anual',rent:'Ingresos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC034',idc:'C034',nombre:'COSTO_VENTA',nominal:null,formula:'INSUMOS_PERZ_ENSOBRADO + PROCESAMIENTO + MARCA_CALCULADO',estado:'Activo',driver:'—',clase:'OUTPUT',moneda:'SOLES',label:'Costo de venta',categoria:'Costos y gastos',resumen:'Suma de insumos, procesamiento y costo de marca',rent:'Costos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC035',idc:'C035',nombre:'TUR_COSTO_VENTA',nominal:null,formula:'COSTO_VENTA / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'%',clase:'OUTPUT',moneda:'SOLES',label:'Tasa unitaria — costo de venta',categoria:'Costos y gastos',resumen:'Costo de venta como % del BV anual',rent:'Costos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC036',idc:'C036',nombre:'INSUMOS_PERZ_ENSOBRADO',nominal:null,formula:'(WELCOME_KIT + PERSONALIZACION + EMISION_DE_TARJETAS) * PROPUESTA.CANTIDAD_TARJETAS + PERSONALIZACION_FLYER_SOBRE_OTROS; SI SERVICIO_LOGO_EMPRESA = SI, SUMAR (EMISION_TARJETAS_CON_AFINIDAD * CANTIDAD_TARJETAS) + CONFIGURACION_DE_AFINIDAD',estado:'Activo',driver:'—',clase:'OUTPUT',moneda:'SOLES',label:'Insumos, personalización y ensobrado',categoria:'Tarjetas y emisión',resumen:'Welcome kit, personalización y emisión × tarjetas activas',rent:'Costos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC037',idc:'C037',nombre:'TUR_INSUMOS_PERZ_ENSOBRADO',nominal:null,formula:'INSUMOS_PERZ_ENSOBRADO / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'%',clase:'OUTPUT',moneda:'SOLES',label:'Tasa unitaria — insumos y ensobrado',categoria:'Tarjetas y emisión',resumen:'Insumos y ensobrado como % del BV anual',rent:'Costos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC038',idc:'C038',nombre:'PROCESAMIENTO',nominal:null,formula:'(TRANSACCIONES_APROBADAS * NUMERO_TRANSACCIONES_PROMEDIO) + (CUENTA_ACTIVA * PROPUESTA.CANTIDAD_TARJETAS * PROPUESTA.NUMERO_PEDIDOS_AL_ANIO) + (PROCESAMIENTO_BINES_ALERTAS_BLOQUEO_PARAMETRIZACIONES * PROPUESTA.CANTIDAD_TARJETAS * PROPUESTA.NUMERO_PEDIDOS_AL_ANIO)',estado:'Activo',driver:'—',clase:'OUTPUT',moneda:'SOLES',label:'Procesamiento',categoria:'Transaccional y procesamiento',resumen:'Transacciones, cuentas activas y BINes × pedidos al año',rent:'Costos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC039',idc:'C039',nombre:'TUR_PROCESAMIENTO',nominal:null,formula:'PROCESAMIENTO / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'%',clase:'OUTPUT',moneda:'SOLES',label:'Tasa unitaria — procesamiento',categoria:'Transaccional y procesamiento',resumen:'Procesamiento como % del BV anual',rent:'Costos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC040',idc:'C040',nombre:'OTROS_GASTOS',nominal:null,formula:'GASTOS_FINANCIEROS + CARTA_FIANZA + PAYROLL',estado:'Activo',driver:'—',clase:'OUTPUT',moneda:'SOLES',label:'Otros gastos',categoria:'Costos y gastos',resumen:'Suma de gastos financieros, carta fianza y payroll',rent:'Gastos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC041',idc:'C041',nombre:'TUR_OTROS_GASTOS',nominal:null,formula:'OTROS_GASTOS / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'%',clase:'OUTPUT',moneda:'SOLES',label:'Tasa unitaria — otros gastos',categoria:'Costos y gastos',resumen:'Otros gastos como % del BV anual',rent:'Gastos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC042',idc:'C042',nombre:'PAYROLL',nominal:null,formula:'COMISION_VARIABLE_EJECUTIVO + (BONO_LARGE_DEAL * −1)',estado:'Activo',driver:'—',clase:'OUTPUT',moneda:'SOLES',label:'Payroll comercial',categoria:'Costos y gastos',resumen:'Comisión variable del ejecutivo menos bono large deal',rent:'Gastos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC043',idc:'C043',nombre:'TUR_PAYROLL',nominal:null,formula:'PAYROLL / PROPUESTA.BV_MENSUAL',estado:'Activo',driver:'%',clase:'OUTPUT',moneda:'SOLES',label:'Tasa unitaria — payroll',categoria:'Costos y gastos',resumen:'Payroll como % del BV mensual',rent:'Gastos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC044',idc:'C044',nombre:'COMISION_VARIABLE_EJECUTIVO',nominal:null,formula:'(PROPUESTA.BV_MENSUAL ÷ 1000) × FACTOR (NAVIDAD=3.8 · RECURRENTE=12 · ÚNICO=1.3)',estado:'Activo',driver:'—',clase:'OUTPUT',moneda:'SOLES',label:'Comisión variable del ejecutivo',categoria:'Costos y gastos',resumen:'BV mensual × factor según recurrencia',rent:'Gastos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC045',idc:'C045',nombre:'BONO_LARGE_DEAL',nominal:3500,formula:'SI PROPUESTA.RECURRENCIA = RECURRENTE Y PROPUESTA.BV_MENSUAL > S/ 200,000 ENTONCES 3500',estado:'Activo',driver:'—',clase:'OUTPUT',moneda:'SOLES',label:'Bono por large deal',categoria:'Costos y gastos',resumen:'S/ 3,500 si es recurrente y el BV mensual supera S/ 200,000',rent:'Gastos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC046',idc:'C046',nombre:'CARTA_FIANZA',nominal:null,formula:'SI PROPUESTA.SECTOR = PUBLICO Y PROPUESTA.CARTA_FIANZA = SI ENTONCES CARTA_FIANZA_TASA × MONTO_CARTA_FIANZA',estado:'Activo',driver:'—',clase:'OUTPUT',moneda:'SOLES',label:'Carta fianza',categoria:'Carta fianza y garantías',resumen:'Tasa de carta fianza aplicada al monto, si es sector público',rent:'Gastos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC047',idc:'C047',nombre:'TUR_CARTA_FIANZA',nominal:null,formula:'(+) CARTA_FIANZA / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'%',clase:'OUTPUT',moneda:'SOLES',label:'Tasa unitaria — carta fianza',categoria:'Carta fianza y garantías',resumen:'Carta fianza como % del BV anual',rent:'Gastos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC048',idc:'C048',nombre:'GASTOS_FINANCIEROS',nominal:null,formula:'SI PROPUESTA.MODALIDAD_DE_PAGO = CREDITO: ((1 + 5.2%)^(1/360) − 1) × PROPUESTA.BV_MENSUAL × (PROPUESTA.DIAS_CREDITO + 5)',estado:'Activo',driver:'—',clase:'OUTPUT',moneda:'SOLES',label:'Gastos financieros',categoria:'Costos y gastos',resumen:'Costo financiero si la modalidad de pago es crédito',rent:'Gastos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC049',idc:'C049',nombre:'TUR_GASTOS_FINANCIEROS',nominal:null,formula:'GASTOS_FINANCIEROS / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'%',clase:'OUTPUT',moneda:'SOLES',label:'Tasa unitaria — gastos financieros',categoria:'Costos y gastos',resumen:'Gastos financieros como % del BV anual',rent:'Gastos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC050',idc:'C050',nombre:'RENTABILIDAD',nominal:null,formula:'TOTAL_RESTA_INGRESOS_GASTOS / TOTAL_INGRESOS (si ambos son negativos, se conserva el signo negativo del margen)',estado:'Activo',driver:'%',clase:'OUTPUT',moneda:'SOLES',label:'Rentabilidad',categoria:'Rentabilidad total',resumen:'Margen: (ingresos − gastos) sobre el total de ingresos',rent:'Resultado',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC051',idc:'C051',nombre:'NUMERO_TRANSACCIONES_PROMEDIO',nominal:null,formula:'REEMBOLSO / TICKET_PROMEDIO',estado:'Activo',driver:'—',clase:'OUTPUT',moneda:'SOLES',label:'Número de transacciones promedio',categoria:'Transaccional y procesamiento',resumen:'Reembolso dividido entre el ticket promedio',rent:'Parametro',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC052',idc:'C052',nombre:'TICKET_PROMEDIO',nominal:null,assumed:38,formula:'DE ACUERDO A PROPUESTA.PRODUCTO_ELEGIDO Y PROPUESTA.RECURRENCIA',estado:'Pendiente',driver:'—',clase:'OUTPUT',moneda:'SOLES',label:'Ticket promedio',categoria:'Transaccional y procesamiento',resumen:'Según producto elegido y recurrencia',rent:'Parametro',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC053',idc:'C053',nombre:'REEMBOLSO',nominal:null,formula:'RATIO_DE_CONSUMO_SOBRE_LA_CARGA × PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',clase:'OUTPUT',moneda:'SOLES',label:'Reembolso',categoria:'Transaccional y procesamiento',resumen:'Ratio de consumo sobre la carga × BV anual',rent:'Parametro',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC054',idc:'C054',nombre:'MONTO_CARTA_FIANZA',nominal:null,formula:'SI PROPUESTA.CARTA_FIANZA = SI ENTONCES 10% × PROPUESTA.BV_ANUAL',estado:'Activo',driver:'%',clase:'OUTPUT',moneda:'SOLES',label:'Monto de carta fianza',categoria:'Carta fianza y garantías',resumen:'10% del BV anual, si se requiere carta fianza',rent:'Gastos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC055',idc:'C055',nombre:'MARCA_CALCULADO',nominal:null,formula:'(−) PROCESAMIENTO_TX_MARCA × REEMBOLSO',estado:'Activo',driver:'—',clase:'OUTPUT',moneda:'SOLES',label:'Costo de marca (calculado)',categoria:'Transaccional y procesamiento',resumen:'Costo de procesamiento de marca sobre el reembolso',rent:'Costos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC056',idc:'C056',nombre:'TOTAL_INGRESOS',nominal:null,formula:'COMISION_CLIENTE + COMISION_MERCHANT + OTROS_INGRESOS_CALCULADO',estado:'Activo',driver:'—',clase:'OUTPUT',moneda:'SOLES',label:'Total de ingresos',categoria:'Rentabilidad total',resumen:'Comisión cliente + comisión merchant + otros ingresos',rent:'Resultado',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC057',idc:'C057',nombre:'TOTAL_GASTOS',nominal:null,formula:'COSTO_VENTA + OTROS_GASTOS',estado:'Activo',driver:'—',clase:'OUTPUT',moneda:'SOLES',label:'Total de gastos',categoria:'Rentabilidad total',resumen:'Costo de venta + otros gastos',rent:'Resultado',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC058',idc:'C058',nombre:'TOTAL_RESTA_INGRESOS_GASTOS',nominal:null,formula:'TOTAL_INGRESOS − TOTAL_GASTOS',estado:'Activo',driver:'—',clase:'OUTPUT',moneda:'SOLES',label:'Ingresos menos gastos',categoria:'Rentabilidad total',resumen:'Total de ingresos menos total de gastos',rent:'Resultado',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC059',idc:'C059',nombre:'TUR_TOTAL_RESTA_INGRESOS_GASTOS',nominal:null,formula:'TOTAL_RESTA_INGRESOS_GASTOS / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'%',clase:'OUTPUT',moneda:'SOLES',label:'Tasa unitaria — margen',categoria:'Rentabilidad total',resumen:'Margen como % del BV anual',rent:'Resultado',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'MC060',idc:'C060',nombre:'PERSONALIZACION_FLYER_SOBRE_OTROS',nominal:null,assumed:0,formula:'PROPUESTA.PERSONALIZACION_FLYER_SOBRE_OTROS = SI',estado:'Pendiente',driver:'Tarjeta',clase:'INPUT',moneda:'SOLES',label:'Personalización de flyer sobre otros',categoria:'Tarjetas y emisión',resumen:'Aplica si se solicita personalización de flyer',rent:'Costos',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
-{id:'C061',idc:'C061',nombre:'PESO%_MES_SUMATORIA',nominal:null,assumed:1,formula:'MES%_1 + MES%_2 + MES%_3 + MES%_4 + MES%_5 + MES%_6 + MES%_7 + MES%_8 + MES%_9 + MES%_10 + MES%_11 + MES%_12',estado:'Pendiente',driver:'%',clase:'INPUT',moneda:'SOLES',label:'Peso % mensual (sumatoria)',categoria:'Parámetros de tiempo',resumen:'Suma de los pesos porcentuales mensuales',rent:'Parametro',history:[{ts:'2026-06-01T09:00:00',action:'Carga inicial',user:'Sistema',detail:'Registro importado del catálogo fuente (Excel de fórmulas)'}]},
+{id:'C001',idc:'C001',nombre:'PERSONALIZACION_ADHOC',label:'Personalización adhoc',categoria:'Tarjetas y emisión',nominal:null,esSupuesto:true,formula:'SI PROPUESTA.ADICIONAL_ADHOC !=NO && PROPUESTA.ADICIONAL_ADHOC=!EXONERADO ENTONCES (VALOR NOMINAL) SINO 0',estado:'Activo',driver:'Hora',moneda:'SOLES',rent:'Insumo de cálculo — ingreso',history:[]},
+{id:'C002',idc:'C002',nombre:'WELCOME_KIT',label:'Welcome kit',categoria:'Tarjetas y emisión',nominal:0.18,esSupuesto:false,formula:'(VALOR NOMINAL*PROPUESTA.QTARJETA)',estado:'Activo',driver:'Tarjeta',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C003',idc:'C003',nombre:'EMBOZADO',label:'Embozado',categoria:'Tarjetas y emisión',nominal:null,esSupuesto:true,formula:'(VALOR NOMINAL*PROPUESTA.QTARJETA)',estado:'Activo',driver:'Tarjeta',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C004',idc:'C004',nombre:'EMISION_TARJETAS_CON_AFINIDAD',label:'Emisión de tarjetas con afinidad',categoria:'Tarjetas y emisión',nominal:0.1,esSupuesto:false,formula:'(VALOR NOMINAL*PROPUESTA.QTARJETA)',estado:'Activo',driver:'Tarjeta',moneda:'EURO',rent:'Computada',history:[]},
+{id:'C005',idc:'C005',nombre:'COSTO_PLASTICO_TARJETAS',label:'Costo del plástico de tarjetas',categoria:'Tarjetas y emisión',nominal:null,esSupuesto:true,formula:'(PROPUESTA.COSTO_PLASTICO_DE_TARJETAS)',estado:'Activo',driver:'Tarjeta',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C006',idc:'C006',nombre:'ENVIO_TARJETAS_A_PROVINCIA',label:'Envío de tarjetas a provincia',categoria:'Logística y entrega',nominal:18,esSupuesto:false,formula:'(VALOR NOMINAL * PROPUESTA.CONDCOMERCIAL.QDESTINOS_PROVINCIA)',estado:'Activo',driver:'Punto de entrega',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C007',idc:'C007',nombre:'ENVIO_TARJETAS_A_LIMA',label:'Envío de tarjetas a Lima',categoria:'Logística y entrega',nominal:10,esSupuesto:false,formula:'(VALOR NOMINAL * PROPUESTA.CONDCOMERCIAL.QDESTINOS_LIMA)',estado:'Activo',driver:'Punto de entrega',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C008',idc:'C008',nombre:'REPOSICION_POR_PERDIDA_O_ROBO',label:'Reposición por pérdida o robo',categoria:'Tarjetas y emisión',nominal:16.95,esSupuesto:false,formula:'SI PROPUESTA.REPOSICION!= EXONERADO ENTONCES (VALOR NOMINAL*RATIO_REPOSICION)',estado:'Activo',driver:'Tarjeta',moneda:'SOLES',rent:'Ingreso',history:[]},
+{id:'C009',idc:'C009',nombre:'TRANSACCIONES_APROBADAS',label:'Transacciones aprobadas',categoria:'Transaccional y procesamiento',nominal:0.06,esSupuesto:false,formula:'(VALOR NOMINAL* NUMERO_TRANSACCIONES_PROMEDIO)',estado:'Activo',driver:'Transacción',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C010',idc:'C010',nombre:'CUENTA_ACTIVA',label:'Cuenta activa',categoria:'Transaccional y procesamiento',nominal:0.12,esSupuesto:false,formula:'(VALOR NOMINAL*PROPUESTA.QTARJETAS* PROPUESTA.NUMERO_PEDIDOS_AL_ANIO)',estado:'Activo',driver:'Transacción',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C011',idc:'C011',nombre:'PROCESAMIENTO_OTROS_COSTOS',label:'Procesamiento (otros costos)',categoria:'Transaccional y procesamiento',nominal:0.105,esSupuesto:false,formula:'(VALOR NOMINAL* PROPUESTA.QTARJETAS)*PROPUESTA.NUMERO_PEDIDOS_AL_ANIO)',estado:'Activo',driver:'Transacción',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C012',idc:'C012',nombre:'PROCESAMIENTO_TRANSACCION_MARCA',label:'Procesamiento de transacción de marca',categoria:'Transaccional y procesamiento',nominal:null,esSupuesto:true,formula:'(PROPUESTA.PROCESAMIENTO_TX_MARCA.VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C013',idc:'C013',nombre:'INTERCHANGE_FEE',label:'Interchange fee',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'(PROPUESTA.INTERCHANGE_FEE.VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C014',idc:'C014',nombre:'MDR_ADICIONAL',label:'MDR adicional',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'(PROPUESTA.MDR_ADICIONAL.VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C015',idc:'C015',nombre:'RATIO_CONSUMO_SOBRE_LA_CARGA',label:'Ratio de consumo sobre la carga',categoria:'Transaccional y procesamiento',nominal:98,esSupuesto:false,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C016',idc:'C016',nombre:'LOGISTICA_Y_ENVIOS_L_E',label:'Logística y envíos (L&E)',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'(PROPUESTA.L&E.VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C017',idc:'C017',nombre:'COSTO_PROMEDIO_MANTENIMIENTO',label:'Costo promedio de mantenimiento',categoria:'Comisiones e ingresos',nominal:0.5,esSupuesto:false,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C018',idc:'C018',nombre:'CARTA_FIANZA_TASA',label:'Carta fianza (tasa)',categoria:'Carta fianza y garantías',nominal:5.2,esSupuesto:false,formula:'SI PROPUESTA.CARTA_FIANZA= SI (VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C019',idc:'C019',nombre:'COMISION_AL_CLIENTE',label:'Comisión al cliente',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'(PROPUESTA.COMISION_CLIENTE_EJECUTIVO* PROPUESTA.BV_ANUAL )- CALCULO_REBATE',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Ingreso',history:[]},
+{id:'C020',idc:'C020',nombre:'TASA_UNITARIA_COMISION_CLIENTE',label:'Tasa unitaria — comisión cliente',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'(COMISION_CLIENTE /PROPUESTA.BV_ANUAL)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — ingreso',history:[]},
+{id:'C021',idc:'C021',nombre:'COMISION_MERCHANT',label:'Comisión merchant',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'(TUR_COMISION_MERCHANT* REEMBOLSO)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Ingreso',history:[]},
+{id:'C022',idc:'C022',nombre:'TASA_UNITARIA_COMISION_MERCHANT',label:'Tasa unitaria — comisión merchant',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'SI PROPUESTA.PRODUCTO_CUSTOM !=SI, ENTONCES:(INTERCHANGE_FEE + MDR_ADICIONAL) SINO: (INTERCHANGE_FEE + PROPUESTA.MDR_NEGOCIADO)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — ingreso',history:[]},
+{id:'C023',idc:'C023',nombre:'OTROS_INGRESOS_CALCULADO',label:'Otros ingresos (calculado)',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'L&E_CALCULADO+MANTENIMIENTO+PERSONALIZACION_ADHOC+DISTRIBUCION',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Ingreso',history:[]},
+{id:'C024',idc:'C024',nombre:'TASA_UNITARIA_OTROS_INGRESOS',label:'Tasa unitaria — otros ingresos',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'OTROS_INGRESOS(CALCULADO) /PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — ingreso',history:[]},
+{id:'C025',idc:'C025',nombre:'LOGISTICA_Y_ENVIOS_CALCULADO',label:'Logística y envíos (calculado)',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'L&E * PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — ingreso',history:[]},
+{id:'C026',idc:'C026',nombre:'MANTENIMIENTO',label:'Mantenimiento',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'SI PROPUESTA.SOLUCION!=FOOD ENTONCES PROPUESTA.Q_TARJETAS_NUEVAS * COSTO_PROMEDIO_DE_MANTENIMIENTO * PESO%_MES_SUMATORIA SINO 0',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — ingreso',history:[]},
+{id:'C027',idc:'C027',nombre:'TASA_UNITARIA_MANTENIMIENTO',label:'Tasa unitaria — mantenimiento',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'MANTENIMIENTO / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — ingreso',history:[]},
+{id:'C028',idc:'C028',nombre:'TASA_UNITARIA_PERSONALIZACION_ADHOC',label:'Tasa unitaria — personalización adhoc',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'PERSONALIZACION_ADHOC / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — ingreso',history:[]},
+{id:'C029',idc:'C029',nombre:'DISTRIBUCION_COSTO',label:'Distribución (costo)',categoria:'Logística y entrega',nominal:null,esSupuesto:true,formula:'((ENVIO_TARJETAS_LIMA )+ ENVIO_TARJETAS_PROVINCIA)*1.1',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
+{id:'C030',idc:'C030',nombre:'TASA_UNITARIA_DISTRIBUCION',label:'Tasa unitaria — distribución',categoria:'Logística y entrega',nominal:null,esSupuesto:true,formula:'DISTRIBUCION / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
+{id:'C031',idc:'C031',nombre:'COSTO_VENTA',label:'Costo de venta',categoria:'Costos y gastos',nominal:null,esSupuesto:true,formula:'INSUMOS_PERSONALIZACION_Y_ENSOBRADO+PROCESAMIENTO+MARCA_CALCULADO+DISTRIBUCION_COSTO',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Costo',history:[]},
+{id:'C032',idc:'C032',nombre:'TASA_UNITARIA_COSTO_VENTA',label:'Tasa unitaria — costo de venta',categoria:'Costos y gastos',nominal:null,esSupuesto:true,formula:'COSTO_VENTA / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
+{id:'C033',idc:'C033',nombre:'INSUMOS_PERSONALIZACION_Y_ENSOBRADO',label:'Insumos, personalización y ensobrado',categoria:'Tarjetas y emisión',nominal:null,esSupuesto:true,formula:'(WELCOME_KIT)+(EMBOZADO)+(COSTO_PLASTICO_DE_TARJETAS) SI PROPUESTA.ADICIONAL_ADHOC =SI y PROPUESTA.ADICIONAL_ADHOC=EXONERADO, ENTONCES: (WELCOME_KIT)+(EMBOZADO)+(COSTO_PLASTICO_DE_TARJETAS)+EMISION_TARJETAS_CON_AFINIDAD+COSTO_PERSONALIZACION_ADHOC',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
+{id:'C034',idc:'C034',nombre:'TASA_UNITARIA_INSUMOS_Y_ENSOBRADO',label:'Tasa unitaria — insumos y ensobrado',categoria:'Tarjetas y emisión',nominal:null,esSupuesto:true,formula:'INSUMOS_PERSONALIZACION_Y_ENSOBRADO / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
+{id:'C035',idc:'C035',nombre:'PROCESAMIENTO',label:'Procesamiento',categoria:'Transaccional y procesamiento',nominal:null,esSupuesto:true,formula:'(TRANSACCIONES_APROBADAS)+(CUENTA_ACTIVA)+(PROCESAMIENTO (OTROS COSTOS))',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
+{id:'C036',idc:'C036',nombre:'TASA_UNITARIA_PROCESAMIENTO',label:'Tasa unitaria — procesamiento',categoria:'Transaccional y procesamiento',nominal:null,esSupuesto:true,formula:'PROCESAMIENTO / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
+{id:'C037',idc:'C037',nombre:'OTROS_GASTOS',label:'Otros gastos',categoria:'Costos y gastos',nominal:null,esSupuesto:true,formula:'GASTOS_FINANCIEROS+ CARTA_FIANZA+PAYROLL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Gasto',history:[]},
+{id:'C038',idc:'C038',nombre:'TASA_UNITARIA_OTROS_GASTOS',label:'Tasa unitaria — otros gastos',categoria:'Costos y gastos',nominal:null,esSupuesto:true,formula:'OTROS_GASTOS / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — gasto',history:[]},
+{id:'C039',idc:'C039',nombre:'PAYROLL_COMERCIAL',label:'Payroll comercial',categoria:'Costos y gastos',nominal:null,esSupuesto:true,formula:'COMISION_VARIABLE_EJECUTIVO + BONO_LARGE_DEAL * -1',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — gasto',history:[]},
+{id:'C040',idc:'C040',nombre:'TASA_UNITARIA_PAYROLL',label:'Tasa unitaria — payroll',categoria:'Costos y gastos',nominal:null,esSupuesto:true,formula:'PAYROLL / PROPUESTA.BV_MENSUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — gasto',history:[]},
+{id:'C041',idc:'C041',nombre:'COMISION_VARIABLE_EJECUTIVO',label:'Comisión variable del ejecutivo',categoria:'Costos y gastos',nominal:null,esSupuesto:true,formula:'(PROPUESTA.BV_MENSUAL ÷ 1000) × FACTOR CORRESPONDIENTE (NAVIDAD=3.8, RECURRENTE=12, ÚNICO=1.3)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — gasto',history:[]},
+{id:'C042',idc:'C042',nombre:'BONO_POR_LARGE_DEAL',label:'Bono por large deal',categoria:'Costos y gastos',nominal:3500,esSupuesto:false,formula:'SI PROPUESTA.RECURRENCIA = RECURRENTE && PROPUESTA.BV_MENSUAL > S/200,000. ENTONCES: 3500',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — gasto',history:[]},
+{id:'C043',idc:'C043',nombre:'CARTA_FIANZA',label:'Carta fianza',categoria:'Carta fianza y garantías',nominal:null,esSupuesto:true,formula:'SI PROPUESTA.SECTOR = PUBLICO && PROPUESTA.CARTA_FIANZA =SI ENTONCES: CARTA_FIANZA(TASA)* MONTO_CARTA_FIANZA',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — gasto',history:[]},
+{id:'C044',idc:'C044',nombre:'TASA_UNITARIA_CARTA_FIANZA',label:'Tasa unitaria — carta fianza',categoria:'Carta fianza y garantías',nominal:null,esSupuesto:true,formula:'(+)CARTA_FIANZA / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — gasto',history:[]},
+{id:'C045',idc:'C045',nombre:'GASTOS_FINANCIEROS',label:'Gastos financieros',categoria:'Costos y gastos',nominal:null,esSupuesto:true,formula:'SI PROPUESTA.MODALIDAD_DE_PAGO =CREDITO ENTONCES: ((1 + 5.2%)^(1/360) − 1) × PROPUESTA.BV_MENSUAL × (PROPUESTA.DIAS_CRÉDITO + 5)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — gasto',history:[]},
+{id:'C046',idc:'C046',nombre:'TASA_UNITARIA_GASTOS_FINANCIEROS',label:'Tasa unitaria — gastos financieros',categoria:'Costos y gastos',nominal:null,esSupuesto:true,formula:'GASTOS_FINANCIEROS / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — gasto',history:[]},
+{id:'C047',idc:'C047',nombre:'RENTABILIDAD',label:'Rentabilidad',categoria:'Rentabilidad total',nominal:null,esSupuesto:true,formula:'SI (TOTAL_RESTA_INGRESOS_GASTOS) && TOTAL_INGRESOS > 0, ENTONCES: - TOTAL_RESTA_INGRESOS_GASTOS/ TOTAL_INGRESOS SINO: +TOTAL_RESTA_INGRESOS_GASTOS/ TOTAL_INGRESOS',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Resultante',history:[]},
+{id:'C048',idc:'C048',nombre:'NUMERO_TRANSACCIONES_PROMEDIO',label:'Número de transacciones promedio',categoria:'Transaccional y procesamiento',nominal:null,esSupuesto:true,formula:'REEMBOLSO / TICKET_PROMEDIO',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C049',idc:'C049',nombre:'TICKET_PROMEDIO',label:'Ticket promedio',categoria:'Transaccional y procesamiento',nominal:null,esSupuesto:true,formula:'(PROPUESTA.TICKET_PROMEDIO.VALOR NOMINAL)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C050',idc:'C050',nombre:'REEMBOLSO',label:'Reembolso',categoria:'Transaccional y procesamiento',nominal:null,esSupuesto:true,formula:'RATIO_DE_CONSUMO_SOBRE_LA_CARGA* PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C051',idc:'C051',nombre:'MONTO_CARTA_FIANZA',label:'Monto de carta fianza',categoria:'Carta fianza y garantías',nominal:null,esSupuesto:true,formula:'SI PROPUESTA.CARTA_FIANZA =SI 10%*PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — gasto',history:[]},
+{id:'C052',idc:'C052',nombre:'COSTO_MARCA_CALCULADO',label:'Costo de marca (calculado)',categoria:'Transaccional y procesamiento',nominal:null,esSupuesto:true,formula:'(-)(PROCESAMIENTO_TX_MARCA)*REEMBOLSO',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
+{id:'C053',idc:'C053',nombre:'TOTAL_INGRESOS',label:'Total de ingresos',categoria:'Rentabilidad total',nominal:null,esSupuesto:true,formula:'COMISION_CLIENTE + COMISION_MERCHANT + OTROS_INGRESOS(CALCULADO)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Resultante',history:[]},
+{id:'C054',idc:'C054',nombre:'TOTAL_GASTOS',label:'Total de gastos',categoria:'Rentabilidad total',nominal:null,esSupuesto:true,formula:'COSTO_VENTA + OTROS_GASTOS',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Resultante',history:[]},
+{id:'C055',idc:'C055',nombre:'INGRESOS_MENOS_GASTOS',label:'Ingresos menos gastos',categoria:'Rentabilidad total',nominal:null,esSupuesto:true,formula:'TOTAL_INGRESOS - TOTAL_GASTOS',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Resultante',history:[]},
+{id:'C056',idc:'C056',nombre:'TASA_UNITARIA_MARGEN',label:'Tasa unitaria — margen',categoria:'Rentabilidad total',nominal:null,esSupuesto:true,formula:'TOTAL_RESTA_INGRESOS_GASTOS / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Resultante',history:[]},
+{id:'C057',idc:'C057',nombre:'COSTO_PERSONALIZACION_ADHOC',label:'Costo de personalización adhoc',categoria:'Tarjetas y emisión',nominal:null,esSupuesto:true,formula:'SI PROPUESTA.COSTO_PERSONALIZACION_ADHOC=SI ENTONCES: (VALOR NOMINAL)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
+{id:'C058',idc:'C058',nombre:'PESO_MENSUAL_SUMATORIA',label:'Peso % mensual (sumatoria)',categoria:'Parámetros de tiempo',nominal:null,esSupuesto:true,formula:'(MES%_1+MES%_2+MES%_3+MES%_4+MES%_5+MES%_6+MES%_7+MES%_8+MES%_9+MES%_10+MES%_11+MES%_12)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C059',idc:'C059',nombre:'EMISION_TARJETAS',label:'Emisión de tarjetas',categoria:'Tarjetas y emisión',nominal:null,esSupuesto:true,formula:'(PROPUESTA.EMISION_TARJETAS.VALOR NOMINAL* PROPUESTA.QTARJETAS)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Ingreso',history:[]},
+{id:'C060',idc:'C060',nombre:'TIPO_REBATE',label:'Tipo de rebate',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'(PROPUESTA.TIPO_REBATE)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C061',idc:'C061',nombre:'CALCULO_REBATE',label:'Cálculo de rebate',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'SI PROPUESTA.TIPO_REBATE=MONTO_FIJO_REBATE ENTONCES: (PROPUESTA.MONTO_FIJO_REBATE) SINO (PROPUESTA.%BV_REBATE * PROPUESTA.BV_ANUAL)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C062',idc:'C062',nombre:'RATIO_REPOSICION',label:'Ratio de reposición',categoria:'Tarjetas y emisión',nominal:null,esSupuesto:true,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C063',idc:'C063',nombre:'DISTRIBUCION',label:'Distribución',categoria:'Logística y entrega',nominal:null,esSupuesto:true,formula:'SI PROPUESTA.DISTRIBUCION!= EXONERADO ENTONCES: (DISTRIBUCION_LIMA + DISTRIBUCION_PROVINCIA) SINO 0',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — ingreso',history:[]},
+{id:'C064',idc:'C064',nombre:'DISTRIBUCION_LIMA',label:'Distribución — Lima',categoria:'Logística y entrega',nominal:null,esSupuesto:true,formula:'(VALOR NOMINAL * PROPUESTA.CONDCOMERCIAL.QDESTINOS_PROVINCIA)',estado:'Activo',driver:'Punto de entrega',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C065',idc:'C065',nombre:'DISTRIBUCION_PROVINCIA',label:'Distribución — provincia',categoria:'Logística y entrega',nominal:null,esSupuesto:true,formula:'(VALOR NOMINAL * PROPUESTA.CONDCOMERCIAL.QDESTINOS_LIMA)',estado:'Activo',driver:'Punto de entrega',moneda:'SOLES',rent:'Computada',history:[]},
 ];
 
 /* Clon profundo hacia el estado de trabajo: las ediciones/eliminaciones
@@ -2804,9 +2932,23 @@ function findDependents(record){
   return DATA.filter(d=>findDependencies(d).includes(record.id)).map(d=>d.id);
 }
 
-/* Badges (heredan .badge del host; colores semánticos mv-) */
-const RENT_LABELS = {Ingresos:'Ingresos',Costos:'Costos',Gastos:'Gastos',Resultado:'Resultado',Parametro:'Parámetro'};
-const RENT_CLASS  = {Ingresos:'mv-rent-ingresos',Costos:'mv-rent-costos',Gastos:'mv-rent-gastos',Resultado:'mv-rent-resultado',Parametro:'mv-rent-parametro'};
+/* Badges (heredan .badge del host; colores semánticos mv-).
+   `rent` guarda el campo "clase" del catálogo fuente (Ingreso/Costo/
+   Gasto/Resultante/Computada/Insumo de cálculo — X); se muestra en la
+   columna "Clase". Las 3 variantes "Insumo de cálculo — X" heredan el
+   color de su X. */
+const RENT_LABELS = {
+  'Ingreso':'Ingreso', 'Costo':'Costo', 'Gasto':'Gasto', 'Resultante':'Resultante', 'Computada':'Computada',
+  'Insumo de cálculo — ingreso':'Insumo de cálculo — ingreso',
+  'Insumo de cálculo — costo':'Insumo de cálculo — costo',
+  'Insumo de cálculo — gasto':'Insumo de cálculo — gasto'
+};
+const RENT_CLASS = {
+  'Ingreso':'mv-rent-ingresos', 'Costo':'mv-rent-costos', 'Gasto':'mv-rent-gastos', 'Resultante':'mv-rent-resultado', 'Computada':'mv-rent-parametro',
+  'Insumo de cálculo — ingreso':'mv-rent-ingresos',
+  'Insumo de cálculo — costo':'mv-rent-costos',
+  'Insumo de cálculo — gasto':'mv-rent-gastos'
+};
 function rentBadge(rent){
   return '<span class="badge '+(RENT_CLASS[rent]||'mv-rent-parametro')+'">'+esc(RENT_LABELS[rent]||rent)+'</span>';
 }
@@ -2909,8 +3051,8 @@ function renderConceptosTable(){
       let nominalCell;
       if(d.nominal!==null){
         nominalCell = '<span>'+fmtNum(d.nominal, Number.isInteger(d.nominal)?0:2)+'</span>';
-      } else if(d.assumed!==undefined){
-        nominalCell = '<span>—</span><span class="mv-assumed"><span class="mv-assumed-warn" data-tooltip="Este valor es un supuesto, no está confirmado">'+ICONS.warning+'</span>supuesto: '+fmtNum(d.assumed,2)+'</span>';
+      } else if(d.esSupuesto){
+        nominalCell = '<span>—</span><span class="mv-assumed"><span class="mv-assumed-warn" data-tooltip="Este valor es un supuesto, no está confirmado">'+ICONS.warning+'</span>Valor supuesto</span>';
       } else if(d.clase==='OUTPUT'){
         nominalCell = '<span class="mv-nominal-calc">calculado</span>';
       } else {
@@ -2966,7 +3108,7 @@ function exportRows(){
     rent:RENT_LABELS[d.rent]||d.rent, moneda:d.moneda
   }));
 }
-const EXPORT_HEADERS = ['ID','Idconcepto','Nombre (negocio)','Nombre técnico','Categoría','Valor nominal','Fórmula','Estado','Unidad de medida','Rentabilidad','Moneda'];
+const EXPORT_HEADERS = ['ID','Idconcepto','Nombre (negocio)','Nombre técnico','Categoría','Valor nominal','Fórmula','Estado','Unidad de medida','Clase','Moneda'];
 
 function triggerDownload(blob, filename){
   const url = URL.createObjectURL(blob);
@@ -3058,7 +3200,7 @@ function openFormulaModal(id){
   $('#mv-formula-title').textContent = d.label || d.nombre;
   const deps = findDependencies(d);
   const usedBy = findDependents(d);
-  const nominalLine = d.nominal!==null ? fmtNum(d.nominal,2) : (d.assumed!==undefined ? fmtNum(d.assumed,2)+' (supuesto)' : 'Sin definir');
+  const nominalLine = d.nominal!==null ? fmtNum(d.nominal,2) : (d.esSupuesto ? 'Valor supuesto (sin confirmar)' : 'Sin definir');
   const depChips = (list)=>list.map(depId=>{
     const dd = byId(depId);
     return '<span class="mv-dep-item">'+
@@ -3069,7 +3211,7 @@ function openFormulaModal(id){
   $('#mv-formula-body').innerHTML =
     '<div class="mv-tech-line"><span class="mv-mono-chip">'+esc(d.id)+' · '+esc(d.idc)+'</span><span class="mv-tech-name">'+esc(d.nombre)+'</span></div>'+
     '<div class="mv-meta-grid">'+
-      '<div class="mv-meta-item"><div class="mv-m-label">Rentabilidad</div><div class="mv-m-value">'+esc(RENT_LABELS[d.rent]||d.rent)+'</div></div>'+
+      '<div class="mv-meta-item"><div class="mv-m-label">Clase</div><div class="mv-m-value">'+esc(RENT_LABELS[d.rent]||d.rent)+'</div></div>'+
       '<div class="mv-meta-item"><div class="mv-m-label">Origen del valor</div><div class="mv-m-value">'+claseLabel(d.clase)+'</div></div>'+
       '<div class="mv-meta-item"><div class="mv-m-label">Valor nominal</div><div class="mv-m-value">'+nominalLine+'</div></div>'+
       '<div class="mv-meta-item"><div class="mv-m-label">Moneda</div><div class="mv-m-value">'+(d.moneda==='EURO'?'Euro (€)':d.moneda==='DOLARES'?'Dólares ($)':'Soles (S/)')+'</div></div>'+
@@ -3124,7 +3266,7 @@ function openConceptHistoryModal(id){
 function buildHistoryDiff(oldRec, newVals){
   const fields = [
     ['label','Nombre'],['categoria','Categoría'],['nominal','Valor nominal'],['formula','Fórmula'],
-    ['estado','Estado'],['driver','Unidad de medida'],['rent','Rentabilidad'],['moneda','Moneda'],['resumen','Resumen'],
+    ['estado','Estado'],['driver','Unidad de medida'],['rent','Clase'],['moneda','Moneda'],['resumen','Resumen'],
   ];
   const changes = [];
   fields.forEach(pair=>{
@@ -3202,13 +3344,16 @@ function editFormTemplate(d){
       '<select name="driver">'+DRIVER_OPTIONS.map(o=>'<option value="'+esc(o)+'" '+(d&&d.driver===o?'selected':'')+'>'+esc(o)+'</option>').join('')+'</select>'+
     '</div>'+
     '<div class="field-group">'+
-      '<label>Rentabilidad <span class="req">*</span></label>'+
+      '<label>Clase <span class="req">*</span></label>'+
       '<select name="rent">'+
-        '<option value="Ingresos" '+((!d||d.rent==='Ingresos')?'selected':'')+'>Ingresos</option>'+
-        '<option value="Costos" '+(d&&d.rent==='Costos'?'selected':'')+'>Costos</option>'+
-        '<option value="Gastos" '+(d&&d.rent==='Gastos'?'selected':'')+'>Gastos</option>'+
-        '<option value="Resultado" '+(d&&d.rent==='Resultado'?'selected':'')+'>Resultado</option>'+
-        '<option value="Parametro" '+(d&&d.rent==='Parametro'?'selected':'')+'>Parámetro</option>'+
+        '<option value="Ingreso" '+((!d||d.rent==='Ingreso')?'selected':'')+'>Ingreso</option>'+
+        '<option value="Costo" '+(d&&d.rent==='Costo'?'selected':'')+'>Costo</option>'+
+        '<option value="Gasto" '+(d&&d.rent==='Gasto'?'selected':'')+'>Gasto</option>'+
+        '<option value="Resultante" '+(d&&d.rent==='Resultante'?'selected':'')+'>Resultante</option>'+
+        '<option value="Computada" '+(d&&d.rent==='Computada'?'selected':'')+'>Computada</option>'+
+        '<option value="Insumo de cálculo — ingreso" '+(d&&d.rent==='Insumo de cálculo — ingreso'?'selected':'')+'>Insumo de cálculo — ingreso</option>'+
+        '<option value="Insumo de cálculo — costo" '+(d&&d.rent==='Insumo de cálculo — costo'?'selected':'')+'>Insumo de cálculo — costo</option>'+
+        '<option value="Insumo de cálculo — gasto" '+(d&&d.rent==='Insumo de cálculo — gasto'?'selected':'')+'>Insumo de cálculo — gasto</option>'+
       '</select>'+
       '<span class="field-hint">A qué grupo del estado de resultados pertenece este concepto.</span>'+
     '</div>'+
@@ -3288,8 +3433,12 @@ function handleEditSubmit(e){
     return;
   }
 
+  /* Mismo generador usado para los 65 conceptos cargados en RAW_DATA \u2014
+     se quitan "DE"/"DEL" porque las f\u00f3rmulas del cat\u00e1logo fuente suelen
+     omitirlos en sus referencias cruzadas (ver findDependencies). */
   const technicalName = vals.label.trim().toUpperCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/\bDEL\b/g,' ').replace(/\bDE\b/g,' ')
     .replace(/[^A-Z0-9]+/g,'_').replace(/^_+|_+$/g,'');
 
   const record = {
@@ -3394,7 +3543,7 @@ let SIM = Object.assign({}, SIM_DEFAULTS);
 function getVal(id){
   const d = byId(id);
   if(!d) return 0;
-  return d.nominal!==null ? d.nominal : (d.assumed!==undefined ? d.assumed : 0);
+  return d.nominal!==null ? d.nominal : 0; /* esSupuesto sin cifra confirmada -> 0 hasta que se defina */
 }
 
 function computeAll(){
@@ -3448,8 +3597,8 @@ function computeAll(){
   v.MC056 = v.MC022 + v.MC024 + v.MC026;                                          // TOTAL_INGRESOS
 
   v.MC036 = (v.MC002+v.MC003+v.MC005) * P.cantidadTarjetas + v.MC060
-            + (P.servicioLogoEmpresa==='SI' ? (v.MC004*P.cantidadTarjetas)+v.MC001 : 0); // INSUMOS_PERZ_ENSOBRADO
-  v.MC037 = P.bvAnual ? v.MC036 / P.bvAnual : null;                               // TUR_INSUMOS_PERZ_ENSOBRADO
+            + (P.servicioLogoEmpresa==='SI' ? (v.MC004*P.cantidadTarjetas)+v.MC001 : 0); // INSUMOS_PERSONALIZACION_Y_ENSOBRADO
+  v.MC037 = P.bvAnual ? v.MC036 / P.bvAnual : null;                               // TUR_INSUMOS_PERSONALIZACION_Y_ENSOBRADO
   v.MC038 = (v.MC012*v.MC051) + (v.MC013*P.cantidadTarjetas*P.numeroPedidosAlAnio) + (v.MC014*P.cantidadTarjetas*P.numeroPedidosAlAnio); // PROCESAMIENTO
   v.MC039 = P.bvAnual ? v.MC038 / P.bvAnual : null;                               // TUR_PROCESAMIENTO
   v.MC055 = -(v.MC015 * v.MC053);                                                 // MARCA_CALCULADO
@@ -3555,6 +3704,7 @@ function simFormTemplate(){
 
 function wireSimForm(){
   const form = $('#mv-sim-form');
+  if(!form) return; /* Simulador deshabilitado temporalmente (ver mv-sub-sim) */
   form.innerHTML = simFormTemplate();
 }
 function handleSimChange(e){
@@ -3629,18 +3779,21 @@ function renderGroupedList(rows, valueMap, colKey){
 }
 
 function heroTone(id, value){
-  /* Rentabilidad y margen: color según signo. Ingresos/gastos: tono informativo. */
-  if(id==='MC050' || id==='MC058'){
+  /* Rentabilidad (C047) e Ingresos menos gastos (C055): color según signo.
+     Total de ingresos (C053) / Total de gastos (C054): tono informativo.
+     IDs remapeados al catálogo nuevo (antes MC050/MC058/MC056/MC057). */
+  if(id==='C047' || id==='C055'){
     if(value===null||Number.isNaN(value)) return 'tone-neutral';
     return value>=0 ? 'tone-pos' : 'tone-neg';
   }
-  if(id==='MC056') return 'tone-income';
-  if(id==='MC057') return 'tone-expense';
+  if(id==='C053') return 'tone-income';
+  if(id==='C054') return 'tone-expense';
   return 'tone-neutral';
 }
 
 function runSimulation(){
   if(!rendered) return;
+  if(!$('#mv-sim-form')) return; /* Simulador deshabilitado temporalmente (ver mv-sub-sim) */
   const v = computeAll();
 
   /* Columna 2 — conceptos INPUT (derivados de la PROPUESTA), agrupados */
@@ -3657,7 +3810,7 @@ function runSimulation(){
     renderGroupedList(inputRows, v, 'intermediate');
 
   /* Columna 3 — métricas hero + resto de OUTPUTs agrupados */
-  const heroIds = ['MC050','MC056','MC057','MC058'];
+  const heroIds = ['C047','C053','C054','C055'];
   const heroHtml = heroIds.map(id=>{
     const d = byId(id);
     if(!d) return '';
@@ -3691,7 +3844,7 @@ function switchTab(key){
   $('#mv-sub-crud').classList.toggle('active', key==='crud');
   $('#mv-sub-sim').classList.toggle('active', key==='sim');
   $('#mv-actions-crud').classList.toggle('hidden', key!=='crud');
-  $('#mv-actions-sim').classList.toggle('hidden', key!=='sim');
+  $('#mv-actions-sim').classList.add('hidden'); /* Simulador deshabilitado temporalmente — sin acciones */
   closeExportMenu();
   if(key==='sim') runSimulation(); /* refleja al instante ediciones del catálogo */
 }
@@ -3716,6 +3869,8 @@ function wireStatic(){
   /* Tabs */
   $$('.mv-tab').forEach(t=>t.addEventListener('click', ()=>switchTab(t.dataset.mvTab)));
   root.querySelector('.mv-tabs').addEventListener('keydown', handleTabsKeydown);
+  const simBackBtn = $('#mv-sim-back-btn');
+  if(simBackBtn) simBackBtn.addEventListener('click', ()=>switchTab('crud'));
 
   /* Filtros del catálogo */
   $('#mv-crud-search').addEventListener('input', renderConceptosTable);
@@ -3753,10 +3908,12 @@ function wireStatic(){
 
   /* Formulario del simulador (delegado: sobrevive a re-render de wireSimForm) */
   const simForm = $('#mv-sim-form');
-  simForm.addEventListener('change', handleSimChange);
-  simForm.addEventListener('input', handleSimInput);
-  simForm.addEventListener('click', handleSimToggleClick);
-  simForm.addEventListener('submit', e=>e.preventDefault());
+  if(simForm){
+    simForm.addEventListener('change', handleSimChange);
+    simForm.addEventListener('input', handleSimInput);
+    simForm.addEventListener('click', handleSimToggleClick);
+    simForm.addEventListener('submit', e=>e.preventDefault());
+  } /* Simulador deshabilitado temporalmente (ver mv-sub-sim) */
 
   /* Delegación de clics del módulo (acotada a la vista, no a document) */
   root.addEventListener('click', (e)=>{

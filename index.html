@@ -171,6 +171,81 @@
     <main>
 
     <!-- ============================================================
+         VISTA: INICIO (dashboard de negocio, mismo contenido para
+         todos los perfiles de usuario)
+         ============================================================ -->
+    <div class="app-view active" id="view-inicio">
+      <div class="inicio-welcome">
+        <h1>Bienvenida a EdenHub</h1>
+        <p id="inicioGreeting">—</p>
+      </div>
+
+      <section class="kpi-row" aria-label="Indicadores clave del negocio">
+        <div class="kpi-card">
+          <div class="kpi-ribbon" style="background:var(--light-pink);color:var(--red-hero-dark);">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M3 17l5-5 4 4 8-8M20 8h-4M20 8v4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-head-row">
+              <p class="kpi-label">Business Volume</p>
+              <select id="inicioPeriodo" class="inicio-periodo-select" aria-label="Periodo del indicador Business Volume">
+                <option value="mes" selected>Este mes</option>
+                <option value="trimestre">Este trimestre</option>
+                <option value="anio">Este año</option>
+              </select>
+            </div>
+            <p class="kpi-value" id="inicioKpiBV">—</p>
+            <p class="kpi-sub" id="inicioKpiBVSub">—</p>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-ribbon" style="background:var(--status-aprobada-bg);color:var(--status-aprobada-fg);">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2.2"/><path d="m17 11 2 2 4-4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="kpi-body">
+            <p class="kpi-label">Clientes convertidos</p>
+            <p class="kpi-value" id="inicioKpiClientes">—</p>
+            <p class="kpi-sub" id="inicioKpiClientesSub">—</p>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-ribbon" style="background:var(--cold-white);color:#2554A6;">
+            <svg viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2.5" stroke="currentColor" stroke-width="2.2"/><path d="M2 10h20" stroke="currentColor" stroke-width="2.2"/></svg>
+          </div>
+          <div class="kpi-body">
+            <p class="kpi-label">Tarjetas comprometidas</p>
+            <p class="kpi-value" id="inicioKpiTarjetas">—</p>
+            <p class="kpi-sub" id="inicioKpiTarjetasSub">—</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="inicio-dist-row" aria-label="Distribución de negocio">
+        <div class="inicio-dist-card">
+          <div class="inicio-dist-head">
+            <h2>Distribución por canal</h2>
+            <span class="inicio-mock-tag" title="Dato simulado: el campo Canal aún no existe en el modelo de Propuestas">Mock</span>
+          </div>
+          <div class="inicio-bar-list" id="inicioCanalBars"></div>
+        </div>
+        <div class="inicio-dist-card">
+          <div class="inicio-dist-head">
+            <h2>Distribución por Solución</h2>
+          </div>
+          <div class="inicio-bar-list" id="inicioSolucionBars"></div>
+        </div>
+      </section>
+
+      <section class="panel inicio-top-panel" aria-label="Top clientes por Business Volume">
+        <div class="table-toolbar"><div class="table-toolbar-left"><h3>Top clientes por Business Volume</h3></div></div>
+        <table class="data-table inicio-top-table">
+          <thead><tr><th>Razón social</th><th>Solución principal</th><th class="num">Business Volume</th></tr></thead>
+          <tbody id="inicioTopClientes"></tbody>
+        </table>
+      </section>
+    </div>
+
+    <!-- ============================================================
          VISTA: PROPUESTAS (Gestión Comercial)
          ============================================================ -->
     <div class="app-view" id="view-propuestas">
@@ -334,13 +409,13 @@
     <!-- ============================================================
          VISTA: PLACEHOLDER (otros módulos del menú)
          ============================================================ -->
-    <div class="app-view active" id="view-placeholder">
+    <div class="app-view" id="view-placeholder">
       <div class="placeholder-panel">
         <div class="ph-ribbon">
           <svg viewBox="0 0 24 24" width="28" height="28" fill="none"><path d="M12 3v6M12 15v6M3 12h6M15 12h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         </div>
-        <h3 id="placeholderHeading">Inicio</h3>
-        <p id="placeholderBody">Próximamente verás aquí un resumen de tu actividad, accesos directos y novedades del sistema.</p>
+        <h3 id="placeholderHeading">Módulo en construcción</h3>
+        <p id="placeholderBody">Este módulo todavía no está disponible.</p>
         <span class="ph-tag">Vuelve pronto</span>
       </div>
     </div>
@@ -824,14 +899,17 @@
               <select id="mv-filter-categoria"><option value="">Todas</option></select>
             </div>
             <div class="field-group">
-              <label for="mv-filter-rent">Rentabilidad</label>
+              <label for="mv-filter-rent">Clase</label>
               <select id="mv-filter-rent">
                 <option value="">Todas</option>
-                <option value="Ingresos">Ingresos</option>
-                <option value="Costos">Costos</option>
-                <option value="Gastos">Gastos</option>
-                <option value="Resultado">Resultado</option>
-                <option value="Parametro">Parámetro</option>
+                <option value="Ingreso">Ingreso</option>
+                <option value="Costo">Costo</option>
+                <option value="Gasto">Gasto</option>
+                <option value="Resultante">Resultante</option>
+                <option value="Computada">Computada</option>
+                <option value="Insumo de cálculo — ingreso">Insumo de cálculo — ingreso</option>
+                <option value="Insumo de cálculo — costo">Insumo de cálculo — costo</option>
+                <option value="Insumo de cálculo — gasto">Insumo de cálculo — gasto</option>
               </select>
             </div>
             <div class="field-group">
@@ -876,7 +954,7 @@
                 <tr>
                   <th style="width:88px;">ID</th>
                   <th>Concepto</th>
-                  <th style="width:126px;">Rentabilidad</th>
+                  <th style="width:126px;">Clase</th>
                   <th class="num" style="width:150px;">Valor nominal</th>
                   <th style="width:140px;">Unidad de medida</th>
                   <th style="width:92px;">Moneda</th>
@@ -897,23 +975,14 @@
 
       <!-- ======================= SUB-VISTA: SIMULADOR DE CÁLCULO ======================= -->
       <section class="mv-subview" id="mv-sub-sim" role="tabpanel" aria-labelledby="mv-tab-sim">
-        <p class="mv-sub-lede">Ingresa los datos base de una propuesta comercial y valida, en cadena, cómo se derivan las variables intermedias hasta llegar a los resultados finales (rentabilidad, ingresos y gastos). Todo cambio en el catálogo se refleja aquí al instante.</p>
-
-        <div class="mv-sim-grid">
-          <section class="mv-card mv-sim-col" aria-label="Datos base de la propuesta">
-            <div class="mv-card-head"><h3>1 · Datos base de la propuesta</h3></div>
-            <form class="mv-sim-form" id="mv-sim-form" novalidate><!-- generado por MotorVariablesModule --></form>
-          </section>
-
-          <section class="mv-card mv-sim-col" aria-label="Conceptos intermedios">
-            <div class="mv-card-head"><h3>2 · Conceptos intermedios</h3><span class="mv-hint">derivados de la propuesta</span></div>
-            <div class="mv-sim-list" id="mv-sim-intermediate" aria-live="polite"><!-- generado por MotorVariablesModule --></div>
-          </section>
-
-          <section class="mv-card mv-sim-col mv-sim-output" aria-label="Resultado final">
-            <div class="mv-card-head"><h3>3 · Resultado final</h3></div>
-            <div class="mv-sim-list" id="mv-sim-output" aria-live="polite"><!-- generado por MotorVariablesModule --></div>
-          </section>
+        <div class="placeholder-panel">
+          <div class="ph-ribbon">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none"><path d="M12 3v6M12 15v6M3 12h6M15 12h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <h3>Simulador en actualización</h3>
+          <p>El motor de cálculo está siendo migrado al nuevo catálogo de variables. Volverá a estar disponible próximamente.</p>
+          <span class="ph-tag">Vuelve pronto</span>
+          <button type="button" class="btn-ribbon-neutral" id="mv-sim-back-btn" style="margin-top:18px;">Volver a Gestión de variables</button>
         </div>
       </section>
 
