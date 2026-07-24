@@ -2040,10 +2040,19 @@ table.approval-table{width:100%;border-collapse:collapse;}
   letter-spacing:-0.01em;
 }
 .login-brand-tagline{
-  margin:0 0 10px;text-align:center;
-  font-family:var(--font-body);font-size:13.5px;font-weight:500;color:var(--black);
+  margin:0;text-align:center;
+  font-family:var(--font-body);font-size:13.5px;font-weight:500;color:var(--grey);
 }
-.login-sub{margin:0 0 22px;text-align:center;font-size:12.5px;color:var(--grey);line-height:1.5;}
+/* Etiqueta de sección — mismo patrón que .filters-title (mayúsculas +
+   tracking) usado en el resto de la plataforma, para separar el bloque
+   de identidad de marca del bloque de acción (formulario). */
+.login-action-label{
+  margin:26px 0 14px;padding-top:18px;
+  border-top:1px solid var(--border-soft);
+  text-align:center;
+  font-size:11.5px;font-weight:700;color:var(--grey);
+  text-transform:uppercase;letter-spacing:.06em;
+}
 .login-form-col form{display:flex;flex-direction:column;gap:14px;}
 .login-pass-wrap{position:relative;}
 .login-pass-wrap input{padding-right:42px;}
