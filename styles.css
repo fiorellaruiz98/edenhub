@@ -548,7 +548,11 @@ main{
   position:absolute;left:11px;top:50%;transform:translateY(-50%);
   color:var(--grey);pointer-events:none;
 }
-.input-wrap input{padding-left:32px;}
+/* Especificidad reforzada (.field-group + .input-wrap) a propósito: iguala en
+   peso a "input[type=text]..." de abajo, que de otro modo ganaba el cascade
+   por orden de aparición y anulaba este padding-left, solapando el ícono
+   con el texto. */
+.field-group .input-wrap input{padding-left:32px;}
 
 input[type=text],input[type=search],input[type=date],input[type=number],input[type=password],select,textarea{
   width:100%;
