@@ -1700,11 +1700,8 @@ table.approval-table{width:100%;border-collapse:collapse;}
   .filters-chevron{display:block;}
   .filters-panel.collapsed .filters-chevron{transform:rotate(-90deg);}
   .filters-panel.collapsed .filters-grid{display:none;}
-}
-@media (max-width: 560px){
-  /* .filters-grid ya queda en 1 columna desde 639px (ver arriba). Estas
-     dos reglas son de Fase 2 (tarjetas KPI / encabezados de página), sin
-     tocar en esta sesión. */
+  /* Fase 2: mismo umbral de móvil que el resto del chrome (antes 560px,
+     dejaba un rango 560-639px en un estado intermedio raro). */
   .kpi-card{flex-direction:column;align-items:flex-start;text-align:left;}
   .page-heading{flex-direction:column;align-items:flex-start;}
 }
