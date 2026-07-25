@@ -1722,6 +1722,65 @@ table.approval-table{width:100%;border-collapse:collapse;}
   .page-heading{flex-direction:column;align-items:flex-start;}
 }
 
+/* ============================================================
+   FASE 3 (piloto — SOLO Propuestas): tabla -> tarjeta apilada en
+   móvil. Pricebook y Motor de Variables siguen sin tocar; por eso
+   todo va scopeado a #view-propuestas y no a .data-table a secas
+   (esa clase la comparten las otras 2 tablas + la de "Top clientes").
+   Visible en la tarjeta: Código, Razón social (+giro), Business
+   Volume, Estado, Acciones. El resto (RUC, Solución, Producto, Tipo,
+   Tarjetas, Modalidad, Versión) ya era visible en el drawer de
+   "Editar propuesta" antes de este cambio — no se pierde información,
+   solo se deja de duplicar en la fila para que quepa en el ancho real
+   del teléfono (medido: incluso 4 columnas "prioritarias" a su ancho
+   natural superan 375px, así que ocultar columnas sin apilar el
+   nombre no alcanzaba). */
+@media (max-width: 639px){
+  #view-propuestas .table-scroll{overflow-x:visible;}
+  #view-propuestas .data-table{min-width:0;width:100%;}
+  #view-propuestas .data-table thead{display:none;}
+  #view-propuestas .data-table tbody{display:block;}
+  #view-propuestas .data-table tbody tr{
+    display:block;
+    border:1px solid var(--border-soft);
+    border-radius:var(--radius-m);
+    padding:14px 16px;
+    margin-bottom:12px;
+    box-shadow:var(--shadow-card);
+    background:var(--white);
+  }
+  #view-propuestas .data-table tbody tr:hover{background:var(--white);}
+  #view-propuestas .data-table tbody td{
+    display:block;
+    padding:0;
+    border:none;
+    white-space:normal;
+    text-align:left;
+  }
+  #view-propuestas .data-table tbody td.cell-hide-mobile{display:none;}
+  #view-propuestas .data-table tbody td.cell-codigo{
+    font-size:11px;color:var(--grey);margin-bottom:2px;
+  }
+  #view-propuestas .data-table tbody td.cell-empresa{margin-bottom:8px;}
+  #view-propuestas .data-table tbody td.cell-bv{
+    font-size:16px;font-weight:700;margin-bottom:8px;
+  }
+  #view-propuestas .data-table tbody td.cell-estado{margin-bottom:10px;}
+  #view-propuestas .data-table tbody td.cell-acciones{
+    padding-top:10px;
+    border-top:1px solid var(--border-soft);
+  }
+  #view-propuestas .data-table tbody .row-actions{justify-content:flex-start;gap:12px;}
+  /* Área táctil mínima (44x44, iOS HIG / Material Design) — solo en la
+     tarjeta de móvil, el dedo reemplaza al cursor aquí. El ícono
+     interno mantiene su tamaño visual de siempre (el svg trae su
+     propio width/height fijo, no depende del tamaño del botón); solo
+     crece el padding alrededor. gap:12px (antes 6px, heredado del
+     desktop) para que el área expandida de un botón no quede pegada a
+     la del vecino. */
+  #view-propuestas .data-table tbody .row-actions .icon-btn{width:44px;height:44px;}
+}
+
 @media (prefers-reduced-motion: reduce){
   *{animation-duration:.01ms !important;transition-duration:.01ms !important;}
 }
@@ -2768,3 +2827,119 @@ table.approval-table{width:100%;border-collapse:collapse;}
   #view-motor-variables .mv-tab{flex:1;justify-content:center;}
 }
 
+
+/* ============================================================
+   FASE 3 — Servicios y Tarifas: mismo patrón de tarjeta apilada que
+   Propuestas. Scope exclusivo a #view-pricebook (no toca .data-table
+   genérico ni ninguna otra vista). Visible: ID Servicio, Servicio,
+   Estado, Acciones. Solución/Producto/Tarifario asociado quedan
+   disponibles vía "Ver detalle" (ya existía antes de este cambio).
+   ============================================================ */
+.pb-mobile-sort{display:none;}
+@media (max-width: 639px){
+  #view-pricebook #main-table{min-width:0;width:100%;}
+  #view-pricebook thead{display:none;}
+  #view-pricebook tbody{display:block;}
+  #view-pricebook tbody tr{
+    display:block;
+    border:1px solid var(--border-soft);
+    border-radius:var(--radius-m);
+    padding:14px 16px;
+    margin-bottom:12px;
+    box-shadow:var(--shadow-card);
+    background:var(--white);
+  }
+  #view-pricebook tbody tr:hover{background:var(--white);}
+  #view-pricebook tbody td{
+    display:block;
+    padding:0;
+    border:none;
+    white-space:normal;
+    text-align:left;
+  }
+  #view-pricebook tbody td.cell-hide-mobile{display:none;}
+  #view-pricebook tbody td.cell-code{margin-bottom:2px;}
+  #view-pricebook tbody td.cell-name{margin-bottom:8px;}
+  #view-pricebook tbody td.cell-name .desc{max-width:none;white-space:normal;}
+  #view-pricebook tbody td.cell-estado{margin-bottom:10px;}
+  #view-pricebook tbody td.cell-acciones{
+    padding-top:10px;
+    border-top:1px solid var(--border-soft);
+  }
+  #view-pricebook tbody .pb-row-actions{justify-content:flex-start;gap:12px;}
+  /* tbody agregado a proposito para subir la especificidad por encima
+     de la regla base #view-pricebook .pb-icon-btn (mismo peso si no) —
+     sin esto, el orden de aparicion en el archivo hacia ganar a la
+     regla de 30px pese a estar dentro de este media query. */
+  #view-pricebook tbody .pb-icon-btn{width:44px;height:44px;}
+
+  /* Control "Ordenar por": reemplaza el click en encabezado de columna,
+     que no existe en la vista de tarjeta. Junto al panel de filtros. */
+  .pb-mobile-sort{
+    display:flex;align-items:center;gap:10px;
+    background:var(--white);
+    border:1px solid var(--border-soft);
+    border-radius:var(--radius-m);
+    padding:10px 14px;
+    margin-bottom:14px;
+    box-shadow:var(--shadow-card);
+  }
+  .pb-mobile-sort label{font-size:12px;font-weight:700;color:var(--grey);white-space:nowrap;}
+  .pb-mobile-sort select{flex:1;min-width:0;}
+  .pb-mobile-sort button{
+    width:44px;height:44px;flex:0 0 auto;
+    border:1px solid var(--light-grey);border-radius:var(--radius-s);
+    background:var(--white);color:var(--grey);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;font-size:14px;
+  }
+  .pb-mobile-sort button:disabled{opacity:.4;cursor:not-allowed;}
+}
+
+/* ============================================================
+   FASE 3 — Motor de Variables (catálogo de conceptos): tarjeta MÁS
+   COMPACTA que Propuestas/Servicios (2 líneas, no una por campo) —
+   con 65 conceptos por recorrer, una tarjeta tan alta como las otras
+   sería tediosa. Scope exclusivo a #view-motor-variables .mv-table
+   (no .data-table a secas). Visible: ID + Concepto (con badge ƒ) en
+   la línea 1; Estado + Acciones en la línea 2. Clase, Valor nominal,
+   Unidad de medida y Moneda quedan disponibles vía edición o el modal
+   de fórmula (ƒ), sin duplicarlos en la tarjeta.
+   La fila de categoría (.mv-cat-row) no se toca — sigue igual que
+   siempre, es un <td colspan> con el botón de colapsar. El colapso en
+   sí (renderConceptosTable()) filtra qué <tr> se generan ANTES de que
+   el CSS entre en juego, así que es indiferente a si esas filas se
+   ven como fila de tabla o como tarjeta. */
+@media (max-width: 639px){
+  #view-motor-variables table.mv-table{min-width:0;width:100%;}
+  #view-motor-variables .mv-table thead{display:none;}
+  #view-motor-variables .mv-table tbody{display:block;}
+
+  #view-motor-variables .mv-table tbody tr.mv-cat-row{display:block;}
+  #view-motor-variables .mv-table tbody tr.mv-cat-row td{display:block;padding:0;border:none;}
+
+  #view-motor-variables .mv-table tbody tr:not(.mv-cat-row){
+    display:grid;
+    grid-template-columns:auto 1fr;
+    align-items:center;
+    column-gap:10px;
+    row-gap:6px;
+    border:1px solid var(--border-soft);
+    border-radius:var(--radius-m);
+    padding:10px 14px;
+    margin-bottom:8px;
+    box-shadow:var(--shadow-card);
+    background:var(--white);
+  }
+  #view-motor-variables .mv-table tbody tr:not(.mv-cat-row):hover{background:var(--white);}
+  #view-motor-variables .mv-table tbody tr:not(.mv-cat-row) td{
+    padding:0;border:none;white-space:normal;text-align:left;
+  }
+  #view-motor-variables .mv-table tbody td.cell-hide-mobile{display:none;}
+  #view-motor-variables .mv-table tbody td.cell-mv-id{grid-column:1;grid-row:1;}
+  #view-motor-variables .mv-table tbody td.cell-mv-concepto{grid-column:2;grid-row:1;}
+  #view-motor-variables .mv-table tbody td.cell-mv-estado{grid-column:1;grid-row:2;}
+  #view-motor-variables .mv-table tbody td.cell-mv-acciones{grid-column:2;grid-row:2;justify-self:end;}
+  #view-motor-variables .mv-table tbody .row-actions{justify-content:flex-end;gap:8px;}
+  #view-motor-variables .mv-table tbody .row-actions .icon-btn{width:44px;height:44px;}
+}

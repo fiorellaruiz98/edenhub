@@ -523,17 +523,17 @@ function renderProposalsTable(){
       return `
       <tr data-id="${p.id}">
         <td class="cell-codigo">${esc(p.codigo)}</td>
-        <td>${esc(p.ruc)}</td>
+        <td class="cell-hide-mobile">${esc(p.ruc)}</td>
         <td class="cell-empresa"><strong>${esc(p.razonSocial)}</strong><span>${esc(p.giro)}</span></td>
-        <td><span class="tag-neutral">${esc(p.solucion)}</span></td>
-        <td>${esc(p.producto)}</td>
-        <td>${esc(p.tipoProducto)}</td>
-        <td class="num">${money(bvTotalFor(p))}</td>
-        <td class="num">${intFmt(p.cantTarjetas)}</td>
-        <td>${esc(p.modalidadPago)}</td>
-        <td class="center"><span class="version-chip">v${p.version}</span></td>
-        <td><span class="badge ${badgeClass(p.estado)}">${esc(p.estado)}</span></td>
-        <td class="center">
+        <td class="cell-hide-mobile"><span class="tag-neutral">${esc(p.solucion)}</span></td>
+        <td class="cell-hide-mobile">${esc(p.producto)}</td>
+        <td class="cell-hide-mobile">${esc(p.tipoProducto)}</td>
+        <td class="num cell-bv">${money(bvTotalFor(p))}</td>
+        <td class="num cell-hide-mobile">${intFmt(p.cantTarjetas)}</td>
+        <td class="cell-hide-mobile">${esc(p.modalidadPago)}</td>
+        <td class="center cell-hide-mobile"><span class="version-chip">v${p.version}</span></td>
+        <td class="cell-estado"><span class="badge ${badgeClass(p.estado)}">${esc(p.estado)}</span></td>
+        <td class="center cell-acciones">
           <div class="row-actions">
             ${isRejected
               ? `<button class="icon-btn newversion" data-action="newversion" data-id="${p.id}" title="Generar nueva versión">
@@ -2119,6 +2119,15 @@ function initSidebarNav(){
       th.classList.toggle('sort-active', isActive);
       icon.textContent = isActive ? (sortState.direction === 'asc' ? '▲' : '▼') : '';
     });
+    /* Control "Ordenar por" de móvil: mismo estado que los encabezados,
+       sea cual sea el control que originó el cambio. */
+    const sortFieldEl = document.getElementById('pbSortField');
+    const sortDirBtn = document.getElementById('pbSortDirBtn');
+    if(sortFieldEl){
+      sortFieldEl.value = sortState.field || '';
+      sortDirBtn.disabled = !sortState.field;
+      sortDirBtn.textContent = sortState.direction === 'desc' ? '▼' : '▲';
+    }
   }
 
   /* ------------------------------------------------------------
@@ -2151,15 +2160,15 @@ function initSidebarNav(){
       tr.innerHTML = `
         <td class="cell-code">#${id}</td>
         <td class="cell-name">${s.nombre}<span class="desc">${s.descripcion}</span></td>
-        <td><span class="tag-neutral">${s.solucion || '—'}</span></td>
-        <td><span class="tag-product"><i class="dot"></i>${PRODUCTO_LABELS[s.productoId]}</span></td>
-        <td>
+        <td class="cell-hide-mobile"><span class="tag-neutral">${s.solucion || '—'}</span></td>
+        <td class="cell-hide-mobile"><span class="tag-product"><i class="dot"></i>${PRODUCTO_LABELS[s.productoId]}</span></td>
+        <td class="cell-hide-mobile">
           <div class="tarifario-summary">
             <span class="tarifario-count"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>${s.tarifas.length} ${s.tarifas.length === 1 ? 'tarifa' : 'tarifas'}</span>
           </div>
         </td>
-        <td>${s.estado ? '<span class="pb-badge status-activo"><i class="dot"></i>Activo</span>' : '<span class="pb-badge status-inactivo"><i class="dot"></i>Inactivo</span>'}</td>
-        <td>
+        <td class="cell-estado">${s.estado ? '<span class="pb-badge status-activo"><i class="dot"></i>Activo</span>' : '<span class="pb-badge status-inactivo"><i class="dot"></i>Inactivo</span>'}</td>
+        <td class="cell-acciones">
           <div class="pb-row-actions">
             <button class="pb-icon-btn" title="Ver detalle" onclick="openDetalleServicio('${id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 8v.01M12 11v5"/></svg></button>
             <button class="pb-icon-btn edit" title="Editar" onclick="openServiceDrawer('${id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg></button>
@@ -2735,6 +2744,20 @@ function initSidebarNav(){
     if(th) toggleSort(th.dataset.field);
   });
 
+  /* "Ordenar por" de móvil — mismo mecanismo (sortState/applyPricebookFilters)
+     que el click en encabezado, solo que el encabezado no es visible en la
+     vista de tarjeta (<=639px). */
+  document.getElementById('pbSortField').addEventListener('change', (e) => {
+    const field = e.target.value;
+    if(!field){ sortState = { field: null, direction: 'asc' }; }
+    else { sortState = { field, direction: 'asc' }; }
+    updateSortIndicators();
+    applyPricebookFilters();
+  });
+  document.getElementById('pbSortDirBtn').addEventListener('click', () => {
+    if(sortState.field) toggleSort(sortState.field);
+  });
+
   /* Init del módulo Pricebook — expuesto al router del host.
      El router llama ensureRendered() al entrar a la vista. */
   var __pbRendered = false;
@@ -3187,14 +3210,14 @@ function renderConceptosTable(){
       const conceptSub = d.resumen ? '<span class="mv-concept-sub" title="'+esc(d.resumen)+'">'+esc(d.resumen)+'</span>' : '';
       return (
       '<tr id="mv-row-'+esc(d.id)+'">'+
-        '<td><span class="cell-codigo">'+esc(d.id)+'</span></td>'+
-        '<td style="white-space:normal;">'+conceptMain+conceptSub+'</td>'+
-        '<td>'+rentBadge(d.rent)+'</td>'+
-        '<td class="num mv-cell-nominal">'+nominalCell+'</td>'+
-        '<td>'+(d.driver && d.driver!=='—' ? esc(d.driver) : '<span style="color:var(--grey);">—</span>')+'</td>'+
-        '<td>'+monedaName(d.moneda)+'</td>'+
-        '<td>'+estadoBadge(d.estado)+'</td>'+
-        '<td class="center"><div class="row-actions" style="justify-content:center;">'+
+        '<td class="cell-mv-id"><span class="cell-codigo">'+esc(d.id)+'</span></td>'+
+        '<td class="cell-mv-concepto" style="white-space:normal;">'+conceptMain+conceptSub+'</td>'+
+        '<td class="cell-hide-mobile">'+rentBadge(d.rent)+'</td>'+
+        '<td class="num mv-cell-nominal cell-hide-mobile">'+nominalCell+'</td>'+
+        '<td class="cell-hide-mobile">'+(d.driver && d.driver!=='—' ? esc(d.driver) : '<span style="color:var(--grey);">—</span>')+'</td>'+
+        '<td class="cell-hide-mobile">'+monedaName(d.moneda)+'</td>'+
+        '<td class="cell-mv-estado">'+estadoBadge(d.estado)+'</td>'+
+        '<td class="center cell-mv-acciones"><div class="row-actions" style="justify-content:center;">'+
           '<button type="button" class="icon-btn history" data-mv-history="'+d.id+'" data-tooltip="Ver histórico" aria-label="Ver historial de '+esc(d.label||d.nombre)+'">'+ICONS.clock+'</button>'+
           '<button type="button" class="icon-btn edit" data-mv-edit="'+d.id+'" data-tooltip="Editar" aria-label="Editar '+esc(d.label||d.nombre)+'">'+ICONS.pencil+'</button>'+
           '<button type="button" class="icon-btn reject" data-mv-delete="'+d.id+'" data-tooltip="Eliminar" aria-label="Eliminar '+esc(d.label||d.nombre)+'">'+ICONS.trash+'</button>'+

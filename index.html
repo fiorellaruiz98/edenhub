@@ -487,6 +487,22 @@
         </div>
       </section>
 
+      <!-- Solo visible en movil (<=639px): reemplaza el click en encabezado
+           de columna, que no existe en la vista de tarjeta. -->
+      <div class="pb-mobile-sort" id="pbMobileSort">
+        <label for="pbSortField">Ordenar por</label>
+        <select id="pbSortField">
+          <option value="">Sin ordenar</option>
+          <option value="id">ID Servicio</option>
+          <option value="nombre">Servicio</option>
+          <option value="solucion">Solución</option>
+          <option value="producto">Producto</option>
+          <option value="tarifas">Tarifario asociado</option>
+          <option value="estado">Estado</option>
+        </select>
+        <button type="button" id="pbSortDirBtn" aria-label="Invertir dirección de orden" title="Invertir dirección de orden" disabled>▲</button>
+      </div>
+
       <section class="panel table-panel" aria-label="Listado de servicios">
         <div class="table-toolbar">
           <div><h2>Listado de servicios<span class="count" id="row-count">7 resultados</span></h2></div>
