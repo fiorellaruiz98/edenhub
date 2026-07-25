@@ -49,9 +49,25 @@
 }
 
 *,*::before,*::after{box-sizing:border-box;}
-html,body{height:100%;}
+/* overflow-x:clip aqui, no en un wrapper interno: los paneles off-canvas
+   (.drawer, .mv-drawer, .sidebar en movil) usan position:fixed +
+   transform:translateX(...) para ocultarse fuera de pantalla — Chromium
+   sigue contando esa caja transformada como "scrollable overflow" del
+   documento, aunque sea invisible, generando scroll horizontal
+   fantasma. Mismo principio que el wrapper .table-scroll (contener el
+   overflow en vez de dejarlo escapar), aplicado a html+body porque la
+   fuente es position:fixed, no un elemento en flujo normal.
+   Es "clip" y no "hidden" a proposito: "hidden" convierte a ambos en
+   contenedores de scroll (activa la regla de la spec que fuerza
+   overflow-y a "auto" cuando overflow-x no es "visible"), lo que aqui
+   rompia el scroll vertical de toda la pagina (verificado). "clip" no
+   crea un contenedor de scroll, asi que el alto/scroll vertical del
+   documento queda exactamente igual que antes. */
+html{height:100%;overflow-x:clip;}
 body{
+  height:100%;
   margin:0;
+  overflow-x:clip;
   font-family:var(--font-body);
   background:var(--surface-app);
   color:var(--black);
