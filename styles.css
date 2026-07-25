@@ -60,13 +60,20 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 
+/* ============================================================
+   BREAKPOINTS (Fase 1 — fundación y chrome)
+   Móvil    : hasta 639px  → @media (max-width:639px)
+   Tablet   : 640–1024px   → @media (min-width:640px) and (max-width:1024px)
+   Desktop  : desde 1025px → @media (min-width:1025px)
+   ============================================================ */
+
 /* Densidad de escritorio: equivale a que el usuario reduzca el zoom del
    navegador a 80%, para que quepa más información en pantalla sin
    necesidad de scroll. El sidebar ya no usa `vh` (ver comentario en
    .sidebar más abajo), así que ya no compite con esta regla. Solo
-   aplica en escritorio: en móvil reduciría los touch targets por
-   debajo del mínimo recomendado (~44px). */
-@media (min-width:861px){
+   aplica en escritorio real (>1024px): en tablet/móvil reduciría los
+   touch targets por debajo del mínimo recomendado (~44px). */
+@media (min-width:1025px){
   html{ zoom:0.8; }
 }
 img,svg{display:block;}
@@ -117,7 +124,7 @@ a{color:inherit;}
   z-index:50;
   transition:transform .28s cubic-bezier(.32,.72,0,1), width .22s ease;
 }
-@media (min-width:861px){
+@media (min-width:1025px){
   .shell-main{ margin-left:246px; }
   .app-shell:has(.sidebar.collapsed) .shell-main{ margin-left:76px; }
 }
@@ -210,8 +217,11 @@ a{color:inherit;}
 .sidebar-footer p{margin:0;font-size:10.5px;color:var(--grey);font-weight:500;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .sidebar-footer b{color:var(--red-hero-dark);}
 
-/* Collapsed rail mode — icon-only with custom hover tooltips (desktop only) */
-@media (min-width:861px){
+/* Collapsed rail mode — icon-only con tooltip al hover. En desktop
+   (>1024px) es una opcion manual (.sidebar.collapsed, boton en el
+   logo); en tablet es automatico y forzado (ver bloque de tablet
+   mas abajo, que reutiliza este mismo look sin depender de la clase). */
+@media (min-width:1025px){
   .sidebar.collapsed{width:76px;}
   .sidebar.collapsed .sidebar-logo{padding:20px 0 16px;justify-content:center;}
   .sidebar.collapsed .logo-full{display:none;}
@@ -237,6 +247,41 @@ a{color:inherit;}
     box-shadow:var(--shadow-pop);
   }
   .sidebar.collapsed .sidebar-footer{display:none;}
+}
+
+/* Tablet (640–1024px): rail automatico y forzado, sin alternativa
+   manual — el boton de colapsar es exclusivo de escritorio, se oculta
+   aqui. Mismas reglas visuales que el modo colapsado de escritorio,
+   pero sobre .sidebar directamente (no depende de la clase .collapsed
+   porque en este rango no es una eleccion del usuario). */
+@media (min-width:640px) and (max-width:1024px){
+  .shell-main{ margin-left:72px; }
+  .sidebar{ width:72px; transform:none; box-shadow:none; }
+  .sidebar-collapse-toggle{ display:none; }
+  .sidebar-logo{ padding:20px 0 16px; justify-content:center; }
+  .logo-full{ display:none; }
+  .logo-mark{ display:block; }
+  .nav-group-label{ display:none; }
+  .nav-group{
+    border-top:1px solid var(--border-soft);
+    margin-top:6px;padding-top:10px;
+  }
+  .nav-group:first-child{ border-top:none; margin-top:0; padding-top:0; }
+  .nav-link{ justify-content:center; padding:10px 0; }
+  .nav-link.sub{ padding-left:0; }
+  .nav-link .nav-label{ display:none; }
+  .nav-link.active::before{ left:6px; }
+  .nav-link:hover::after{
+    content: attr(data-label);
+    position:absolute;left:100%;top:50%;transform:translateY(-50%);
+    margin-left:10px;
+    background:var(--black);color:#fff;
+    font-size:11.5px;font-weight:600;
+    padding:6px 10px;border-radius:6px;
+    white-space:nowrap;z-index:200;pointer-events:none;
+    box-shadow:var(--shadow-pop);
+  }
+  .sidebar-footer{ display:none; }
 }
 
 .sidebar-overlay{
@@ -277,7 +322,10 @@ a{color:inherit;}
   display:flex;
   align-items:center;
   gap:14px;
+  min-width:0;
+  flex:1 1 auto;
 }
+.topbar-crumb{min-width:0;}
 .topbar-crumb p{
   margin:0 0 1px;
   font-size:10.5px;
@@ -285,6 +333,7 @@ a{color:inherit;}
   color:var(--grey);
   text-transform:uppercase;
   letter-spacing:.04em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .topbar-crumb p b{color:var(--red-hero);font-weight:700;}
 .topbar-crumb h1{
@@ -294,11 +343,13 @@ a{color:inherit;}
   color:var(--black);
   margin:0;
   letter-spacing:-0.01em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .topbar-right{
   display:flex;
   align-items:center;
   gap:14px;
+  flex:0 0 auto;
 }
 .env-chip{
   display:flex;align-items:center;gap:6px;
@@ -531,6 +582,24 @@ main{
   width:15px;height:15px;
   background:no-repeat center/contain url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F72717' stroke-width='2.2' stroke-linecap='round'><path d='M4 6h16M7 12h10M10 18h4'/></svg>");
 }
+/* Botón que envuelve el título — solo actúa como control de
+   expandir/colapsar en móvil (ver @media abajo); en tablet/desktop se
+   ve y se comporta igual que el <div> de siempre. */
+.filters-toggle{
+  background:none;border:none;padding:0;margin:0;
+  cursor:default;
+  display:flex;align-items:center;gap:8px;
+}
+.filters-count{
+  margin-left:2px;
+  font-size:11px;font-weight:700;
+  text-transform:none;letter-spacing:0;
+  color:var(--red-hero-dark);
+  background:var(--light-pink);
+  padding:1px 7px;
+  border-radius:var(--radius-ribbon);
+}
+.filters-chevron{display:none;flex:0 0 auto;color:var(--grey);transition:transform .2s ease;}
 .filters-clear{
   background:none;border:none;
   color:var(--grey);
@@ -1606,23 +1675,36 @@ table.approval-table{width:100%;border-collapse:collapse;}
   main{padding:16px;}
   .topbar{padding:12px 16px;}
   .filters-grid{grid-template-columns:1fr 1fr;}
+  /* Drawers y formularios internos: fuera de alcance de la Fase 1
+     (responsive de chrome) — se revisan en su propia fase. */
   .form-grid,.form-grid.cols-3{grid-template-columns:1fr;}
   .drawer{width:100vw;}
   .drawer-nav{display:none;}
+  .drawer-footer{flex-direction:column;align-items:stretch;}
+  .drawer-footer-left,.drawer-footer-right{width:100%;}
+  .drawer-footer-left .btn,.drawer-footer-right .btn,.drawer-footer-right .btn-text{flex:1;}
+}
+/* Móvil (<640px): sidebar off-canvas, topbar simplificado. */
+@media (max-width: 639px){
   .user-meta{display:none;}
   .hamburger-btn{display:flex;}
+  .sidebar-collapse-toggle{display:none;}
   .sidebar{
     transform:translateX(-100%);
     box-shadow:var(--shadow-pop);
   }
   .sidebar.open{transform:translateX(0);}
   .sidebar-close{display:flex;}
-  .drawer-footer{flex-direction:column;align-items:stretch;}
-  .drawer-footer-left,.drawer-footer-right{width:100%;}
-  .drawer-footer-left .btn,.drawer-footer-right .btn,.drawer-footer-right .btn-text{flex:1;}
+  .filters-grid{grid-template-columns:1fr;}
+  .filters-toggle{cursor:pointer;}
+  .filters-chevron{display:block;}
+  .filters-panel.collapsed .filters-chevron{transform:rotate(-90deg);}
+  .filters-panel.collapsed .filters-grid{display:none;}
 }
 @media (max-width: 560px){
-  .filters-grid{grid-template-columns:1fr;}
+  /* .filters-grid ya queda en 1 columna desde 639px (ver arriba). Estas
+     dos reglas son de Fase 2 (tarjetas KPI / encabezados de página), sin
+     tocar en esta sesión. */
   .kpi-card{flex-direction:column;align-items:flex-start;text-align:left;}
   .page-heading{flex-direction:column;align-items:flex-start;}
 }

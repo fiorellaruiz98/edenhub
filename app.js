@@ -1573,6 +1573,7 @@ document.addEventListener("DOMContentLoaded", function(){
   renderKPIs();
   renderProposalsTable();
   initSidebarNav();
+  initFiltersPanels();
 
   // Filters
   ["fCliente"].forEach(id=>document.getElementById(id).addEventListener("input", applyProposalsFilters));
@@ -1782,6 +1783,45 @@ const PLACEHOLDER_COPY = {
 function closeSidebar(){
   document.getElementById("sidebar").classList.remove("open");
   document.getElementById("sidebarOverlay").classList.remove("visible");
+}
+
+/* Patrón compartido de ".filters-panel" (Propuestas, Servicios y
+   Tarifas, Motor de Variables): en móvil arranca colapsado con un
+   contador de filtros activos; en tablet/desktop se mantiene expandido
+   como siempre. Una sola función para los 3 módulos — no hay nada
+   específico de cada uno aquí. */
+function countActiveFilters(panel){
+  const fields = panel.querySelectorAll(".filters-grid input, .filters-grid select");
+  let count = 0;
+  fields.forEach(f=>{ if(f.value && f.value.trim()!=="") count++; });
+  return count;
+}
+function updateFiltersCount(panel){
+  const badge = panel.querySelector(".filters-count");
+  if(!badge) return;
+  const n = countActiveFilters(panel);
+  badge.textContent = " (" + n + ")";
+  badge.hidden = n===0;
+}
+function initFiltersPanels(){
+  document.querySelectorAll(".filters-panel").forEach(panel=>{
+    const toggle = panel.querySelector(".filters-toggle");
+    if(toggle){
+      toggle.addEventListener("click", ()=>{
+        panel.classList.toggle("collapsed");
+        toggle.setAttribute("aria-expanded", panel.classList.contains("collapsed") ? "false" : "true");
+      });
+      if(window.matchMedia("(max-width:639px)").matches){
+        panel.classList.add("collapsed");
+        toggle.setAttribute("aria-expanded", "false");
+      }
+    }
+    updateFiltersCount(panel);
+    panel.querySelectorAll(".filters-grid input, .filters-grid select").forEach(f=>{
+      f.addEventListener("input", ()=>updateFiltersCount(panel));
+      f.addEventListener("change", ()=>updateFiltersCount(panel));
+    });
+  });
 }
 
 function initSidebarNav(){
