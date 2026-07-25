@@ -1002,7 +1002,13 @@ table.data-table{
   display:flex;align-items:center;justify-content:center;flex:0 0 auto;
 }
 .form-section-head h4{margin:0;font-size:14.5px;font-weight:700;}
-.form-section-head span{font-size:11.5px;color:var(--grey);margin-left:auto;}
+/* :not(.sec-num) a proposito: .sec-num tambien es un <span>, y sin esta
+   exclusion heredaba el margin-left:auto pensado solo para la etiqueta
+   lateral opcional ("No editable", etc.) — eso empujaba el numero+titulo
+   una cantidad variable hacia la derecha segun cuanto contenido hubiera
+   en el resto del renglon, rompiendo la alineacion izquierda entre las
+   8 secciones del drawer. */
+.form-section-head span:not(.sec-num){font-size:11.5px;color:var(--grey);margin-left:auto;}
 
 .form-grid{
   display:grid;
