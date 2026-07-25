@@ -2943,3 +2943,86 @@ table.approval-table{width:100%;border-collapse:collapse;}
   #view-motor-variables .mv-table tbody .row-actions{justify-content:flex-end;gap:8px;}
   #view-motor-variables .mv-table tbody .row-actions .icon-btn{width:44px;height:44px;}
 }
+
+/* ============================================================
+   FASE 4 — Drawers y modales a pantalla completa en móvil (<=639px).
+   Todo scopeado a la clase/ID de cada componente — no se toca nada de
+   tablet/desktop, que siguen exactamente igual que hoy.
+   ============================================================ */
+@media (max-width: 639px){
+  /* ---------- 1) Drawer de Propuestas (#drawer): nav vertical -> tabs
+     horizontales con scroll-snap. El scroll-spy (click + scroll) sigue
+     siendo el mismo JS de siempre — ver scrollNavItemIntoView() en
+     app.js, que solo se agregó para autodesplazar el tab activo. Los
+     otros 2 drawers (pb-drawer, mv-drawer) no tienen nav propia. ---------- */
+  .drawer-body{flex-direction:column;}
+  .drawer-nav{
+    display:flex;
+    width:100%;
+    flex:0 0 auto;
+    overflow-x:auto;
+    overflow-y:visible;
+    border-right:none;
+    border-bottom:1px solid var(--border-soft);
+    padding:8px 10px;
+    gap:4px;
+    scroll-snap-type:x proximity;
+    -webkit-overflow-scrolling:touch;
+  }
+  .drawer-nav-item{
+    flex:0 0 auto;
+    white-space:nowrap;
+    scroll-snap-align:start;
+    min-height:44px;
+    margin-bottom:0;
+  }
+
+  /* ---------- 2) Los 3 drawers a pantalla completa (ancho y alto).
+     La altura ya era 100% siempre (position:fixed;top:0;bottom:0);
+     esto fija el ancho a exactamente 100vw, incluida la variante
+     "ampliada" (.expanded), que en escritorio agranda el panel. ---------- */
+  .drawer, .drawer.expanded,
+  #view-pricebook .pb-drawer, #view-pricebook .pb-drawer.expanded,
+  #view-motor-variables .mv-drawer, #view-motor-variables .mv-drawer.expanded{
+    width:100vw;
+    max-width:100vw;
+    height:100%;
+  }
+
+  /* ---------- 3) Área táctil 44x44 en cierres/expandir de los 3
+     drawers. El ícono interno no cambia (mismo criterio que la Fase 3:
+     el svg trae su propio tamaño fijo, solo crece el padding). ---------- */
+  .drawer-header-actions .icon-btn{width:44px;height:44px;}
+  #view-pricebook .drawer-close, #view-pricebook .drawer-expand,
+  #view-motor-variables .mv-drawer .drawer-close,
+  #view-motor-variables .mv-drawer .drawer-expand{
+    width:44px;height:44px;
+  }
+
+  /* ---------- 4) Modales centrados: los 13 caben sin cortarse. Los 9
+     que ya usan .modal-card (6 globales: reject/history/rentab/stage/
+     oportunidad/oportunidadSuccess + 3 de MV via .mv-modal) ya traían
+     max-height:86% + overflow-y:auto de fábrica — no necesitan nada
+     nuevo. Los 4 de Pricebook (tarifa/delete/unsaved/detalle) usan la
+     clase propia .pb-modal, que NO tenía tope de alto ni scroll
+     interno — eso es lo que se agrega aquí (el que más lo necesitaba,
+     #tarifa-modal, tiene una grilla de tarifas que puede crecer). ---------- */
+  .modal{padding:12px;}
+  #view-pricebook .pb-modal{
+    width:calc(100vw - 24px);
+    max-width:calc(100vw - 24px);
+    max-height:90vh;
+    overflow-y:auto;
+  }
+
+  /* ---------- 5) Área táctil 44x44 en el resto de botones de
+     drawers/modales: cerrar (X) y acciones de pie. ---------- */
+  .close-x{width:44px;height:44px;}
+  .drawer-footer .btn, .drawer-footer .btn-text,
+  .modal-footer .btn, .modal-footer .btn-text,
+  #view-pricebook .modal-actions button,
+  #view-pricebook .pb-drawer-footer button,
+  #view-motor-variables .mv-drawer-footer button{
+    min-height:44px;
+  }
+}

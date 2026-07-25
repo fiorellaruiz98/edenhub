@@ -1664,14 +1664,29 @@ document.addEventListener("DOMContentLoaded", function(){
       document.getElementById(btn.dataset.target).scrollIntoView({behavior:"smooth", block:"start"});
       document.querySelectorAll(".drawer-nav-item").forEach(b=>b.classList.remove("active"));
       btn.classList.add("active");
+      scrollNavItemIntoView(btn);
     });
   });
   document.getElementById("drawerForm").addEventListener("scroll", function(){
-    const sections = [...document.querySelectorAll(".form-section")];
+    /* Bug pre-existente encontrado en esta sesión: ".form-section" no es
+       exclusiva de este drawer — el modal de "Nueva oportunidad" reutiliza
+       la misma clase para sus propias 2 secciones (op-sec-empresa,
+       op-sec-oportunidad), sin scope al ID de su form. Sin acotar la
+       búsqueda a #drawerForm, este array traía 10 elementos en vez de 8,
+       desalineado con los 8 .drawer-nav-item — al hacer scroll hasta el
+       final, activeIdx podía terminar en 8/9 (índices que no existen
+       entre los nav items), y NINGÚN tab quedaba marcado .active. */
+    const sections = [...document.querySelectorAll("#drawerForm .form-section")];
     const scrollTop = this.scrollTop;
     let activeIdx = 0;
     sections.forEach((s,i)=>{ if(s.offsetTop - 80 <= scrollTop) activeIdx = i; });
-    document.querySelectorAll(".drawer-nav-item").forEach((b,i)=>b.classList.toggle("active", i===activeIdx));
+    let activeBtn = null;
+    document.querySelectorAll(".drawer-nav-item").forEach((b,i)=>{
+      const isActive = i===activeIdx;
+      b.classList.toggle("active", isActive);
+      if(isActive) activeBtn = b;
+    });
+    if(activeBtn) scrollNavItemIntoView(activeBtn);
   });
 
   // Live "esto generará una nueva versión" banner — se actualiza con cualquier
@@ -1822,6 +1837,18 @@ function initFiltersPanels(){
       f.addEventListener("change", ()=>updateFiltersCount(panel));
     });
   });
+}
+
+/* Fase 4 — móvil (<=639px): .drawer-nav pasa de columna vertical a
+   tabs horizontales con scroll-snap. El scroll-spy que ya existía
+   (click salta a la sección, scroll del form resalta el tab activo)
+   sigue igual — esto solo hace que el tab recién activado se
+   autodesplace al centro de su propio contenedor horizontal, para que
+   el usuario no tenga que arrastrar la barra a mano para verlo. En
+   desktop/tablet (.drawer-nav vertical, sin overflow-x) esta llamada
+   no tiene ningún efecto visible. */
+function scrollNavItemIntoView(btn){
+  if(btn.scrollIntoView) btn.scrollIntoView({inline:"center", block:"nearest", behavior:"smooth"});
 }
 
 function initSidebarNav(){
