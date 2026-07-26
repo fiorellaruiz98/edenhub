@@ -3196,41 +3196,41 @@ const RAW_DATA = [
 {id:'C010',idc:'C010',nombre:'CUENTA_ACTIVA',claveOriginal:'CUENTA_ACTIVA',label:'Cuenta activa',categoria:'Transaccional y procesamiento',nominal:0.12,esSupuesto:false,formula:'(VALOR NOMINAL*PROPUESTA.QTARJETAS* PROPUESTA.NUMERO_PEDIDOS_AL_ANIO)',estado:'Activo',driver:'Transacción',moneda:'SOLES',rent:'Computada',history:[]},
 {id:'C011',idc:'C011',nombre:'PROCESAMIENTO_OTROS_COSTOS',claveOriginal:'PROCESAMIENTO (OTROS COSTOS)',label:'Procesamiento (otros costos)',categoria:'Transaccional y procesamiento',nominal:0.105,esSupuesto:false,formula:'(VALOR NOMINAL* PROPUESTA.QTARJETAS)*PROPUESTA.NUMERO_PEDIDOS_AL_ANIO',estado:'Activo',driver:'Transacción',moneda:'SOLES',rent:'Computada',history:[]},
 {id:'C012',idc:'C012',nombre:'PROCESAMIENTO_TRANSACCION_MARCA',claveOriginal:'PROCESAMIENTO_TX_MARCA',label:'Procesamiento de transacción de marca',categoria:'Transaccional y procesamiento',nominal:null,esSupuesto:true,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
-{id:'C013',idc:'C013',nombre:'INTERCHANGE_FEE',claveOriginal:'INTERCHANGE_FEE',label:'Interchange fee',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
-{id:'C014',idc:'C014',nombre:'MDR_ADICIONAL',claveOriginal:'MDR_ADICIONAL',label:'MDR adicional',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
-{id:'C015',idc:'C015',nombre:'RATIO_CONSUMO_SOBRE_LA_CARGA',claveOriginal:'RATIO_DE_CONSUMO_SOBRE_LA_CARGA',label:'Ratio de consumo sobre la carga',categoria:'Transaccional y procesamiento',nominal:0.98,esSupuesto:false,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
-{id:'C016',idc:'C016',nombre:'LOGISTICA_Y_ENVIOS_L_E',claveOriginal:'L&E',label:'Logística y envíos (L&E)',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C013',idc:'C013',nombre:'INTERCHANGE_FEE',claveOriginal:'INTERCHANGE_FEE',label:'Interchange fee',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,esPorcentaje:true,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C014',idc:'C014',nombre:'MDR_ADICIONAL',claveOriginal:'MDR_ADICIONAL',label:'MDR adicional',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,esPorcentaje:true,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C015',idc:'C015',nombre:'RATIO_CONSUMO_SOBRE_LA_CARGA',claveOriginal:'RATIO_DE_CONSUMO_SOBRE_LA_CARGA',label:'Ratio de consumo sobre la carga',categoria:'Transaccional y procesamiento',nominal:0.98,esSupuesto:false,esPorcentaje:true,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C016',idc:'C016',nombre:'LOGISTICA_Y_ENVIOS_L_E',claveOriginal:'L&E',label:'Logística y envíos (L&E)',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,esPorcentaje:true,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
 {id:'C017',idc:'C017',nombre:'COSTO_PROMEDIO_MANTENIMIENTO',claveOriginal:'COSTO_PROMEDIO_DE_MANTENIMIENTO',label:'Costo promedio de mantenimiento',categoria:'Comisiones e ingresos',nominal:0.5,esSupuesto:false,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
-{id:'C018',idc:'C018',nombre:'CARTA_FIANZA_TASA',claveOriginal:'CARTA_FIANZA(TASA)',label:'Carta fianza (tasa)',categoria:'Carta fianza y garantías',nominal:0.052,esSupuesto:false,formula:'SI PROPUESTA.CARTA_FIANZA= SI (VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C018',idc:'C018',nombre:'CARTA_FIANZA_TASA',claveOriginal:'CARTA_FIANZA(TASA)',label:'Carta fianza (tasa)',categoria:'Carta fianza y garantías',nominal:0.052,esSupuesto:false,esPorcentaje:true,formula:'SI PROPUESTA.CARTA_FIANZA= SI (VALOR NOMINAL)',estado:'Activo',driver:'Business Volume',moneda:'SOLES',rent:'Computada',history:[]},
 {id:'C019',idc:'C019',nombre:'COMISION_AL_CLIENTE',claveOriginal:'COMISION_CLIENTE',label:'Comisión al cliente',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'(PROPUESTA.COMISION_CLIENTE_EJECUTIVO/100* PROPUESTA.BV_ANUAL )- CALCULO_REBATE',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Ingreso',history:[]},
-{id:'C020',idc:'C020',nombre:'TASA_UNITARIA_COMISION_CLIENTE',claveOriginal:'TUR_COMISION_CLIENTE',label:'Tasa unitaria — comisión cliente',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'(COMISION_CLIENTE /PROPUESTA.BV_ANUAL)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — ingreso',history:[]},
+{id:'C020',idc:'C020',nombre:'TASA_UNITARIA_COMISION_CLIENTE',claveOriginal:'TUR_COMISION_CLIENTE',label:'Tasa unitaria — comisión cliente',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,esPorcentaje:true,formula:'(COMISION_CLIENTE /PROPUESTA.BV_ANUAL)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — ingreso',history:[]},
 {id:'C021',idc:'C021',nombre:'COMISION_MERCHANT',claveOriginal:'COMISION_MERCHANT',label:'Comisión merchant',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'(TUR_COMISION_MERCHANT* REEMBOLSO)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Ingreso',history:[]},
-{id:'C022',idc:'C022',nombre:'TASA_UNITARIA_COMISION_MERCHANT',claveOriginal:'TUR_COMISION_MERCHANT',label:'Tasa unitaria — comisión merchant',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'SI PROPUESTA.PRODUCTO_CUSTOM !=SI, ENTONCES:(INTERCHANGE_FEE + MDR_ADICIONAL) SINO: (INTERCHANGE_FEE + PROPUESTA.MDR_NEGOCIADO)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — ingreso',history:[]},
+{id:'C022',idc:'C022',nombre:'TASA_UNITARIA_COMISION_MERCHANT',claveOriginal:'TUR_COMISION_MERCHANT',label:'Tasa unitaria — comisión merchant',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,esPorcentaje:true,formula:'SI PROPUESTA.PRODUCTO_CUSTOM !=SI, ENTONCES:(INTERCHANGE_FEE + MDR_ADICIONAL) SINO: (INTERCHANGE_FEE + PROPUESTA.MDR_NEGOCIADO)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — ingreso',history:[]},
 {id:'C023',idc:'C023',nombre:'OTROS_INGRESOS_CALCULADO',claveOriginal:'OTROS_INGRESOS(CALCULADO)',label:'Otros ingresos (calculado)',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'L&E_CALCULADO+MANTENIMIENTO+PERSONALIZACION_ADHOC+DISTRIBUCION',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Ingreso',history:[]},
-{id:'C024',idc:'C024',nombre:'TASA_UNITARIA_OTROS_INGRESOS',claveOriginal:'TUR_OTROS_INGRESOS',label:'Tasa unitaria — otros ingresos',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'OTROS_INGRESOS(CALCULADO) /PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — ingreso',history:[]},
+{id:'C024',idc:'C024',nombre:'TASA_UNITARIA_OTROS_INGRESOS',claveOriginal:'TUR_OTROS_INGRESOS',label:'Tasa unitaria — otros ingresos',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,esPorcentaje:true,formula:'OTROS_INGRESOS(CALCULADO) /PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — ingreso',history:[]},
 {id:'C025',idc:'C025',nombre:'LOGISTICA_Y_ENVIOS_CALCULADO',claveOriginal:'L&E_CALCULADO',label:'Logística y envíos (calculado)',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'L&E * PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — ingreso',history:[]},
 {id:'C026',idc:'C026',nombre:'MANTENIMIENTO',claveOriginal:'MANTENIMIENTO',label:'Mantenimiento',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'SI PROPUESTA.SOLUCION!=FOOD ENTONCES PROPUESTA.Q_TARJETAS_NUEVAS * COSTO_PROMEDIO_DE_MANTENIMIENTO * PESO%_MES_SUMATORIA SINO 0',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — ingreso',history:[]},
-{id:'C027',idc:'C027',nombre:'TASA_UNITARIA_MANTENIMIENTO',claveOriginal:'TUR__MANTENIMIENTO',label:'Tasa unitaria — mantenimiento',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'MANTENIMIENTO / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — ingreso',history:[]},
-{id:'C028',idc:'C028',nombre:'TASA_UNITARIA_PERSONALIZACION_ADHOC',claveOriginal:'TUR_PERSONALIZACION_ADHOC',label:'Tasa unitaria — personalización adhoc',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'PERSONALIZACION_ADHOC / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — ingreso',history:[]},
+{id:'C027',idc:'C027',nombre:'TASA_UNITARIA_MANTENIMIENTO',claveOriginal:'TUR__MANTENIMIENTO',label:'Tasa unitaria — mantenimiento',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,esPorcentaje:true,formula:'MANTENIMIENTO / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — ingreso',history:[]},
+{id:'C028',idc:'C028',nombre:'TASA_UNITARIA_PERSONALIZACION_ADHOC',claveOriginal:'TUR_PERSONALIZACION_ADHOC',label:'Tasa unitaria — personalización adhoc',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,esPorcentaje:true,formula:'PERSONALIZACION_ADHOC / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — ingreso',history:[]},
 {id:'C029',idc:'C029',nombre:'DISTRIBUCION_COSTO',claveOriginal:'DISTRIBUCION_COSTO',label:'Distribución (costo)',categoria:'Logística y entrega',nominal:null,esSupuesto:true,formula:'((ENVIO_TARJETAS_LIMA )+ ENVIO_TARJETAS_PROVINCIA)*1.1',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
-{id:'C030',idc:'C030',nombre:'TASA_UNITARIA_DISTRIBUCION',claveOriginal:'TUR_DISTRIBUCION',label:'Tasa unitaria — distribución',categoria:'Logística y entrega',nominal:null,esSupuesto:true,formula:'DISTRIBUCION / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
+{id:'C030',idc:'C030',nombre:'TASA_UNITARIA_DISTRIBUCION',claveOriginal:'TUR_DISTRIBUCION',label:'Tasa unitaria — distribución',categoria:'Logística y entrega',nominal:null,esSupuesto:true,esPorcentaje:true,formula:'DISTRIBUCION / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
 {id:'C031',idc:'C031',nombre:'COSTO_VENTA',claveOriginal:'COSTO_VENTA',label:'Costo de venta',categoria:'Costos y gastos',nominal:null,esSupuesto:true,formula:'INSUMOS_PERSONALIZACION_Y_ENSOBRADO+PROCESAMIENTO+MARCA_CALCULADO+DISTRIBUCION_COSTO',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Costo',history:[]},
-{id:'C032',idc:'C032',nombre:'TASA_UNITARIA_COSTO_VENTA',claveOriginal:'TUR_COSTO_VENTA',label:'Tasa unitaria — costo de venta',categoria:'Costos y gastos',nominal:null,esSupuesto:true,formula:'COSTO_VENTA / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
+{id:'C032',idc:'C032',nombre:'TASA_UNITARIA_COSTO_VENTA',claveOriginal:'TUR_COSTO_VENTA',label:'Tasa unitaria — costo de venta',categoria:'Costos y gastos',nominal:null,esSupuesto:true,esPorcentaje:true,formula:'COSTO_VENTA / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
 {id:'C033',idc:'C033',nombre:'INSUMOS_PERSONALIZACION_Y_ENSOBRADO',claveOriginal:'INSUMOS_PERZ_ENSOBRADO',label:'Insumos, personalización y ensobrado',categoria:'Tarjetas y emisión',nominal:null,esSupuesto:true,formula:'(WELCOME_KIT)+(EMBOZADO)+(COSTO_PLASTICO_DE_TARJETAS) SI PROPUESTA.ADICIONAL_ADHOC =SI o PROPUESTA.ADICIONAL_ADHOC=EXONERADO, ENTONCES: (WELCOME_KIT)+(EMBOZADO)+(COSTO_PLASTICO_DE_TARJETAS)+EMISION_TARJETAS_CON_AFINIDAD+COSTO_PERSONALIZACION_ADHOC',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
-{id:'C034',idc:'C034',nombre:'TASA_UNITARIA_INSUMOS_Y_ENSOBRADO',claveOriginal:'TUR_INSUMOS_PERZ_ENSOBRADO',label:'Tasa unitaria — insumos y ensobrado',categoria:'Tarjetas y emisión',nominal:null,esSupuesto:true,formula:'INSUMOS_PERSONALIZACION_Y_ENSOBRADO / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
+{id:'C034',idc:'C034',nombre:'TASA_UNITARIA_INSUMOS_Y_ENSOBRADO',claveOriginal:'TUR_INSUMOS_PERZ_ENSOBRADO',label:'Tasa unitaria — insumos y ensobrado',categoria:'Tarjetas y emisión',nominal:null,esSupuesto:true,esPorcentaje:true,formula:'INSUMOS_PERSONALIZACION_Y_ENSOBRADO / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
 {id:'C035',idc:'C035',nombre:'PROCESAMIENTO',claveOriginal:'PROCESAMIENTO',label:'Procesamiento',categoria:'Transaccional y procesamiento',nominal:null,esSupuesto:true,formula:'(TRANSACCIONES_APROBADAS)+(CUENTA_ACTIVA)+(PROCESAMIENTO (OTROS COSTOS))',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
-{id:'C036',idc:'C036',nombre:'TASA_UNITARIA_PROCESAMIENTO',claveOriginal:'TUR_PROCESAMIENTO',label:'Tasa unitaria — procesamiento',categoria:'Transaccional y procesamiento',nominal:null,esSupuesto:true,formula:'PROCESAMIENTO / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
+{id:'C036',idc:'C036',nombre:'TASA_UNITARIA_PROCESAMIENTO',claveOriginal:'TUR_PROCESAMIENTO',label:'Tasa unitaria — procesamiento',categoria:'Transaccional y procesamiento',nominal:null,esSupuesto:true,esPorcentaje:true,formula:'PROCESAMIENTO / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
 {id:'C037',idc:'C037',nombre:'OTROS_GASTOS',claveOriginal:'OTROS_GASTOS',label:'Otros gastos',categoria:'Costos y gastos',nominal:null,esSupuesto:true,formula:'GASTOS_FINANCIEROS+ CARTA_FIANZA+PAYROLL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Gasto',history:[]},
-{id:'C038',idc:'C038',nombre:'TASA_UNITARIA_OTROS_GASTOS',claveOriginal:'TUR_OTROS_GASTOS',label:'Tasa unitaria — otros gastos',categoria:'Costos y gastos',nominal:null,esSupuesto:true,formula:'OTROS_GASTOS / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — gasto',history:[]},
+{id:'C038',idc:'C038',nombre:'TASA_UNITARIA_OTROS_GASTOS',claveOriginal:'TUR_OTROS_GASTOS',label:'Tasa unitaria — otros gastos',categoria:'Costos y gastos',nominal:null,esSupuesto:true,esPorcentaje:true,formula:'OTROS_GASTOS / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — gasto',history:[]},
 {id:'C039',idc:'C039',nombre:'PAYROLL_COMERCIAL',claveOriginal:'PAYROLL',label:'Payroll comercial',categoria:'Costos y gastos',nominal:null,esSupuesto:true,formula:'COMISION_VARIABLE_EJECUTIVO + BONO_LARGE_DEAL * -1',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — gasto',history:[]},
-{id:'C040',idc:'C040',nombre:'TASA_UNITARIA_PAYROLL',claveOriginal:'TUR_PAYROLL',label:'Tasa unitaria — payroll',categoria:'Costos y gastos',nominal:null,esSupuesto:true,formula:'PAYROLL / PROPUESTA.BV_MENSUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — gasto',history:[]},
+{id:'C040',idc:'C040',nombre:'TASA_UNITARIA_PAYROLL',claveOriginal:'TUR_PAYROLL',label:'Tasa unitaria — payroll',categoria:'Costos y gastos',nominal:null,esSupuesto:true,esPorcentaje:true,formula:'PAYROLL / PROPUESTA.BV_MENSUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — gasto',history:[]},
 {id:'C041',idc:'C041',nombre:'COMISION_VARIABLE_EJECUTIVO',claveOriginal:'COMISION_VARIABLE_EJECUTIVO',label:'Comisión variable del ejecutivo',categoria:'Costos y gastos',nominal:null,esSupuesto:true,formula:'(PROPUESTA.BV_MENSUAL ÷ 1000) × FACTOR CORRESPONDIENTE (NAVIDAD=1.65, RECURRENTE=22, ÚNICO=1.2)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — gasto',history:[]},
 {id:'C042',idc:'C042',nombre:'BONO_POR_LARGE_DEAL',claveOriginal:'BONO_LARGE_DEAL',label:'Bono por large deal',categoria:'Costos y gastos',nominal:3500,esSupuesto:false,formula:'SI PROPUESTA.RECURRENCIA = RECURRENTE && PROPUESTA.BV_MENSUAL > S/200,000. ENTONCES: 3500',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — gasto',history:[]},
 {id:'C043',idc:'C043',nombre:'CARTA_FIANZA',claveOriginal:'CARTA_FIANZA',label:'Carta fianza',categoria:'Carta fianza y garantías',nominal:null,esSupuesto:true,formula:'SI PROPUESTA.SECTOR = PUBLICO && PROPUESTA.CARTA_FIANZA =SI ENTONCES: CARTA_FIANZA(TASA)* MONTO_CARTA_FIANZA',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — gasto',history:[]},
-{id:'C044',idc:'C044',nombre:'TASA_UNITARIA_CARTA_FIANZA',claveOriginal:'TUR_CARTA_FIANZA',label:'Tasa unitaria — carta fianza',categoria:'Carta fianza y garantías',nominal:null,esSupuesto:true,formula:'CARTA_FIANZA / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — gasto',history:[]},
+{id:'C044',idc:'C044',nombre:'TASA_UNITARIA_CARTA_FIANZA',claveOriginal:'TUR_CARTA_FIANZA',label:'Tasa unitaria — carta fianza',categoria:'Carta fianza y garantías',nominal:null,esSupuesto:true,esPorcentaje:true,formula:'CARTA_FIANZA / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — gasto',history:[]},
 {id:'C045',idc:'C045',nombre:'GASTOS_FINANCIEROS',claveOriginal:'GASTOS_FINANCIEROS',label:'Gastos financieros',categoria:'Costos y gastos',nominal:null,esSupuesto:true,formula:'SI PROPUESTA.MODALIDAD_DE_PAGO =CREDITO ENTONCES: ((1 + 5.2%)^(1/360) − 1) × PROPUESTA.BV_MENSUAL × (PROPUESTA.DIAS_CRÉDITO + 5)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — gasto',history:[]},
-{id:'C046',idc:'C046',nombre:'TASA_UNITARIA_GASTOS_FINANCIEROS',claveOriginal:'TUR_GASTOS_FINANCIEROS',label:'Tasa unitaria — gastos financieros',categoria:'Costos y gastos',nominal:null,esSupuesto:true,formula:'GASTOS_FINANCIEROS / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — gasto',history:[]},
-{id:'C047',idc:'C047',nombre:'RENTABILIDAD',claveOriginal:'RENTABILIDAD',label:'Rentabilidad',categoria:'Rentabilidad total',nominal:null,esSupuesto:true,formula:'SI (TOTAL_RESTA_INGRESOS_GASTOS) && TOTAL_INGRESOS > 0, ENTONCES: - TOTAL_RESTA_INGRESOS_GASTOS/ TOTAL_INGRESOS SINO: +TOTAL_RESTA_INGRESOS_GASTOS/ TOTAL_INGRESOS',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Resultante',history:[]},
+{id:'C046',idc:'C046',nombre:'TASA_UNITARIA_GASTOS_FINANCIEROS',claveOriginal:'TUR_GASTOS_FINANCIEROS',label:'Tasa unitaria — gastos financieros',categoria:'Costos y gastos',nominal:null,esSupuesto:true,esPorcentaje:true,formula:'GASTOS_FINANCIEROS / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — gasto',history:[]},
+{id:'C047',idc:'C047',nombre:'RENTABILIDAD',claveOriginal:'RENTABILIDAD',label:'Rentabilidad',categoria:'Rentabilidad total',nominal:null,esSupuesto:true,esPorcentaje:true,formula:'SI (TOTAL_RESTA_INGRESOS_GASTOS) && TOTAL_INGRESOS > 0, ENTONCES: - TOTAL_RESTA_INGRESOS_GASTOS/ TOTAL_INGRESOS SINO: +TOTAL_RESTA_INGRESOS_GASTOS/ TOTAL_INGRESOS',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Resultante',history:[]},
 {id:'C048',idc:'C048',nombre:'NUMERO_TRANSACCIONES_PROMEDIO',claveOriginal:'NUMERO_TRANSACCIONES_PROMEDIO',label:'Número de transacciones promedio',categoria:'Transaccional y procesamiento',nominal:null,esSupuesto:true,formula:'REEMBOLSO / TICKET_PROMEDIO',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Computada',history:[]},
 {id:'C049',idc:'C049',nombre:'TICKET_PROMEDIO',claveOriginal:'TICKET_PROMEDIO',label:'Ticket promedio',categoria:'Transaccional y procesamiento',nominal:null,esSupuesto:true,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Computada',history:[]},
 {id:'C050',idc:'C050',nombre:'REEMBOLSO',claveOriginal:'REEMBOLSO',label:'Reembolso',categoria:'Transaccional y procesamiento',nominal:null,esSupuesto:true,formula:'RATIO_DE_CONSUMO_SOBRE_LA_CARGA* PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Computada',history:[]},
@@ -3239,7 +3239,7 @@ const RAW_DATA = [
 {id:'C053',idc:'C053',nombre:'TOTAL_INGRESOS',claveOriginal:'TOTAL_INGRESOS',label:'Total de ingresos',categoria:'Rentabilidad total',nominal:null,esSupuesto:true,formula:'COMISION_CLIENTE + COMISION_MERCHANT + OTROS_INGRESOS(CALCULADO)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Resultante',history:[]},
 {id:'C054',idc:'C054',nombre:'TOTAL_GASTOS',claveOriginal:'TOTAL_GASTOS',label:'Total de gastos',categoria:'Rentabilidad total',nominal:null,esSupuesto:true,formula:'COSTO_VENTA + OTROS_GASTOS',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Resultante',history:[]},
 {id:'C055',idc:'C055',nombre:'INGRESOS_MENOS_GASTOS',claveOriginal:'TOTAL_RESTA_INGRESOS_GASTOS',label:'Ingresos menos gastos',categoria:'Rentabilidad total',nominal:null,esSupuesto:true,formula:'TOTAL_INGRESOS - TOTAL_GASTOS',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Resultante',history:[]},
-{id:'C056',idc:'C056',nombre:'TASA_UNITARIA_MARGEN',claveOriginal:'TUR_TOTAL_RESTA_INGRESOS_GASTOS',label:'Tasa unitaria — margen',categoria:'Rentabilidad total',nominal:null,esSupuesto:true,formula:'TOTAL_RESTA_INGRESOS_GASTOS / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Resultante',history:[]},
+{id:'C056',idc:'C056',nombre:'TASA_UNITARIA_MARGEN',claveOriginal:'TUR_TOTAL_RESTA_INGRESOS_GASTOS',label:'Tasa unitaria — margen',categoria:'Rentabilidad total',nominal:null,esSupuesto:true,esPorcentaje:true,formula:'TOTAL_RESTA_INGRESOS_GASTOS / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Resultante',history:[]},
 {id:'C057',idc:'C057',nombre:'COSTO_PERSONALIZACION_ADHOC',claveOriginal:'COSTO_PERSONALIZACION_ADHOC',label:'Costo de personalización adhoc',categoria:'Tarjetas y emisión',nominal:null,esSupuesto:true,formula:'SI PROPUESTA.COSTO_PERSONALIZACION_ADHOC=SI ENTONCES: (VALOR NOMINAL)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
 {id:'C058',idc:'C058',nombre:'PESO_MENSUAL_SUMATORIA',claveOriginal:'PESO%_MES_SUMATORIA',label:'Peso % mensual (sumatoria)',categoria:'Parámetros de tiempo',nominal:3.87,esSupuesto:false,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Computada',history:[]},
 {id:'C059',idc:'C059',nombre:'EMISION_TARJETAS',claveOriginal:'EMISION_TARJETAS',label:'Emisión de tarjetas',categoria:'Tarjetas y emisión',nominal:null,esSupuesto:true,tarifaProvisional:true,formula:'(VALOR NOMINAL* PROPUESTA.QTARJETAS)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Ingreso',history:[]},
@@ -4875,7 +4875,7 @@ function handleSimToggleClick(e){
 
 /* ---------- Columnas 2 y 3: listas agrupadas ---------- */
 function calcRowHtml(d, value, pendingMsg){
-  const isPct = d.driver==='%';
+  const isPct = !!d.esPorcentaje;
   let display;
   if(value===MV_PENDING){
     display = '<span class="mv-cr-value pending"><span class="mv-assumed-warn" data-tooltip="'+esc(pendingMsg)+'">'+ICONS.warning+'</span>Pendiente</span>';
@@ -4935,16 +4935,120 @@ function renderGroupedList(rows, valueMap, colKey){
   }).join('');
 }
 
-function heroTone(id, value){
-  /* Rentabilidad (C047) e Ingresos menos gastos (C055): color según signo.
-     Total de ingresos (C053) / Total de gastos (C054): tono informativo. */
-  if(id==='C047' || id==='C055'){
-    if(value===null||value===undefined||Number.isNaN(value)) return 'tone-neutral';
-    return value>=0 ? 'tone-pos' : 'tone-neg';
+/* =============================================================================
+   COLUMNA 3 — ESTADO DE RESULTADOS (P&L)
+   Reemplaza el grid de heroes + lista plana anterior. Misma fuente de
+   verdad que la Columna 2 (el mapa `v` de computeAllNew()) — estos 12
+   conceptos (C019-C024, C031, C032, C037, C038, C053-C056) también
+   siguen apareciendo en la Columna 2, agrupados por categoría contable
+   como siempre; aquí solo se reordenan en formato de estado de
+   resultados. Ningún valor se recalcula aparte.
+   ============================================================================= */
+const PNL_INGRESOS = [ {id:'C019', tasa:'C020'}, {id:'C021', tasa:'C022'}, {id:'C023', tasa:'C024'} ];
+const PNL_GASTOS   = [ {id:'C031', tasa:'C032'}, {id:'C037', tasa:'C038'} ];
+
+/* Devuelve {display, warnHtml} para un valor de v[id], mismo criterio de
+   Pendiente/—/número que ya usa el resto del Simulador (calcRowHtml). */
+function pnlFormatValue(id, v, asPct){
+  const d = byId(id);
+  const val = v[id];
+  if(val===MV_PENDING){
+    return { display:'Pendiente', warnHtml:'<span class="mv-assumed-warn" data-tooltip="'+esc(mvPendingMessage(id, v))+'">'+ICONS.warning+'</span>' };
   }
-  if(id==='C053') return 'tone-income';
-  if(id==='C054') return 'tone-expense';
-  return 'tone-neutral';
+  if(val===null||val===undefined||Number.isNaN(val)) return { display:'—', warnHtml:'' };
+  if(typeof val==='string') return { display:esc(val), warnHtml:'' };
+  return { display: asPct ? fmtPct(val) : fmtMoney(val,d.moneda), warnHtml:'' };
+}
+
+/* Envuelve en paréntesis (convención de "esto resta") solo si el número
+   crudo es positivo — si ya viene negativo (ej. C031 cuando MARCA_CALCULADO
+   es muy negativo), fmtMoney ya le puso un "−" y envolverlo también en
+   paréntesis mostraría un doble negativo confuso ("(−S/X)"). */
+function pnlWrapGasto(rawVal, display){
+  return (typeof rawVal==='number' && rawVal<0) ? display : '('+display+')';
+}
+
+/* Una línea de concepto + su "tasa unitaria" ya existente en el catálogo,
+   debajo en texto secundario. isGasto envuelve el monto en paréntesis
+   (convención de estado de resultados) sin alterar el número real.
+   asPct de cada valor viene de d.esPorcentaje/dt.esPorcentaje (Tarea de
+   formato — no hardcodeado por concepto ni por línea). */
+function pnlLineHtml(id, tasaId, v, isGasto){
+  const d = byId(id);
+  const dt = byId(tasaId);
+  const main = pnlFormatValue(id, v, !!d.esPorcentaje);
+  const tasa = pnlFormatValue(tasaId, v, !!dt.esPorcentaje);
+  const mainVal = isGasto ? pnlWrapGasto(v[id], main.display) : main.display;
+  return (
+  '<div class="pnl-line" data-mv-view="'+id+'" role="button" tabindex="0" title="Ver cómo se calcula">'+
+    '<div class="pnl-line-main">'+
+      '<span class="pnl-line-name">'+esc(d.label||d.nombre)+'</span>'+
+      '<span class="pnl-line-value'+(isGasto?' neg':'')+'">'+main.warnHtml+mainVal+'</span>'+
+    '</div>'+
+    '<div class="pnl-line-sub" data-mv-view="'+tasaId+'" role="button" tabindex="0" title="Ver cómo se calcula">'+
+      '<span>'+esc(dt.label||dt.nombre)+'</span><span>'+tasa.warnHtml+tasa.display+'</span>'+
+    '</div>'+
+  '</div>');
+}
+
+/* Fila de subtotal (Total de ingresos / Total de gastos) — mayor peso
+   visual (font-weight/tamaño vía CSS .pnl-subtotal) y borde superior,
+   para que se lea como cierre de sección. */
+function pnlSubtotalHtml(id, v, isGasto){
+  const d = byId(id);
+  const val = pnlFormatValue(id, v, !!d.esPorcentaje);
+  const display = isGasto ? pnlWrapGasto(v[id], val.display) : val.display;
+  return (
+  '<div class="pnl-subtotal" data-mv-view="'+id+'" role="button" tabindex="0" title="Ver cómo se calcula">'+
+    '<span class="pnl-subtotal-name">'+esc(d.label||d.nombre)+'</span>'+
+    '<span class="pnl-subtotal-value'+(isGasto?' neg':'')+'">'+val.warnHtml+display+'</span>'+
+  '</div>');
+}
+
+function pnlSectionHtml(title, tone, items, subtotalId, v, isGasto){
+  const lines = items.map(it=>pnlLineHtml(it.id, it.tasa, v, isGasto)).join('');
+  return (
+  '<div class="pnl-section pnl-'+tone+'">'+
+    '<div class="pnl-section-head">'+esc(title)+'</div>'+
+    lines+
+    pnlSubtotalHtml(subtotalId, v, isGasto)+
+  '</div>');
+}
+
+/* Las 3 tarjetas de "Resultado final" — mismo patrón que las KPI cards
+   de Inicio/Propuestas (ribbon con ícono + valor grande + etiqueta),
+   sin verde/azul: los 3 combinan solo negro, Red Hero y Benefits Pink. */
+function pnlResultCardHtml(id, v, ribbonBg, iconColor, iconSvg){
+  const d = byId(id);
+  const val = pnlFormatValue(id, v, !!d.esPorcentaje);
+  return (
+  '<div class="kpi-card pnl-result-card" data-mv-view="'+id+'" role="button" tabindex="0" title="Ver cómo se calcula">'+
+    '<div class="kpi-ribbon" style="background:'+ribbonBg+';color:'+iconColor+';">'+iconSvg+'</div>'+
+    '<div class="kpi-body">'+
+      '<p class="kpi-label">'+esc(d.label||d.nombre)+'</p>'+
+      '<p class="kpi-value">'+val.warnHtml+val.display+'</p>'+
+    '</div>'+
+  '</div>');
+}
+
+const PNL_ICON_TREND = '<svg viewBox="0 0 24 24" fill="none"><path d="M3 17l5-5 4 4 8-8M20 8h-4M20 8v4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const PNL_ICON_PERCENT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="2.4"/><circle cx="17" cy="17" r="2.4"/><path d="M19 5 5 19"/></svg>';
+const PNL_ICON_BARS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V11M12 20V4M19 20v-7"/></svg>';
+
+function renderPnlColumn(v){
+  const ingresosHtml = pnlSectionHtml('Ingresos', 'ingresos', PNL_INGRESOS, 'C053', v, false);
+  const gastosHtml = pnlSectionHtml('Gastos', 'gastos', PNL_GASTOS, 'C054', v, true);
+  const resultCards =
+    pnlResultCardHtml('C055', v, 'var(--light-pink)', 'var(--red-hero-dark)', PNL_ICON_TREND) +
+    pnlResultCardHtml('C047', v, 'rgba(0,0,0,.05)', 'var(--black)', PNL_ICON_PERCENT) +
+    pnlResultCardHtml('C056', v, 'rgba(255,89,120,.14)', 'var(--benefits-pink)', PNL_ICON_BARS);
+  return (
+    ingresosHtml + gastosHtml +
+    '<div class="pnl-section pnl-resultado">'+
+      '<div class="pnl-section-head">Resultado final</div>'+
+      '<div class="pnl-result-grid">'+resultCards+'</div>'+
+    '</div>'
+  );
 }
 
 /* Tarea 6 — BV mensual/anual ya no son inputs manuales: se derivan de
@@ -4969,8 +5073,9 @@ function runSimulation(){
 
   /* Columna 2 — conceptos "intermedios": todo lo que no es un resultado
      final (rent==='Resultante'; clase INPUT/OUTPUT no aplica al catálogo
-     nuevo, nunca se pobló — ver Hallazgo 1 de la sesión de migración). */
-  const heroIds = ['C047','C053','C054','C055'];
+     nuevo, nunca se pobló — ver Hallazgo 1 de la sesión de migración).
+     Sin cambios: sigue mostrando los mismos 12 conceptos del P&L que
+     Columna 3, agrupados por categoría contable como siempre. */
   const intermediateRows = DATA.filter(d=>d.rent!=='Resultante');
   const pendingCount = MV_ENGINE==='NEW' ? Object.values(v).filter(x=>x===MV_PENDING).length : 0;
   $('#mv-sim-intermediate').innerHTML =
@@ -4983,32 +5088,8 @@ function runSimulation(){
     '</div>'+
     renderGroupedList(intermediateRows, v, 'intermediate');
 
-  /* Columna 3 — métricas hero + resto de "Resultante" agrupados */
-  const heroHtml = heroIds.map(id=>{
-    const d = byId(id);
-    if(!d) return '';
-    const val = v[id];
-    let formatted, warnHtml = '';
-    if(val===MV_PENDING){
-      formatted = 'Pendiente';
-      warnHtml = '<span class="mv-assumed-warn" data-tooltip="'+esc(mvPendingMessage(id, v))+'">'+ICONS.warning+'</span>';
-    } else if(val===null||val===undefined||Number.isNaN(val)){
-      formatted = 'pendiente';
-    } else if(typeof val==='string'){
-      formatted = esc(val);
-    } else {
-      formatted = d.driver==='%' ? fmtPct(val) : fmtMoney(val,d.moneda);
-    }
-    const tone = heroTone(id, val===MV_PENDING?null:val);
-    return '<div class="mv-hero '+tone+'" data-mv-view="'+id+'" role="button" tabindex="0">'+
-      '<div class="mv-hm-label">'+esc(d.label||d.nombre)+'</div>'+
-      '<div class="mv-hm-value">'+warnHtml+formatted+'</div>'+
-      '<div class="mv-hm-sub">'+esc(d.id)+' · clic para ver la fórmula</div>'+
-    '</div>';
-  }).join('');
-
-  const outputRows = DATA.filter(d=>d.rent==='Resultante' && !heroIds.includes(d.id));
-  $('#mv-sim-output').innerHTML = '<div class="mv-hero-grid">'+heroHtml+'</div>' + renderGroupedList(outputRows, v, 'output');
+  /* Columna 3 — Estado de resultados (P&L), ver renderPnlColumn(). */
+  $('#mv-sim-output').innerHTML = renderPnlColumn(v);
 }
 
 /* -------------------------------------------------------------------------
@@ -5149,7 +5230,7 @@ function wireStatic(){
   root.addEventListener('keydown', (e)=>{
     if(e.key!=='Enter' && e.key!==' ') return;
     if(e.target.closest('[data-mv-tarifa-servicio]')) return; /* navegar el select, no abrir el modal */
-    const row = e.target.closest('.mv-calc-row[data-mv-view], .mv-hero[data-mv-view]');
+    const row = e.target.closest('.mv-calc-row[data-mv-view], .pnl-line[data-mv-view], .pnl-line-sub[data-mv-view], .pnl-subtotal[data-mv-view], .pnl-result-card[data-mv-view]');
     if(row){ e.preventDefault(); openFormulaModal(row.dataset.mvView); }
   });
 

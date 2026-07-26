@@ -2586,24 +2586,54 @@ table.approval-table{width:100%;border-collapse:collapse;}
   border-radius:6px;max-width:230px;background-position:right 7px center;background-size:9px;
 }
 
-/* Métricas hero del resultado final */
-#view-motor-variables .mv-hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
-#view-motor-variables .mv-hero{
-  border-radius:var(--radius-m);padding:14px 15px;cursor:pointer;
-  border:1px solid transparent;
-  transition:transform .15s ease,box-shadow .15s ease;
+/* Columna 3 — Estado de resultados (P&L). Secciones con acento de borde
+   izquierdo (nunca fondo sólido) en colores de marca — sin verde/azul. */
+#view-motor-variables .pnl-section{
+  border-left:3px solid var(--border-soft);
+  padding:2px 0 2px 12px;
+  margin-bottom:18px;
 }
-#view-motor-variables .mv-hero:hover{transform:translateY(-1px);box-shadow:var(--shadow-card);}
-#view-motor-variables .mv-hero .mv-hm-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;opacity:.85;}
-#view-motor-variables .mv-hero .mv-hm-value{font-family:var(--font-title);font-size:21px;font-weight:600;line-height:1.15;letter-spacing:-.01em;}
-#view-motor-variables .mv-hero .mv-hm-sub{font-size:10px;opacity:.8;margin-top:5px;font-weight:500;}
-#view-motor-variables .mv-hero.tone-pos{background:var(--status-aprobada-bg);color:var(--status-aprobada-fg);}
-#view-motor-variables .mv-hero.tone-neg{background:var(--light-pink);color:var(--red-hero-dark);}
-#view-motor-variables .mv-hero.tone-income{background:var(--red-hero);color:var(--white);} /* Brandpad: negro prohibido como fondo; la cinta Red Hero sí está avalada como contenedor de cifras clave */
-#view-motor-variables .mv-hero.tone-expense{background:var(--white);color:var(--black);border-color:var(--light-grey);}
-#view-motor-variables .mv-hero.tone-expense .mv-hm-label,
-#view-motor-variables .mv-hero.tone-expense .mv-hm-sub{color:var(--grey);opacity:1;}
-#view-motor-variables .mv-hero.tone-neutral{background:var(--cold-white);color:var(--black);border-color:var(--border-soft);}
+#view-motor-variables .pnl-ingresos{border-left-color:var(--red-hero);}
+#view-motor-variables .pnl-gastos{border-left-color:var(--benefits-pink);}
+#view-motor-variables .pnl-resultado{border-left-color:var(--light-grey);}
+#view-motor-variables .pnl-section-head{
+  font-size:12.5px;font-weight:700;color:var(--black);
+  text-transform:uppercase;letter-spacing:.04em;
+  margin-bottom:10px;
+}
+#view-motor-variables .pnl-line{
+  padding:8px 6px;border-radius:8px;cursor:pointer;
+  transition:background-color .15s ease;
+}
+#view-motor-variables .pnl-line:hover{background:var(--cold-white);}
+#view-motor-variables .pnl-line-main{display:flex;align-items:baseline;justify-content:space-between;gap:10px;}
+#view-motor-variables .pnl-line-name{font-size:12px;font-weight:600;color:var(--black);}
+#view-motor-variables .pnl-line-value{
+  font-family:var(--mv-font-mono);font-size:12.5px;font-weight:700;color:var(--black);
+  font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+#view-motor-variables .pnl-line-value.neg{color:var(--red-hero-dark);}
+#view-motor-variables .pnl-line-sub{
+  display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  font-size:10.5px;color:var(--grey);margin-top:2px;cursor:pointer;
+}
+#view-motor-variables .pnl-line-sub:hover{color:var(--black);}
+#view-motor-variables .pnl-subtotal{
+  display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  border-top:1px solid var(--border-soft);
+  margin-top:6px;padding:8px 6px 2px;cursor:pointer;
+  border-radius:8px;
+}
+#view-motor-variables .pnl-subtotal:hover{background:var(--cold-white);}
+#view-motor-variables .pnl-subtotal-name{font-size:13px;font-weight:700;color:var(--black);}
+#view-motor-variables .pnl-subtotal-value{
+  font-family:var(--mv-font-mono);font-size:14px;font-weight:700;color:var(--black);
+  font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+#view-motor-variables .pnl-subtotal-value.neg{color:var(--red-hero-dark);}
+#view-motor-variables .pnl-result-grid{display:flex;flex-direction:column;gap:10px;}
+#view-motor-variables .pnl-result-card{cursor:pointer;}
+#view-motor-variables .pnl-result-card .kpi-value{font-size:20px;}
 
 /* ---------- Modales del módulo ----------
    Contenedor propio .mv-modal (ciclo de vida gestionado por el módulo,
@@ -2826,7 +2856,6 @@ table.approval-table{width:100%;border-collapse:collapse;}
 @media (max-width:720px){
   #view-motor-variables .mv-filters-grid{grid-template-columns:1fr;}
   #view-motor-variables .mv-meta-grid{grid-template-columns:1fr;}
-  #view-motor-variables .mv-hero-grid{grid-template-columns:1fr;}
   #view-motor-variables .mv-tabs{width:100%;}
   #view-motor-variables .mv-tab{flex:1;justify-content:center;}
 }
