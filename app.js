@@ -3214,8 +3214,8 @@ const RAW_DATA = [
 {id:'C028',idc:'C028',nombre:'TASA_UNITARIA_PERSONALIZACION_ADHOC',claveOriginal:'TUR_PERSONALIZACION_ADHOC',label:'Tasa unitaria — personalización adhoc',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,esPorcentaje:true,formula:'PERSONALIZACION_ADHOC / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — ingreso',history:[]},
 {id:'C029',idc:'C029',nombre:'DISTRIBUCION_COSTO',claveOriginal:'DISTRIBUCION_COSTO',label:'Distribución (costo)',categoria:'Logística y entrega',nominal:null,esSupuesto:true,formula:'((ENVIO_TARJETAS_LIMA )+ ENVIO_TARJETAS_PROVINCIA)*1.1',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
 {id:'C030',idc:'C030',nombre:'TASA_UNITARIA_DISTRIBUCION',claveOriginal:'TUR_DISTRIBUCION',label:'Tasa unitaria — distribución',categoria:'Logística y entrega',nominal:null,esSupuesto:true,esPorcentaje:true,formula:'DISTRIBUCION / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
-{id:'C031',idc:'C031',nombre:'COSTO_VENTA',claveOriginal:'COSTO_VENTA',label:'Costo de venta',categoria:'Costos y gastos',nominal:null,esSupuesto:true,formula:'INSUMOS_PERSONALIZACION_Y_ENSOBRADO+PROCESAMIENTO+MARCA_CALCULADO+DISTRIBUCION_COSTO',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Costo',history:[]},
-{id:'C032',idc:'C032',nombre:'TASA_UNITARIA_COSTO_VENTA',claveOriginal:'TUR_COSTO_VENTA',label:'Tasa unitaria — costo de venta',categoria:'Costos y gastos',nominal:null,esSupuesto:true,esPorcentaje:true,formula:'COSTO_VENTA / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
+{id:'C031',idc:'C031',nombre:'COSTO_VENTA',claveOriginal:'COSTO_VENTA',label:'Costo de venta',categoria:'Costos y gastos',nominal:null,esSupuesto:true,calculoProvisional:true,formula:'INSUMOS_PERSONALIZACION_Y_ENSOBRADO+PROCESAMIENTO+MARCA_CALCULADO+DISTRIBUCION_COSTO',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Costo',history:[]},
+{id:'C032',idc:'C032',nombre:'TASA_UNITARIA_COSTO_VENTA',claveOriginal:'TUR_COSTO_VENTA',label:'Tasa unitaria — costo de venta',categoria:'Costos y gastos',nominal:null,esSupuesto:true,esPorcentaje:true,calculoProvisional:true,formula:'COSTO_VENTA / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
 {id:'C033',idc:'C033',nombre:'INSUMOS_PERSONALIZACION_Y_ENSOBRADO',claveOriginal:'INSUMOS_PERZ_ENSOBRADO',label:'Insumos, personalización y ensobrado',categoria:'Tarjetas y emisión',nominal:null,esSupuesto:true,formula:'(WELCOME_KIT)+(EMBOZADO)+(COSTO_PLASTICO_DE_TARJETAS) SI PROPUESTA.ADICIONAL_ADHOC =SI o PROPUESTA.ADICIONAL_ADHOC=EXONERADO, ENTONCES: (WELCOME_KIT)+(EMBOZADO)+(COSTO_PLASTICO_DE_TARJETAS)+EMISION_TARJETAS_CON_AFINIDAD+COSTO_PERSONALIZACION_ADHOC',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
 {id:'C034',idc:'C034',nombre:'TASA_UNITARIA_INSUMOS_Y_ENSOBRADO',claveOriginal:'TUR_INSUMOS_PERZ_ENSOBRADO',label:'Tasa unitaria — insumos y ensobrado',categoria:'Tarjetas y emisión',nominal:null,esSupuesto:true,esPorcentaje:true,formula:'INSUMOS_PERSONALIZACION_Y_ENSOBRADO / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
 {id:'C035',idc:'C035',nombre:'PROCESAMIENTO',claveOriginal:'PROCESAMIENTO',label:'Procesamiento',categoria:'Transaccional y procesamiento',nominal:null,esSupuesto:true,formula:'(TRANSACCIONES_APROBADAS)+(CUENTA_ACTIVA)+(PROCESAMIENTO (OTROS COSTOS))',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
@@ -3230,16 +3230,16 @@ const RAW_DATA = [
 {id:'C044',idc:'C044',nombre:'TASA_UNITARIA_CARTA_FIANZA',claveOriginal:'TUR_CARTA_FIANZA',label:'Tasa unitaria — carta fianza',categoria:'Carta fianza y garantías',nominal:null,esSupuesto:true,esPorcentaje:true,formula:'CARTA_FIANZA / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — gasto',history:[]},
 {id:'C045',idc:'C045',nombre:'GASTOS_FINANCIEROS',claveOriginal:'GASTOS_FINANCIEROS',label:'Gastos financieros',categoria:'Costos y gastos',nominal:null,esSupuesto:true,formula:'SI PROPUESTA.MODALIDAD_DE_PAGO =CREDITO ENTONCES: ((1 + 5.2%)^(1/360) − 1) × PROPUESTA.BV_MENSUAL × (PROPUESTA.DIAS_CRÉDITO + 5)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — gasto',history:[]},
 {id:'C046',idc:'C046',nombre:'TASA_UNITARIA_GASTOS_FINANCIEROS',claveOriginal:'TUR_GASTOS_FINANCIEROS',label:'Tasa unitaria — gastos financieros',categoria:'Costos y gastos',nominal:null,esSupuesto:true,esPorcentaje:true,formula:'GASTOS_FINANCIEROS / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — gasto',history:[]},
-{id:'C047',idc:'C047',nombre:'RENTABILIDAD',claveOriginal:'RENTABILIDAD',label:'Rentabilidad',categoria:'Rentabilidad total',nominal:null,esSupuesto:true,esPorcentaje:true,formula:'SI (TOTAL_RESTA_INGRESOS_GASTOS) && TOTAL_INGRESOS > 0, ENTONCES: - TOTAL_RESTA_INGRESOS_GASTOS/ TOTAL_INGRESOS SINO: +TOTAL_RESTA_INGRESOS_GASTOS/ TOTAL_INGRESOS',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Resultante',history:[]},
+{id:'C047',idc:'C047',nombre:'RENTABILIDAD',claveOriginal:'RENTABILIDAD',label:'Rentabilidad',categoria:'Rentabilidad total',nominal:null,esSupuesto:true,esPorcentaje:true,calculoProvisional:true,formula:'SI (TOTAL_RESTA_INGRESOS_GASTOS) && TOTAL_INGRESOS > 0, ENTONCES: - TOTAL_RESTA_INGRESOS_GASTOS/ TOTAL_INGRESOS SINO: +TOTAL_RESTA_INGRESOS_GASTOS/ TOTAL_INGRESOS',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Resultante',history:[]},
 {id:'C048',idc:'C048',nombre:'NUMERO_TRANSACCIONES_PROMEDIO',claveOriginal:'NUMERO_TRANSACCIONES_PROMEDIO',label:'Número de transacciones promedio',categoria:'Transaccional y procesamiento',nominal:null,esSupuesto:true,formula:'REEMBOLSO / TICKET_PROMEDIO',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Computada',history:[]},
 {id:'C049',idc:'C049',nombre:'TICKET_PROMEDIO',claveOriginal:'TICKET_PROMEDIO',label:'Ticket promedio',categoria:'Transaccional y procesamiento',nominal:null,esSupuesto:true,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Computada',history:[]},
 {id:'C050',idc:'C050',nombre:'REEMBOLSO',claveOriginal:'REEMBOLSO',label:'Reembolso',categoria:'Transaccional y procesamiento',nominal:null,esSupuesto:true,formula:'RATIO_DE_CONSUMO_SOBRE_LA_CARGA* PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Computada',history:[]},
 {id:'C051',idc:'C051',nombre:'MONTO_CARTA_FIANZA',claveOriginal:'MONTO_CARTA_FIANZA',label:'Monto de carta fianza',categoria:'Carta fianza y garantías',nominal:null,esSupuesto:true,formula:'SI PROPUESTA.CARTA_FIANZA =SI 10%*PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — gasto',history:[]},
 {id:'C052',idc:'C052',nombre:'COSTO_MARCA_CALCULADO',claveOriginal:'MARCA_CALCULADO',label:'Costo de marca (calculado)',categoria:'Transaccional y procesamiento',nominal:null,esSupuesto:true,formula:'-(PROCESAMIENTO_TX_MARCA)*REEMBOLSO',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
 {id:'C053',idc:'C053',nombre:'TOTAL_INGRESOS',claveOriginal:'TOTAL_INGRESOS',label:'Total de ingresos',categoria:'Rentabilidad total',nominal:null,esSupuesto:true,formula:'COMISION_CLIENTE + COMISION_MERCHANT + OTROS_INGRESOS(CALCULADO)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Resultante',history:[]},
-{id:'C054',idc:'C054',nombre:'TOTAL_GASTOS',claveOriginal:'TOTAL_GASTOS',label:'Total de gastos',categoria:'Rentabilidad total',nominal:null,esSupuesto:true,formula:'COSTO_VENTA + OTROS_GASTOS',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Resultante',history:[]},
-{id:'C055',idc:'C055',nombre:'INGRESOS_MENOS_GASTOS',claveOriginal:'TOTAL_RESTA_INGRESOS_GASTOS',label:'Ingresos menos gastos',categoria:'Rentabilidad total',nominal:null,esSupuesto:true,formula:'TOTAL_INGRESOS - TOTAL_GASTOS',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Resultante',history:[]},
-{id:'C056',idc:'C056',nombre:'TASA_UNITARIA_MARGEN',claveOriginal:'TUR_TOTAL_RESTA_INGRESOS_GASTOS',label:'Tasa unitaria — margen',categoria:'Rentabilidad total',nominal:null,esSupuesto:true,esPorcentaje:true,formula:'TOTAL_RESTA_INGRESOS_GASTOS / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Resultante',history:[]},
+{id:'C054',idc:'C054',nombre:'TOTAL_GASTOS',claveOriginal:'TOTAL_GASTOS',label:'Total de gastos',categoria:'Rentabilidad total',nominal:null,esSupuesto:true,calculoProvisional:true,formula:'COSTO_VENTA + OTROS_GASTOS',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Resultante',history:[]},
+{id:'C055',idc:'C055',nombre:'INGRESOS_MENOS_GASTOS',claveOriginal:'TOTAL_RESTA_INGRESOS_GASTOS',label:'Ingresos menos gastos',categoria:'Rentabilidad total',nominal:null,esSupuesto:true,calculoProvisional:true,formula:'TOTAL_INGRESOS - TOTAL_GASTOS',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Resultante',history:[]},
+{id:'C056',idc:'C056',nombre:'TASA_UNITARIA_MARGEN',claveOriginal:'TUR_TOTAL_RESTA_INGRESOS_GASTOS',label:'Tasa unitaria — margen',categoria:'Rentabilidad total',nominal:null,esSupuesto:true,esPorcentaje:true,calculoProvisional:true,formula:'TOTAL_RESTA_INGRESOS_GASTOS / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Resultante',history:[]},
 {id:'C057',idc:'C057',nombre:'COSTO_PERSONALIZACION_ADHOC',claveOriginal:'COSTO_PERSONALIZACION_ADHOC',label:'Costo de personalización adhoc',categoria:'Tarjetas y emisión',nominal:null,esSupuesto:true,formula:'SI PROPUESTA.COSTO_PERSONALIZACION_ADHOC=SI ENTONCES: (VALOR NOMINAL)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
 {id:'C058',idc:'C058',nombre:'PESO_MENSUAL_SUMATORIA',claveOriginal:'PESO%_MES_SUMATORIA',label:'Peso % mensual (sumatoria)',categoria:'Parámetros de tiempo',nominal:3.87,esSupuesto:false,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Computada',history:[]},
 {id:'C059',idc:'C059',nombre:'EMISION_TARJETAS',claveOriginal:'EMISION_TARJETAS',label:'Emisión de tarjetas',categoria:'Tarjetas y emisión',nominal:null,esSupuesto:true,tarifaProvisional:true,formula:'(VALOR NOMINAL* PROPUESTA.QTARJETAS)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Ingreso',history:[]},
@@ -3490,9 +3490,10 @@ function renderConceptosTable(){
 
     const dataRows = groupRows.map(d=>{
       let nominalCell;
-      if(d.tarifaProvisional){
+      if(d.tarifaProvisional || d.calculoProvisional){
         const provVal = d.nominal!==null ? '<span>'+fmtNum(d.nominal, Number.isInteger(d.nominal)?0:2)+'</span>' : '<span>—</span>';
-        nominalCell = provVal+'<span class="mv-assumed"><span class="mv-assumed-warn" data-tooltip="Tarifa provisional — pendiente de confirmación del equipo de negocio">'+ICONS.warning+'</span>Tarifa provisional</span>';
+        const provLabel = d.tarifaProvisional ? 'Tarifa provisional' : 'Cálculo provisional';
+        nominalCell = provVal+'<span class="mv-assumed">'+mvProvisionalWarnHtml(d)+provLabel+'</span>';
       } else if(d.nominal!==null){
         nominalCell = '<span>'+fmtNum(d.nominal, Number.isInteger(d.nominal)?0:2)+'</span>';
       } else if(d.esSupuesto){
@@ -3646,6 +3647,8 @@ function openFormulaModal(id){
   const usedBy = findDependents(d);
   const nominalLine = d.tarifaProvisional
     ? (d.nominal!==null ? fmtNum(d.nominal,2)+' · Tarifa provisional (pendiente de confirmación del equipo de negocio)' : 'Tarifa provisional (pendiente de confirmación del equipo de negocio)')
+    : d.calculoProvisional
+    ? (d.nominal!==null ? fmtNum(d.nominal,2)+' · Cálculo provisional ('+MV_CALCULO_PROVISIONAL_MSG+')' : 'Cálculo provisional ('+MV_CALCULO_PROVISIONAL_MSG+')')
     : (d.nominal!==null ? fmtNum(d.nominal,2) : (d.esSupuesto ? 'Valor supuesto (sin confirmar)' : 'Sin definir'));
   const depChips = (list)=>list.map(depId=>{
     const dd = byId(depId);
@@ -4873,6 +4876,20 @@ function handleSimToggleClick(e){
   runSimulation();
 }
 
+/* Texto único para los conceptos marcados calculoProvisional:true — cadena
+   afectada por el defecto de unidades detectado en C052 (Costo de marca),
+   pendiente de confirmación de negocio. Ver diagnóstico de la sesión. */
+const MV_CALCULO_PROVISIONAL_MSG = 'Depende de C052 (Costo de marca), en revisión — la fórmula actual puede no reflejar el costo real.';
+
+/* Ícono ámbar + tooltip compartido entre Columna 2 (calcRowHtml) y
+   Columna 3 (pnlFormatValue) — una sola fuente de verdad para las 2
+   variantes de "cálculo no confiable todavía" que usa el catálogo. */
+function mvProvisionalWarnHtml(d){
+  if(d.tarifaProvisional) return '<span class="mv-assumed-warn" data-tooltip="Tarifa provisional — pendiente de confirmación del equipo de negocio">'+ICONS.warning+'</span>';
+  if(d.calculoProvisional) return '<span class="mv-assumed-warn" data-tooltip="'+esc(MV_CALCULO_PROVISIONAL_MSG)+'">'+ICONS.warning+'</span>';
+  return '';
+}
+
 /* ---------- Columnas 2 y 3: listas agrupadas ---------- */
 function calcRowHtml(d, value, pendingMsg){
   const isPct = !!d.esPorcentaje;
@@ -4887,12 +4904,10 @@ function calcRowHtml(d, value, pendingMsg){
     const formatted = isPct ? fmtPct(value) : fmtMoney(value,d.moneda);
     display = '<span class="mv-cr-value '+(value<0?'neg':'')+'">'+formatted+'</span>';
   }
-  /* Tarea 5: marcado visual de tarifa provisional — mismo tratamiento que
-     "Valor supuesto" (ícono ámbar + tooltip), texto distinto. Se omite si
-     ya se muestra el ícono de Pendiente, para no duplicar advertencias. */
-  const provWarn = (d.tarifaProvisional && value!==MV_PENDING)
-    ? '<span class="mv-assumed-warn" data-tooltip="Tarifa provisional — pendiente de confirmación del equipo de negocio">'+ICONS.warning+'</span>'
-    : '';
+  /* Tarea 5 / diagnóstico C052: mismo tratamiento visual que "Valor
+     supuesto" (ícono ámbar + tooltip), texto distinto según el motivo.
+     Se omite si ya se muestra el ícono de Pendiente, para no duplicar. */
+  const provWarn = value!==MV_PENDING ? mvProvisionalWarnHtml(d) : '';
   /* Tarea 3: selector de Servicio para los 9 conceptos con tarifa por
      servicio — determina qué fila de TARIFARIO_DATA resuelve el nominal. */
   const tarifaSelect = TARIFA_CONCEPTOS.includes(d.id)
@@ -4955,9 +4970,10 @@ function pnlFormatValue(id, v, asPct){
   if(val===MV_PENDING){
     return { display:'Pendiente', warnHtml:'<span class="mv-assumed-warn" data-tooltip="'+esc(mvPendingMessage(id, v))+'">'+ICONS.warning+'</span>' };
   }
-  if(val===null||val===undefined||Number.isNaN(val)) return { display:'—', warnHtml:'' };
-  if(typeof val==='string') return { display:esc(val), warnHtml:'' };
-  return { display: asPct ? fmtPct(val) : fmtMoney(val,d.moneda), warnHtml:'' };
+  const warnHtml = mvProvisionalWarnHtml(d);
+  if(val===null||val===undefined||Number.isNaN(val)) return { display:'—', warnHtml };
+  if(typeof val==='string') return { display:esc(val), warnHtml };
+  return { display: asPct ? fmtPct(val) : fmtMoney(val,d.moneda), warnHtml };
 }
 
 /* Envuelve en paréntesis (convención de "esto resta") solo si el número

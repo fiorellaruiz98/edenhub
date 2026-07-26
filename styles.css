@@ -2631,9 +2631,18 @@ table.approval-table{width:100%;border-collapse:collapse;}
   font-variant-numeric:tabular-nums;white-space:nowrap;
 }
 #view-motor-variables .pnl-subtotal-value.neg{color:var(--red-hero-dark);}
-#view-motor-variables .pnl-result-grid{display:flex;flex-direction:column;gap:10px;}
-#view-motor-variables .pnl-result-card{cursor:pointer;}
-#view-motor-variables .pnl-result-card .kpi-value{font-size:20px;}
+#view-motor-variables .pnl-result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+#view-motor-variables .pnl-result-card{
+  cursor:pointer;flex-direction:column;align-items:flex-start;text-align:left;
+  padding:14px 12px;gap:8px;
+}
+#view-motor-variables .pnl-result-card .kpi-ribbon{width:36px;height:36px;}
+#view-motor-variables .pnl-result-card .kpi-ribbon svg{width:17px;height:17px;}
+#view-motor-variables .pnl-result-card .kpi-label{font-size:9.5px;white-space:normal;}
+#view-motor-variables .pnl-result-card .kpi-value{font-size:15.5px;white-space:normal;}
+@media (max-width:520px){
+  #view-motor-variables .pnl-result-grid{grid-template-columns:1fr;}
+}
 
 /* ---------- Modales del módulo ----------
    Contenedor propio .mv-modal (ciclo de vida gestionado por el módulo,
