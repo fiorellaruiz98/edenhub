@@ -847,6 +847,11 @@ function fillForm(p){
    y Cantidad de cargas total — nunca se guardan como un número aparte. */
 function calcBvCarga(valorFacial, cantTarjetas){ return (+valorFacial||0) * (+cantTarjetas||0); }
 function calcBvTotal(valorFacial, cantTarjetas, cargas){ return calcBvCarga(valorFacial, cantTarjetas) * (+cargas||0); }
+/* Expuestas en window: este IIFE (Propuestas) es el único dueño del
+   cálculo de BV, pero Motor de Variables (otro módulo, fuera de este
+   IIFE) también lo necesita para su Simulador — ver Tarea 6. */
+window.calcBvCarga = calcBvCarga;
+window.calcBvTotal = calcBvTotal;
 /* "Business Volume" mostrado en listado/dashboards: bookings — el BV
    total de la propuesta se atribuye al periodo en que se aprobó, no un
    ritmo mensual. Siempre BV total, nunca bvMes (que hoy equivale a BV
@@ -4306,6 +4311,12 @@ const SIM_DEFAULTS = {
   servicioLogoEmpresa:'SI', personalizacionFlyer:'NO',
   adicionalAdhoc:'NO', costoPersonalizacionAdhoc:'NO',
   destinoEntrega:'LIMA', destinoReposicion:'LIMA', reposicion:'AFECTO', renovacion:'EXONERADO', distribucion:'AFECTO',
+  /* BV mensual/anual ya no son inputs manuales (Tarea 6) — se derivan de
+     estos 3 (mismos insumos y mismas calcBvCarga/calcBvTotal que
+     Propuestas) dentro de runSimulation(). Los valores por defecto
+     reproducen exactamente los defaults anteriores: 100×500=50000 mensual,
+     50000×12=600000 anual. */
+  valorFacial:100, cargasAnio:12,
   bvAnual:600000, bvMensual:50000, cantidadTarjetas:500, qTarjetasNuevas:120,
   numeroPedidosAlAnio:4, puntosLima:3, puntosProvincia:2, cantidadDeRepartos:12,
   sector:'PRIVADO', cartaFianza:'NO', emitioCartaFianza:'NO',
@@ -4798,9 +4809,11 @@ function simFormTemplate(){
   '</fieldset>'+
   '<fieldset>'+
     '<legend>Volumen comercial (BV)</legend>'+
-    '<div class="mv-sim-field"><label>BV anual (S/)</label><input type="number" min="0" step="1000" data-field="bvAnual" value="'+P.bvAnual+'"></div>'+
-    '<div class="mv-sim-field"><label>BV mensual (S/)</label><input type="number" min="0" step="500" data-field="bvMensual" value="'+P.bvMensual+'"></div>'+
+    '<div class="mv-sim-field"><label>Valor facial (S/)</label><input type="number" min="0" step="0.01" data-field="valorFacial" value="'+P.valorFacial+'"></div>'+
     '<div class="mv-sim-field"><label>Cantidad de tarjetas activas</label><input type="number" min="0" data-field="cantidadTarjetas" value="'+P.cantidadTarjetas+'"></div>'+
+    '<div class="mv-sim-field"><label>Cantidad de cargas / año</label><input type="number" min="0" step="1" data-field="cargasAnio" value="'+P.cargasAnio+'"></div>'+
+    '<div class="mv-sim-field"><label>BV mensual (derivado)</label><input type="number" id="mv-sim-bvMensual" value="'+fmtNum(calcBvCarga(P.valorFacial,P.cantidadTarjetas),2)+'" disabled></div>'+
+    '<div class="mv-sim-field"><label>BV anual (derivado)</label><input type="number" id="mv-sim-bvAnual" value="'+fmtNum(calcBvTotal(P.valorFacial,P.cantidadTarjetas,P.cargasAnio),2)+'" disabled></div>'+
     '<div class="mv-sim-field"><label>Tarjetas nuevas (Q)</label><input type="number" min="0" data-field="qTarjetasNuevas" value="'+P.qTarjetasNuevas+'"></div>'+
     '<div class="mv-sim-field"><label>N.º pedidos al año</label><input type="number" min="0" data-field="numeroPedidosAlAnio" value="'+P.numeroPedidosAlAnio+'"></div>'+
     '<div class="mv-sim-field"><label>Comisión cliente ejecutivo (%)</label><input type="number" min="0" step="0.1" data-field="comisionClienteEjecutivo" value="'+P.comisionClienteEjecutivo+'"></div>'+
@@ -4934,9 +4947,24 @@ function heroTone(id, value){
   return 'tone-neutral';
 }
 
+/* Tarea 6 — BV mensual/anual ya no son inputs manuales: se derivan de
+   Valor facial + Cantidad de tarjetas + Cantidad de cargas, reutilizando
+   calcBvCarga/calcBvTotal (las mismas funciones de Propuestas). Se llama
+   en cada corrida — más liviano que un wireSimForm() completo, y necesario
+   porque runSimulation() nunca re-renderiza la columna 1 del formulario. */
+function recalcSimBv(){
+  SIM.bvMensual = calcBvCarga(SIM.valorFacial, SIM.cantidadTarjetas);
+  SIM.bvAnual = calcBvTotal(SIM.valorFacial, SIM.cantidadTarjetas, SIM.cargasAnio);
+  const bvMEl = document.getElementById('mv-sim-bvMensual');
+  const bvAEl = document.getElementById('mv-sim-bvAnual');
+  if(bvMEl) bvMEl.value = fmtNum(SIM.bvMensual, 2);
+  if(bvAEl) bvAEl.value = fmtNum(SIM.bvAnual, 2);
+}
+
 function runSimulation(){
   if(!rendered) return;
   if(!$('#mv-sim-form')) return;
+  recalcSimBv();
   const v = MV_ENGINE==='NEW' ? computeAllNew() : computeAll();
 
   /* Columna 2 — conceptos "intermedios": todo lo que no es un resultado
