@@ -1951,6 +1951,242 @@ function initSidebarNav(){
     'uid-prod-04': 'Navidad', 'uid-prod-05': 'Movilidad', 'uid-prod-06': 'Comedor'
   };
 
+  /* ============================================================
+     CATÁLOGO REAL DE SERVICIOS — fuente: assets/matriz- vf3_1.xlsx,
+     hoja "Servicio (2)" (272 filas; estas 220 son las que efectivamente
+     usa Servicio_Concepto). Autoritativo: reemplaza/amplía los 10
+     servicios sembrados a mano más abajo. "producto" es el código real
+     de producto (ej. "TCA", "RAM0001") — no coincide con el esquema
+     interno productoId/PRODUCTO_LABELS (uid-prod-01..06), así que se
+     guarda aparte en vez de forzar un mapeo sin evidencia. */
+  const SERVICIOS_REALES = {
+    "S001": {nombre:"Costo del plástico",desc:"Costo del plástico de tarjetas a emitir",producto:"TCA",solucion:"FOOD",condCom:false,estado:true},
+    "S002": {nombre:"Costo del plástico",desc:"Costo del plástico de tarjetas a emitir",producto:"TAM",solucion:"FOOD",condCom:false,estado:true},
+    "S003": {nombre:"Costo del plástico",desc:"Costo del plástico de tarjetas a emitir",producto:"TAV",solucion:"FOOD",condCom:false,estado:true},
+    "S004": {nombre:"Costo del plástico",desc:"Costo del plástico de tarjetas a emitir",producto:"RAM0001",solucion:"FOOD",condCom:false,estado:true},
+    "S005": {nombre:"Costo del plástico",desc:"Costo del plástico de tarjetas a emitir",producto:"RAM0002",solucion:"FOOD",condCom:false,estado:true},
+    "S006": {nombre:"Costo del plástico",desc:"Costo del plástico de tarjetas a emitir",producto:"RAM0003",solucion:"FOOD",condCom:false,estado:true},
+    "S007": {nombre:"Costo del plástico",desc:"Costo del plástico de tarjetas a emitir",producto:"RAM0004",solucion:"FOOD",condCom:false,estado:true},
+    "S008": {nombre:"Costo del plástico",desc:"Costo del plástico de tarjetas a emitir",producto:"RAM0005",solucion:"FOOD",condCom:false,estado:true},
+    "S009": {nombre:"Costo del plástico",desc:"Costo del plástico de tarjetas a emitir",producto:"RAM0006",solucion:"FOOD",condCom:false,estado:true},
+    "S010": {nombre:"Costo del plástico",desc:"Costo del plástico de tarjetas a emitir",producto:"RAM0007",solucion:"FOOD",condCom:false,estado:true},
+    "S011": {nombre:"Costo del plástico",desc:"Costo del plástico de tarjetas a emitir",producto:"RAM0008",solucion:"FOOD",condCom:false,estado:true},
+    "S012": {nombre:"Costo del plástico",desc:"Costo del plástico de tarjetas a emitir",producto:"TRV",solucion:"GIFT",condCom:false,estado:true},
+    "S013": {nombre:"Costo del plástico",desc:"Costo del plástico de tarjetas a emitir",producto:"TRM",solucion:"GIFT",condCom:false,estado:true},
+    "S014": {nombre:"Costo del plástico",desc:"Costo del plástico de tarjetas a emitir",producto:"TCR",solucion:"GIFT",condCom:false,estado:true},
+    "S015": {nombre:"Costo del plástico",desc:"Costo del plástico de tarjetas a emitir",producto:"TRR",solucion:"GIFT",condCom:false,estado:true},
+    "S016": {nombre:"Costo del plástico",desc:"Costo del plástico de tarjetas a emitir",producto:"RRV0001",solucion:"GIFT",condCom:false,estado:true},
+    "S017": {nombre:"Costo del plástico",desc:"Costo del plástico de tarjetas a emitir",producto:"RIM0001",solucion:"GIFT",condCom:false,estado:true},
+    "S018": {nombre:"Costo del plástico",desc:"Costo del plástico de tarjetas a emitir",producto:"RRM0001",solucion:"GIFT",condCom:false,estado:true},
+    "S019": {nombre:"Costo del plástico",desc:"Costo del plástico de tarjetas a emitir",producto:"RIM0002",solucion:"GIFT",condCom:false,estado:true},
+    "S020": {nombre:"Costo del plástico",desc:"Costo del plástico de tarjetas a emitir",producto:"RRM0002",solucion:"GIFT",condCom:false,estado:true},
+    "S021": {nombre:"Costo del plástico",desc:"Costo del plástico de tarjetas a emitir",producto:"TRN",solucion:"GIFT",condCom:false,estado:true},
+    "S022": {nombre:"Costo del plástico",desc:"Costo del plástico de tarjetas a emitir",producto:"RNM0001",solucion:"GIFT",condCom:false,estado:true},
+    "S023": {nombre:"Costo del plástico",desc:"Costo del plástico de tarjetas a emitir",producto:"RNM0002",solucion:"GIFT",condCom:false,estado:true},
+    "S024": {nombre:"Costo del plástico",desc:"Costo del plástico de tarjetas a emitir",producto:"RNM0003",solucion:"GIFT",condCom:false,estado:true},
+    "S025": {nombre:"Costo del plástico",desc:"Costo del plástico de tarjetas a emitir",producto:"RNM0004",solucion:"GIFT",condCom:false,estado:true},
+    "S026": {nombre:"Costo del plástico",desc:"Costo del plástico de tarjetas a emitir",producto:"RNM0005",solucion:"GIFT",condCom:false,estado:true},
+    "S027": {nombre:"Costo del plástico",desc:"Costo del plástico de tarjetas a emitir",producto:"TCM",solucion:"MOBILITY",condCom:false,estado:true},
+    "S028": {nombre:"Entrega de tarjetas",desc:"Distribución y despacho de tarjetas físicas al domicilio o centro de trabajo del titular.",producto:"TCA",solucion:"FOOD",condCom:true,estado:true},
+    "S029": {nombre:"Entrega de tarjetas",desc:"Distribución y despacho de tarjetas físicas al domicilio o centro de trabajo del titular.",producto:"TAM",solucion:"FOOD",condCom:true,estado:true},
+    "S030": {nombre:"Entrega de tarjetas",desc:"Distribución y despacho de tarjetas físicas al domicilio o centro de trabajo del titular.",producto:"TAV",solucion:"FOOD",condCom:true,estado:true},
+    "S031": {nombre:"Entrega de tarjetas",desc:"Distribución y despacho de tarjetas físicas al domicilio o centro de trabajo del titular.",producto:"RAM0001",solucion:"FOOD",condCom:true,estado:true},
+    "S032": {nombre:"Entrega de tarjetas",desc:"Distribución y despacho de tarjetas físicas al domicilio o centro de trabajo del titular.",producto:"RAM0002",solucion:"FOOD",condCom:true,estado:true},
+    "S033": {nombre:"Entrega de tarjetas",desc:"Distribución y despacho de tarjetas físicas al domicilio o centro de trabajo del titular.",producto:"RAM0003",solucion:"FOOD",condCom:true,estado:true},
+    "S034": {nombre:"Entrega de tarjetas",desc:"Distribución y despacho de tarjetas físicas al domicilio o centro de trabajo del titular.",producto:"RAM0004",solucion:"FOOD",condCom:true,estado:true},
+    "S035": {nombre:"Entrega de tarjetas",desc:"Distribución y despacho de tarjetas físicas al domicilio o centro de trabajo del titular.",producto:"RAM0005",solucion:"FOOD",condCom:true,estado:true},
+    "S036": {nombre:"Entrega de tarjetas",desc:"Distribución y despacho de tarjetas físicas al domicilio o centro de trabajo del titular.",producto:"RAM0006",solucion:"FOOD",condCom:true,estado:true},
+    "S037": {nombre:"Entrega de tarjetas",desc:"Distribución y despacho de tarjetas físicas al domicilio o centro de trabajo del titular.",producto:"RAM0007",solucion:"FOOD",condCom:true,estado:true},
+    "S038": {nombre:"Entrega de tarjetas",desc:"Distribución y despacho de tarjetas físicas al domicilio o centro de trabajo del titular.",producto:"RAM0008",solucion:"FOOD",condCom:true,estado:true},
+    "S039": {nombre:"Entrega de tarjetas",desc:"Distribución y despacho de tarjetas físicas al domicilio o centro de trabajo del titular.",producto:"TRV",solucion:"GIFT",condCom:true,estado:true},
+    "S040": {nombre:"Entrega de tarjetas",desc:"Distribución y despacho de tarjetas físicas al domicilio o centro de trabajo del titular.",producto:"TRM",solucion:"GIFT",condCom:true,estado:true},
+    "S041": {nombre:"Entrega de tarjetas",desc:"Distribución y despacho de tarjetas físicas al domicilio o centro de trabajo del titular.",producto:"TCR",solucion:"GIFT",condCom:true,estado:true},
+    "S042": {nombre:"Entrega de tarjetas",desc:"Distribución y despacho de tarjetas físicas al domicilio o centro de trabajo del titular.",producto:"TRR",solucion:"GIFT",condCom:true,estado:true},
+    "S043": {nombre:"Entrega de tarjetas",desc:"Distribución y despacho de tarjetas físicas al domicilio o centro de trabajo del titular.",producto:"RRV0001",solucion:"GIFT",condCom:true,estado:true},
+    "S044": {nombre:"Entrega de tarjetas",desc:"Distribución y despacho de tarjetas físicas al domicilio o centro de trabajo del titular.",producto:"RIM0001",solucion:"GIFT",condCom:true,estado:true},
+    "S045": {nombre:"Entrega de tarjetas",desc:"Distribución y despacho de tarjetas físicas al domicilio o centro de trabajo del titular.",producto:"RRM0001",solucion:"GIFT",condCom:true,estado:true},
+    "S046": {nombre:"Entrega de tarjetas",desc:"Distribución y despacho de tarjetas físicas al domicilio o centro de trabajo del titular.",producto:"RRM0002",solucion:"GIFT",condCom:true,estado:true},
+    "S047": {nombre:"Entrega de tarjetas",desc:"Distribución y despacho de tarjetas físicas al domicilio o centro de trabajo del titular.",producto:"TRN",solucion:"GIFT",condCom:true,estado:true},
+    "S048": {nombre:"Entrega de tarjetas",desc:"Distribución y despacho de tarjetas físicas al domicilio o centro de trabajo del titular.",producto:"RNM0001",solucion:"GIFT",condCom:true,estado:true},
+    "S049": {nombre:"Entrega de tarjetas",desc:"Distribución y despacho de tarjetas físicas al domicilio o centro de trabajo del titular.",producto:"RNM0002",solucion:"GIFT",condCom:true,estado:true},
+    "S050": {nombre:"Entrega de tarjetas",desc:"Distribución y despacho de tarjetas físicas al domicilio o centro de trabajo del titular.",producto:"RNM0003",solucion:"GIFT",condCom:true,estado:true},
+    "S051": {nombre:"Entrega de tarjetas",desc:"Distribución y despacho de tarjetas físicas al domicilio o centro de trabajo del titular.",producto:"RNM0004",solucion:"GIFT",condCom:true,estado:true},
+    "S052": {nombre:"Entrega de tarjetas",desc:"Distribución y despacho de tarjetas físicas al domicilio o centro de trabajo del titular.",producto:"RNM0005",solucion:"GIFT",condCom:true,estado:true},
+    "S053": {nombre:"Entrega de tarjetas",desc:"Distribución y despacho de tarjetas físicas al domicilio o centro de trabajo del titular.",producto:"TCM",solucion:"MOBILITY",condCom:true,estado:true},
+    "S054": {nombre:"Entrega de tarjetas",desc:"Distribución y despacho de tarjetas físicas al domicilio o centro de trabajo del titular.",producto:"RRM0002",solucion:"GIFT",condCom:true,estado:true},
+    "S055": {nombre:"Reposición de tarjetas",desc:"Emisión de tarjeta de reemplazo ante robo, pérdida o deterioro.",producto:"TCA",solucion:"FOOD",condCom:true,estado:true},
+    "S056": {nombre:"Reposición de tarjetas",desc:"Emisión de tarjeta de reemplazo ante robo, pérdida o deterioro.",producto:"TAM",solucion:"FOOD",condCom:true,estado:true},
+    "S057": {nombre:"Reposición de tarjetas",desc:"Emisión de tarjeta de reemplazo ante robo, pérdida o deterioro.",producto:"TAV",solucion:"FOOD",condCom:true,estado:true},
+    "S058": {nombre:"Reposición de tarjetas",desc:"Emisión de tarjeta de reemplazo ante robo, pérdida o deterioro.",producto:"RAM0001",solucion:"FOOD",condCom:true,estado:true},
+    "S059": {nombre:"Reposición de tarjetas",desc:"Emisión de tarjeta de reemplazo ante robo, pérdida o deterioro.",producto:"RAM0002",solucion:"FOOD",condCom:true,estado:true},
+    "S060": {nombre:"Reposición de tarjetas",desc:"Emisión de tarjeta de reemplazo ante robo, pérdida o deterioro.",producto:"RAM0003",solucion:"FOOD",condCom:true,estado:true},
+    "S061": {nombre:"Reposición de tarjetas",desc:"Emisión de tarjeta de reemplazo ante robo, pérdida o deterioro.",producto:"RAM0004",solucion:"FOOD",condCom:true,estado:true},
+    "S062": {nombre:"Reposición de tarjetas",desc:"Emisión de tarjeta de reemplazo ante robo, pérdida o deterioro.",producto:"RAM0005",solucion:"FOOD",condCom:true,estado:true},
+    "S063": {nombre:"Reposición de tarjetas",desc:"Emisión de tarjeta de reemplazo ante robo, pérdida o deterioro.",producto:"RAM0006",solucion:"FOOD",condCom:true,estado:true},
+    "S064": {nombre:"Reposición de tarjetas",desc:"Emisión de tarjeta de reemplazo ante robo, pérdida o deterioro.",producto:"RAM0007",solucion:"FOOD",condCom:true,estado:true},
+    "S065": {nombre:"Reposición de tarjetas",desc:"Emisión de tarjeta de reemplazo ante robo, pérdida o deterioro.",producto:"RAM0008",solucion:"FOOD",condCom:true,estado:true},
+    "S066": {nombre:"Reposición de tarjetas",desc:"Emisión de tarjeta de reemplazo ante robo, pérdida o deterioro.",producto:"TRV",solucion:"GIFT",condCom:true,estado:true},
+    "S067": {nombre:"Reposición de tarjetas",desc:"Emisión de tarjeta de reemplazo ante robo, pérdida o deterioro.",producto:"TRM",solucion:"GIFT",condCom:true,estado:true},
+    "S068": {nombre:"Reposición de tarjetas",desc:"Emisión de tarjeta de reemplazo ante robo, pérdida o deterioro.",producto:"TCR",solucion:"GIFT",condCom:true,estado:true},
+    "S069": {nombre:"Reposición de tarjetas",desc:"Emisión de tarjeta de reemplazo ante robo, pérdida o deterioro.",producto:"TRR",solucion:"GIFT",condCom:true,estado:true},
+    "S070": {nombre:"Reposición de tarjetas",desc:"Emisión de tarjeta de reemplazo ante robo, pérdida o deterioro.",producto:"RRV0001",solucion:"GIFT",condCom:true,estado:true},
+    "S071": {nombre:"Reposición de tarjetas",desc:"Emisión de tarjeta de reemplazo ante robo, pérdida o deterioro.",producto:"RIM0001",solucion:"GIFT",condCom:true,estado:true},
+    "S072": {nombre:"Reposición de tarjetas",desc:"Emisión de tarjeta de reemplazo ante robo, pérdida o deterioro.",producto:"RRM0001",solucion:"GIFT",condCom:true,estado:true},
+    "S073": {nombre:"Reposición de tarjetas",desc:"Emisión de tarjeta de reemplazo ante robo, pérdida o deterioro.",producto:"RIM0002",solucion:"GIFT",condCom:true,estado:true},
+    "S074": {nombre:"Reposición de tarjetas",desc:"Emisión de tarjeta de reemplazo ante robo, pérdida o deterioro.",producto:"RRM0002",solucion:"GIFT",condCom:true,estado:true},
+    "S075": {nombre:"Reposición de tarjetas",desc:"Emisión de tarjeta de reemplazo ante robo, pérdida o deterioro.",producto:"TRN",solucion:"GIFT",condCom:true,estado:true},
+    "S076": {nombre:"Reposición de tarjetas",desc:"Emisión de tarjeta de reemplazo ante robo, pérdida o deterioro.",producto:"RNM0001",solucion:"GIFT",condCom:true,estado:true},
+    "S077": {nombre:"Reposición de tarjetas",desc:"Emisión de tarjeta de reemplazo ante robo, pérdida o deterioro.",producto:"RNM0002",solucion:"GIFT",condCom:true,estado:true},
+    "S078": {nombre:"Reposición de tarjetas",desc:"Emisión de tarjeta de reemplazo ante robo, pérdida o deterioro.",producto:"RNM0003",solucion:"GIFT",condCom:true,estado:true},
+    "S079": {nombre:"Reposición de tarjetas",desc:"Emisión de tarjeta de reemplazo ante robo, pérdida o deterioro.",producto:"RNM0004",solucion:"GIFT",condCom:true,estado:true},
+    "S080": {nombre:"Reposición de tarjetas",desc:"Emisión de tarjeta de reemplazo ante robo, pérdida o deterioro.",producto:"RNM0005",solucion:"GIFT",condCom:true,estado:true},
+    "S081": {nombre:"Reposición de tarjetas",desc:"Emisión de tarjeta de reemplazo ante robo, pérdida o deterioro.",producto:"TCM",solucion:"MOBILITY",condCom:true,estado:true},
+    "S082": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"TCA",solucion:"FOOD",condCom:true,estado:true},
+    "S083": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"TAM",solucion:"FOOD",condCom:true,estado:true},
+    "S084": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"TAV",solucion:"FOOD",condCom:true,estado:true},
+    "S085": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"TICKET ALIMENTACION",solucion:"FOOD",condCom:true,estado:true},
+    "S086": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"TZA",solucion:"FOOD",condCom:true,estado:true},
+    "S087": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"RAM0001",solucion:"FOOD",condCom:true,estado:true},
+    "S088": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"RAM0002",solucion:"FOOD",condCom:true,estado:true},
+    "S089": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"RAM0003",solucion:"FOOD",condCom:true,estado:true},
+    "S090": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"RAM0004",solucion:"FOOD",condCom:true,estado:true},
+    "S091": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"RAM0005",solucion:"FOOD",condCom:true,estado:true},
+    "S092": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"RAM0006",solucion:"FOOD",condCom:true,estado:true},
+    "S093": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"RAM0007",solucion:"FOOD",condCom:true,estado:true},
+    "S094": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"RAM0008",solucion:"FOOD",condCom:true,estado:true},
+    "S095": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"TRV",solucion:"GIFT",condCom:true,estado:true},
+    "S096": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"TRM",solucion:"GIFT",condCom:true,estado:true},
+    "S097": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"TCR",solucion:"GIFT",condCom:true,estado:true},
+    "S098": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"TZR",solucion:"GIFT",condCom:true,estado:true},
+    "S099": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"TRR",solucion:"GIFT",condCom:true,estado:true},
+    "S100": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"RRV0001",solucion:"GIFT",condCom:true,estado:true},
+    "S101": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"RIM0001",solucion:"GIFT",condCom:true,estado:true},
+    "S102": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"RRM0001",solucion:"GIFT",condCom:true,estado:true},
+    "S103": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"RIM0002",solucion:"GIFT",condCom:true,estado:true},
+    "S104": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"RRM0002",solucion:"GIFT",condCom:true,estado:true},
+    "S105": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"TRN",solucion:"GIFT",condCom:true,estado:true},
+    "S106": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"TZN",solucion:"GIFT",condCom:true,estado:true},
+    "S107": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"RNM0001",solucion:"GIFT",condCom:true,estado:true},
+    "S108": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"RNM0002",solucion:"GIFT",condCom:true,estado:true},
+    "S109": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"RNM0003",solucion:"GIFT",condCom:true,estado:true},
+    "S110": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"RNM0004",solucion:"GIFT",condCom:true,estado:true},
+    "S111": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"RNM0005",solucion:"GIFT",condCom:true,estado:true},
+    "S112": {nombre:"Mantenimiento de tarjetas",desc:"Soporte técnico y mantenimiento preventivo sobre tarjetas activas y su vinculación en app.",producto:"TCM",solucion:"MOBILITY",condCom:true,estado:true},
+    "S113": {nombre:"Personalización de tarjetas",desc:"Diseño y grabado personalizado de tarjeta física para campañas o clientes corporativos.",producto:"TCA",solucion:"FOOD",condCom:true,estado:true},
+    "S114": {nombre:"Personalización de tarjetas",desc:"Diseño y grabado personalizado de tarjeta física para campañas o clientes corporativos.",producto:"TAM",solucion:"FOOD",condCom:true,estado:true},
+    "S115": {nombre:"Personalización de tarjetas",desc:"Diseño y grabado personalizado de tarjeta física para campañas o clientes corporativos.",producto:"TAV",solucion:"FOOD",condCom:true,estado:true},
+    "S116": {nombre:"Personalización de tarjetas",desc:"Diseño y grabado personalizado de tarjeta física para campañas o clientes corporativos.",producto:"RAM0001",solucion:"FOOD",condCom:true,estado:true},
+    "S117": {nombre:"Personalización de tarjetas",desc:"Diseño y grabado personalizado de tarjeta física para campañas o clientes corporativos.",producto:"RAM0002",solucion:"FOOD",condCom:true,estado:true},
+    "S118": {nombre:"Personalización de tarjetas",desc:"Diseño y grabado personalizado de tarjeta física para campañas o clientes corporativos.",producto:"RAM0003",solucion:"FOOD",condCom:true,estado:true},
+    "S119": {nombre:"Personalización de tarjetas",desc:"Diseño y grabado personalizado de tarjeta física para campañas o clientes corporativos.",producto:"RAM0004",solucion:"FOOD",condCom:true,estado:true},
+    "S120": {nombre:"Personalización de tarjetas",desc:"Diseño y grabado personalizado de tarjeta física para campañas o clientes corporativos.",producto:"RAM0005",solucion:"FOOD",condCom:true,estado:true},
+    "S121": {nombre:"Personalización de tarjetas",desc:"Diseño y grabado personalizado de tarjeta física para campañas o clientes corporativos.",producto:"RAM0006",solucion:"FOOD",condCom:true,estado:true},
+    "S122": {nombre:"Personalización de tarjetas",desc:"Diseño y grabado personalizado de tarjeta física para campañas o clientes corporativos.",producto:"RAM0007",solucion:"FOOD",condCom:true,estado:true},
+    "S123": {nombre:"Personalización de tarjetas",desc:"Diseño y grabado personalizado de tarjeta física para campañas o clientes corporativos.",producto:"RAM0008",solucion:"FOOD",condCom:true,estado:true},
+    "S124": {nombre:"Personalización de tarjetas",desc:"Diseño y grabado personalizado de tarjeta física para campañas o clientes corporativos.",producto:"TRV",solucion:"GIFT",condCom:true,estado:true},
+    "S125": {nombre:"Personalización de tarjetas",desc:"Diseño y grabado personalizado de tarjeta física para campañas o clientes corporativos.",producto:"TRM",solucion:"GIFT",condCom:true,estado:true},
+    "S126": {nombre:"Personalización de tarjetas",desc:"Diseño y grabado personalizado de tarjeta física para campañas o clientes corporativos.",producto:"TCR",solucion:"GIFT",condCom:true,estado:true},
+    "S127": {nombre:"Personalización de tarjetas",desc:"Diseño y grabado personalizado de tarjeta física para campañas o clientes corporativos.",producto:"TRR",solucion:"GIFT",condCom:true,estado:true},
+    "S128": {nombre:"Personalización de tarjetas",desc:"Diseño y grabado personalizado de tarjeta física para campañas o clientes corporativos.",producto:"RRV0001",solucion:"GIFT",condCom:true,estado:true},
+    "S129": {nombre:"Personalización de tarjetas",desc:"Diseño y grabado personalizado de tarjeta física para campañas o clientes corporativos.",producto:"RIM0001",solucion:"GIFT",condCom:true,estado:true},
+    "S130": {nombre:"Personalización de tarjetas",desc:"Diseño y grabado personalizado de tarjeta física para campañas o clientes corporativos.",producto:"RRM0001",solucion:"GIFT",condCom:true,estado:true},
+    "S131": {nombre:"Personalización de tarjetas",desc:"Diseño y grabado personalizado de tarjeta física para campañas o clientes corporativos.",producto:"RIM0002",solucion:"GIFT",condCom:true,estado:true},
+    "S132": {nombre:"Personalización de tarjetas",desc:"Diseño y grabado personalizado de tarjeta física para campañas o clientes corporativos.",producto:"RRM0002",solucion:"GIFT",condCom:true,estado:true},
+    "S133": {nombre:"Personalización de tarjetas",desc:"Diseño y grabado personalizado de tarjeta física para campañas o clientes corporativos.",producto:"TRN",solucion:"GIFT",condCom:true,estado:true},
+    "S134": {nombre:"Personalización de tarjetas",desc:"Diseño y grabado personalizado de tarjeta física para campañas o clientes corporativos.",producto:"RNM0001",solucion:"GIFT",condCom:true,estado:true},
+    "S135": {nombre:"Personalización de tarjetas",desc:"Diseño y grabado personalizado de tarjeta física para campañas o clientes corporativos.",producto:"RNM0002",solucion:"GIFT",condCom:true,estado:true},
+    "S136": {nombre:"Personalización de tarjetas",desc:"Diseño y grabado personalizado de tarjeta física para campañas o clientes corporativos.",producto:"RNM0003",solucion:"GIFT",condCom:true,estado:true},
+    "S137": {nombre:"Personalización de tarjetas",desc:"Diseño y grabado personalizado de tarjeta física para campañas o clientes corporativos.",producto:"RNM0004",solucion:"GIFT",condCom:true,estado:true},
+    "S138": {nombre:"Personalización de tarjetas",desc:"Diseño y grabado personalizado de tarjeta física para campañas o clientes corporativos.",producto:"RNM0005",solucion:"GIFT",condCom:true,estado:true},
+    "S139": {nombre:"Personalización de tarjetas",desc:"Diseño y grabado personalizado de tarjeta física para campañas o clientes corporativos.",producto:"TCM",solucion:"MOBILITY",condCom:true,estado:true},
+    "S171": {nombre:"Otros servicios",desc:"Otros servicios relacionados",producto:"TCA",solucion:"FOOD",condCom:false,estado:true},
+    "S173": {nombre:"Otros servicios",desc:"Otros servicios relacionados",producto:"TAV",solucion:"FOOD",condCom:false,estado:true},
+    "S174": {nombre:"Otros servicios",desc:"Otros servicios relacionados",producto:"TICKET ALIMENTACION",solucion:"FOOD",condCom:false,estado:true},
+    "S176": {nombre:"Otros servicios",desc:"Otros servicios relacionados",producto:"RAM0001",solucion:"FOOD",condCom:false,estado:true},
+    "S177": {nombre:"Otros servicios",desc:"Otros servicios relacionados",producto:"RAM0002",solucion:"FOOD",condCom:false,estado:true},
+    "S178": {nombre:"Otros servicios",desc:"Otros servicios relacionados",producto:"RAM0003",solucion:"FOOD",condCom:false,estado:true},
+    "S179": {nombre:"Otros servicios",desc:"Otros servicios relacionados",producto:"RAM0004",solucion:"FOOD",condCom:false,estado:true},
+    "S180": {nombre:"Otros servicios",desc:"Otros servicios relacionados",producto:"RAM0005",solucion:"FOOD",condCom:false,estado:true},
+    "S181": {nombre:"Otros servicios",desc:"Otros servicios relacionados",producto:"RAM0006",solucion:"FOOD",condCom:false,estado:true},
+    "S182": {nombre:"Otros servicios",desc:"Otros servicios relacionados",producto:"RAM0007",solucion:"FOOD",condCom:false,estado:true},
+    "S183": {nombre:"Otros servicios",desc:"Otros servicios relacionados",producto:"RAM0008",solucion:"FOOD",condCom:false,estado:true},
+    "S184": {nombre:"Otros servicios",desc:"Otros servicios relacionados",producto:"TRV",solucion:"GIFT",condCom:false,estado:true},
+    "S185": {nombre:"Otros servicios",desc:"Otros servicios relacionados",producto:"TRM",solucion:"GIFT",condCom:false,estado:true},
+    "S186": {nombre:"Otros servicios",desc:"Otros servicios relacionados",producto:"TCR",solucion:"GIFT",condCom:false,estado:true},
+    "S187": {nombre:"Otros servicios",desc:"Otros servicios relacionados",producto:"TZR",solucion:"GIFT",condCom:false,estado:true},
+    "S188": {nombre:"Otros servicios",desc:"Otros servicios relacionados",producto:"TRR",solucion:"GIFT",condCom:false,estado:true},
+    "S191": {nombre:"Otros servicios",desc:"Otros servicios relacionados",producto:"RRM0001",solucion:"GIFT",condCom:false,estado:true},
+    "S193": {nombre:"Otros servicios",desc:"Otros servicios relacionados",producto:"RRM0002",solucion:"GIFT",condCom:false,estado:true},
+    "S194": {nombre:"Otros servicios",desc:"Otros servicios relacionados",producto:"TRN",solucion:"GIFT",condCom:false,estado:true},
+    "S196": {nombre:"Otros servicios",desc:"Otros servicios relacionados",producto:"RNM0001",solucion:"GIFT",condCom:false,estado:true},
+    "S197": {nombre:"Otros servicios",desc:"Otros servicios relacionados",producto:"RNM0002",solucion:"GIFT",condCom:false,estado:true},
+    "S198": {nombre:"Otros servicios",desc:"Otros servicios relacionados",producto:"RNM0003",solucion:"GIFT",condCom:false,estado:true},
+    "S199": {nombre:"Otros servicios",desc:"Otros servicios relacionados",producto:"RNM0004",solucion:"GIFT",condCom:false,estado:true},
+    "S200": {nombre:"Otros servicios",desc:"Otros servicios relacionados",producto:"RNM0005",solucion:"GIFT",condCom:false,estado:true},
+    "S201": {nombre:"Otros servicios",desc:"Otros servicios relacionados",producto:"TCM",solucion:"MOBILITY",condCom:false,estado:true},
+    "S217": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"TCA",solucion:"FOOD",condCom:false,estado:true},
+    "S218": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"TAM",solucion:"FOOD",condCom:false,estado:true},
+    "S219": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"TAV",solucion:"FOOD",condCom:false,estado:true},
+    "S220": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"Ticket alimentación",solucion:"FOOD",condCom:false,estado:true},
+    "S221": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"TZA",solucion:"FOOD",condCom:false,estado:true},
+    "S222": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"RAM0001",solucion:"FOOD",condCom:false,estado:true},
+    "S223": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"RAM0002",solucion:"FOOD",condCom:false,estado:true},
+    "S224": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"RAM0003",solucion:"FOOD",condCom:false,estado:true},
+    "S225": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"RAM0004",solucion:"FOOD",condCom:false,estado:true},
+    "S226": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"RAM0005",solucion:"FOOD",condCom:false,estado:true},
+    "S227": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"RAM0006",solucion:"FOOD",condCom:false,estado:true},
+    "S228": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"RAM0007",solucion:"FOOD",condCom:false,estado:true},
+    "S229": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"RAM0008",solucion:"FOOD",condCom:false,estado:true},
+    "S230": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"TRV",solucion:"GIFT",condCom:true,estado:true},
+    "S231": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"TRM",solucion:"GIFT",condCom:true,estado:true},
+    "S232": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"TCR",solucion:"GIFT",condCom:true,estado:true},
+    "S233": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"TZR",solucion:"GIFT",condCom:true,estado:true},
+    "S234": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"TRR",solucion:"GIFT",condCom:true,estado:true},
+    "S235": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"RRV0001",solucion:"GIFT",condCom:true,estado:true},
+    "S236": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"RIM0001",solucion:"GIFT",condCom:true,estado:true},
+    "S237": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"RRM0001",solucion:"GIFT",condCom:true,estado:true},
+    "S238": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"RIM0002",solucion:"GIFT",condCom:true,estado:true},
+    "S239": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"RRM0002",solucion:"GIFT",condCom:true,estado:true},
+    "S240": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"TRN",solucion:"GIFT",condCom:true,estado:true},
+    "S241": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"TZN",solucion:"GIFT",condCom:true,estado:true},
+    "S242": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"RNM0001",solucion:"GIFT",condCom:true,estado:true},
+    "S243": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"RNM0002",solucion:"GIFT",condCom:true,estado:true},
+    "S244": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"RNM0003",solucion:"GIFT",condCom:true,estado:true},
+    "S245": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"RNM0004",solucion:"GIFT",condCom:true,estado:true},
+    "S246": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"RNM0005",solucion:"GIFT",condCom:true,estado:true},
+    "S247": {nombre:"Emisión de tarjetas",desc:"Alta y personalización inicial de la tarjeta, incluye habilitación en el sistema.",producto:"TCM",solucion:"MOBILITY",condCom:true,estado:true},
+    "S248": {nombre:"Interchange Fee",desc:"Interchange Fee",producto:"TCA",solucion:"FOOD",condCom:false,estado:true},
+    "S249": {nombre:"Interchange Fee",desc:"Interchange Fee",producto:"TAV",solucion:"FOOD",condCom:false,estado:true},
+    "S250": {nombre:"Interchange Fee",desc:"Interchange Fee",producto:"TICKET ALIMENTACION",solucion:"FOOD",condCom:false,estado:true},
+    "S251": {nombre:"Interchange Fee",desc:"Interchange Fee",producto:"RAM0001",solucion:"FOOD",condCom:false,estado:true},
+    "S252": {nombre:"Interchange Fee",desc:"Interchange Fee",producto:"RAM0002",solucion:"FOOD",condCom:false,estado:true},
+    "S253": {nombre:"Interchange Fee",desc:"Interchange Fee",producto:"RAM0003",solucion:"FOOD",condCom:false,estado:true},
+    "S254": {nombre:"Interchange Fee",desc:"Interchange Fee",producto:"RAM0004",solucion:"FOOD",condCom:false,estado:true},
+    "S255": {nombre:"Interchange Fee",desc:"Interchange Fee",producto:"RAM0005",solucion:"FOOD",condCom:false,estado:true},
+    "S256": {nombre:"Interchange Fee",desc:"Interchange Fee",producto:"RAM0006",solucion:"FOOD",condCom:false,estado:true},
+    "S257": {nombre:"Interchange Fee",desc:"Interchange Fee",producto:"RAM0007",solucion:"FOOD",condCom:false,estado:true},
+    "S258": {nombre:"Interchange Fee",desc:"Interchange Fee",producto:"RAM0008",solucion:"FOOD",condCom:false,estado:true},
+    "S259": {nombre:"Interchange Fee",desc:"Interchange Fee",producto:"TRV",solucion:"GIFT",condCom:false,estado:true},
+    "S260": {nombre:"Interchange Fee",desc:"Interchange Fee",producto:"TRM",solucion:"GIFT",condCom:false,estado:true},
+    "S261": {nombre:"Interchange Fee",desc:"Interchange Fee",producto:"TCR",solucion:"GIFT",condCom:false,estado:true},
+    "S262": {nombre:"Interchange Fee",desc:"Interchange Fee",producto:"TZR",solucion:"GIFT",condCom:false,estado:true},
+    "S263": {nombre:"Interchange Fee",desc:"Interchange Fee",producto:"TRR",solucion:"GIFT",condCom:false,estado:true},
+    "S264": {nombre:"Interchange Fee",desc:"Interchange Fee",producto:"RRM0001",solucion:"GIFT",condCom:false,estado:true},
+    "S265": {nombre:"Interchange Fee",desc:"Interchange Fee",producto:"RRM0002",solucion:"GIFT",condCom:false,estado:true},
+    "S266": {nombre:"Interchange Fee",desc:"Interchange Fee",producto:"TRN",solucion:"GIFT",condCom:false,estado:true},
+    "S267": {nombre:"Interchange Fee",desc:"Interchange Fee",producto:"RNM0001",solucion:"GIFT",condCom:false,estado:true},
+    "S268": {nombre:"Interchange Fee",desc:"Interchange Fee",producto:"RNM0002",solucion:"GIFT",condCom:false,estado:true},
+    "S269": {nombre:"Interchange Fee",desc:"Interchange Fee",producto:"RNM0003",solucion:"GIFT",condCom:false,estado:true},
+    "S270": {nombre:"Interchange Fee",desc:"Interchange Fee",producto:"RNM0004",solucion:"GIFT",condCom:false,estado:true},
+    "S271": {nombre:"Interchange Fee",desc:"Interchange Fee",producto:"RNM0005",solucion:"GIFT",condCom:false,estado:true},
+    "S272": {nombre:"Interchange Fee",desc:"Interchange Fee",producto:"TCM",solucion:"MOBILITY",condCom:false,estado:true},
+  };
+  function solucionTituloDe(s){ return s.charAt(0) + s.slice(1).toLowerCase(); }
+  /* Los 210 servicios nuevos no tienen productoId del esquema interno
+     (uid-prod-01..06) — cae a su código real (ej. "TCA") en vez de
+     mostrar "undefined". */
+  function productoLabelOf(s){ return PRODUCTO_LABELS[s.productoId] || s.productoCodigo || '—'; }
+
   let SERVICIOS = {
     /* PLACEHOLDER: tarifa inventada — sin información real de costo de plástico aún */
     'S001': { nombre:'Costo del plástico', descripcion:'Costo del plástico de tarjetas a emitir', solucion:'Gift', productoId:'uid-prod-02', estado:true,
@@ -2019,6 +2255,33 @@ function initSidebarNav(){
         {id:'T-803', nombre:'Tarifa Interchange Estándar', tipo:'otros', moneda:'USD', unidad:'UNI', precio:0.15, vigenciaInicio:'2026-01-01', vigenciaFin:'', historial:[]},
       ]},
   };
+
+  /* Amplía/refresca SERVICIOS con los 220 servicios reales de
+     SERVICIOS_REALES. Para los 10 ya sembrados a mano arriba se
+     conservan marca/tecnología/tarifas/auditoría (detalle que la fuente
+     no trae); solo se refresca nombre/descripción/solución/producto/
+     estado/condición comercial con la fuente autoritativa — algunos ya
+     difieren del mock original (ej. la "solución" real de estos 10 es
+     siempre FOOD, no la mezcla Gift/Food/Mobility inventada a mano). */
+  Object.keys(SERVICIOS_REALES).forEach(id=>{
+    const r = SERVICIOS_REALES[id];
+    const solucionTitulo = solucionTituloDe(r.solucion);
+    if(SERVICIOS[id]){
+      Object.assign(SERVICIOS[id], {
+        nombre: r.nombre, descripcion: r.desc, solucion: solucionTitulo,
+        productoCodigo: r.producto, estado: r.estado, esCondicionComercial: r.condCom,
+      });
+    } else {
+      SERVICIOS[id] = {
+        nombre: r.nombre, descripcion: r.desc, solucion: solucionTitulo,
+        productoId: null, productoCodigo: r.producto, estado: r.estado,
+        marca: null, tecnologia: null, esCondicionComercial: r.condCom,
+        creadoPor: 'sistema.migracion', fechaCreacion: '20/07/2026 09:00',
+        modificadoPor: 'sistema.migracion', fechaModificacion: '20/07/2026 09:00',
+        tarifas: [],
+      };
+    }
+  });
 
   const TODAY = new Date('2026-07-14T00:00:00');
 
@@ -2092,7 +2355,7 @@ function initSidebarNav(){
     const ids = Object.keys(SERVICIOS).filter(id => {
       const s = SERVICIOS[id];
       const matchesQ = !q || id.toLowerCase().includes(q) || s.nombre.toLowerCase().includes(q) || s.descripcion.toLowerCase().includes(q);
-      const matchesProd = !prod || PRODUCTO_LABELS[s.productoId] === prod;
+      const matchesProd = !prod || productoLabelOf(s) === prod;
       const matchesMarca = !marca || s.marca === marca;
       const matchesTecnologia = !tecnologia || s.tecnologia === tecnologia;
       const matchesStatus = !status || (status === 'Activo' && s.estado) || (status === 'Inactivo' && !s.estado);
@@ -2116,7 +2379,7 @@ function initSidebarNav(){
         case 'id': va = idA; vb = idB; break;
         case 'nombre': va = sa.nombre; vb = sb.nombre; break;
         case 'solucion': va = sa.solucion || ''; vb = sb.solucion || ''; break;
-        case 'producto': va = PRODUCTO_LABELS[sa.productoId]; vb = PRODUCTO_LABELS[sb.productoId]; break;
+        case 'producto': va = productoLabelOf(sa); vb = productoLabelOf(sb); break;
         case 'tarifas': va = sa.tarifas.length; vb = sb.tarifas.length; break;
         case 'estado': va = sa.estado ? 1 : 0; vb = sb.estado ? 1 : 0; break;
         default: va = 0; vb = 0;
@@ -2188,7 +2451,7 @@ function initSidebarNav(){
         <td class="cell-code">#${id}</td>
         <td class="cell-name">${s.nombre}<span class="desc">${s.descripcion}</span></td>
         <td class="cell-hide-mobile"><span class="tag-neutral">${s.solucion || '—'}</span></td>
-        <td class="cell-hide-mobile"><span class="tag-product"><i class="dot"></i>${PRODUCTO_LABELS[s.productoId]}</span></td>
+        <td class="cell-hide-mobile"><span class="tag-product"><i class="dot"></i>${productoLabelOf(s)}</span></td>
         <td class="cell-hide-mobile">
           <div class="tarifario-summary">
             <span class="tarifario-count"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>${s.tarifas.length} ${s.tarifas.length === 1 ? 'tarifa' : 'tarifas'}</span>
