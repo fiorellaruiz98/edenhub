@@ -3179,14 +3179,14 @@ document.addEventListener("DOMContentLoaded", function(){
    sin usar — esa dimensión no viene en este dataset y no se renderiza.
    ------------------------------------------------------------------------- */
 const RAW_DATA = [
-{id:'C001',idc:'C001',nombre:'PERSONALIZACION_ADHOC',claveOriginal:'PERSONALIZACION_ADHOC',label:'Personalización adhoc',categoria:'Tarjetas y emisión',nominal:null,esSupuesto:true,formula:'SI PROPUESTA.ADICIONAL_ADHOC !=NO && PROPUESTA.ADICIONAL_ADHOC=!EXONERADO ENTONCES (VALOR NOMINAL) SINO 0',estado:'Activo',driver:'Hora',moneda:'SOLES',rent:'Insumo de cálculo — ingreso',history:[]},
+{id:'C001',idc:'C001',nombre:'PERSONALIZACION_ADHOC',claveOriginal:'PERSONALIZACION_ADHOC',label:'Personalización adhoc',categoria:'Tarjetas y emisión',nominal:null,esSupuesto:true,tarifaProvisional:true,formula:'SI PROPUESTA.ADICIONAL_ADHOC !=NO && PROPUESTA.ADICIONAL_ADHOC=!EXONERADO ENTONCES (VALOR NOMINAL) SINO 0',estado:'Activo',driver:'Hora',moneda:'SOLES',rent:'Insumo de cálculo — ingreso',history:[]},
 {id:'C002',idc:'C002',nombre:'WELCOME_KIT',claveOriginal:'WELCOME_KIT',label:'Welcome kit',categoria:'Tarjetas y emisión',nominal:0.18,esSupuesto:false,formula:'(VALOR NOMINAL*PROPUESTA.QTARJETA)',estado:'Activo',driver:'Tarjeta',moneda:'SOLES',rent:'Computada',history:[]},
 {id:'C003',idc:'C003',nombre:'EMBOZADO',claveOriginal:'EMBOZADO',label:'Embozado',categoria:'Tarjetas y emisión',nominal:null,esSupuesto:true,formula:'(VALOR NOMINAL*PROPUESTA.QTARJETA)',estado:'Activo',driver:'Tarjeta',moneda:'SOLES',rent:'Computada',history:[]},
 {id:'C004',idc:'C004',nombre:'EMISION_TARJETAS_CON_AFINIDAD',claveOriginal:'EMISION_TARJETAS_CON_AFINIDAD',label:'Emisión de tarjetas con afinidad',categoria:'Tarjetas y emisión',nominal:0.1,esSupuesto:false,formula:'(VALOR NOMINAL*PROPUESTA.QTARJETA)',estado:'Activo',driver:'Tarjeta',moneda:'EURO',rent:'Computada',history:[]},
 {id:'C005',idc:'C005',nombre:'COSTO_PLASTICO_TARJETAS',claveOriginal:'COSTO_PLASTICO_DE_TARJETAS',label:'Costo del plástico de tarjetas',categoria:'Tarjetas y emisión',nominal:null,esSupuesto:true,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'Tarjeta',moneda:'SOLES',rent:'Computada',history:[]},
 {id:'C006',idc:'C006',nombre:'ENVIO_TARJETAS_A_PROVINCIA',claveOriginal:'ENVIO_TARJETAS_PROVINCIA',label:'Envío de tarjetas a provincia',categoria:'Logística y entrega',nominal:18,esSupuesto:false,formula:'(VALOR NOMINAL * PROPUESTA.CONDCOMERCIAL.QDESTINOS_PROVINCIA)',estado:'Activo',driver:'Punto de entrega',moneda:'SOLES',rent:'Computada',history:[]},
 {id:'C007',idc:'C007',nombre:'ENVIO_TARJETAS_A_LIMA',claveOriginal:'ENVIO_TARJETAS_LIMA',label:'Envío de tarjetas a Lima',categoria:'Logística y entrega',nominal:10,esSupuesto:false,formula:'(VALOR NOMINAL * PROPUESTA.CONDCOMERCIAL.QDESTINOS_LIMA)',estado:'Activo',driver:'Punto de entrega',moneda:'SOLES',rent:'Computada',history:[]},
-{id:'C008',idc:'C008',nombre:'REPOSICION_POR_PERDIDA_O_ROBO',claveOriginal:'REPOSICION_POR_PERDIDA/ROBO',label:'Reposición por pérdida o robo',categoria:'Tarjetas y emisión',nominal:16.95,esSupuesto:false,formula:'SI PROPUESTA.REPOSICION!= EXONERADO ENTONCES (VALOR NOMINAL*RATIO_REPOSICION)',estado:'Activo',driver:'Tarjeta',moneda:'SOLES',rent:'Ingreso',history:[]},
+{id:'C008',idc:'C008',nombre:'REPOSICION_POR_PERDIDA_O_ROBO',claveOriginal:'REPOSICION_POR_PERDIDA/ROBO',label:'Reposición por pérdida o robo',categoria:'Tarjetas y emisión',nominal:16.95,esSupuesto:false,tarifaProvisional:true,formula:'SI PROPUESTA.REPOSICION!= EXONERADO ENTONCES (VALOR NOMINAL*RATIO_REPOSICION)',estado:'Activo',driver:'Tarjeta',moneda:'SOLES',rent:'Ingreso',history:[]},
 {id:'C009',idc:'C009',nombre:'TRANSACCIONES_APROBADAS',claveOriginal:'TRANSACCIONES_APROBADAS_',label:'Transacciones aprobadas',categoria:'Transaccional y procesamiento',nominal:0.06,esSupuesto:false,formula:'(VALOR NOMINAL* NUMERO_TRANSACCIONES_PROMEDIO)',estado:'Activo',driver:'Transacción',moneda:'SOLES',rent:'Computada',history:[]},
 {id:'C010',idc:'C010',nombre:'CUENTA_ACTIVA',claveOriginal:'CUENTA_ACTIVA',label:'Cuenta activa',categoria:'Transaccional y procesamiento',nominal:0.12,esSupuesto:false,formula:'(VALOR NOMINAL*PROPUESTA.QTARJETAS* PROPUESTA.NUMERO_PEDIDOS_AL_ANIO)',estado:'Activo',driver:'Transacción',moneda:'SOLES',rent:'Computada',history:[]},
 {id:'C011',idc:'C011',nombre:'PROCESAMIENTO_OTROS_COSTOS',claveOriginal:'PROCESAMIENTO (OTROS COSTOS)',label:'Procesamiento (otros costos)',categoria:'Transaccional y procesamiento',nominal:0.105,esSupuesto:false,formula:'(VALOR NOMINAL* PROPUESTA.QTARJETAS)*PROPUESTA.NUMERO_PEDIDOS_AL_ANIO',estado:'Activo',driver:'Transacción',moneda:'SOLES',rent:'Computada',history:[]},
@@ -3237,13 +3237,13 @@ const RAW_DATA = [
 {id:'C056',idc:'C056',nombre:'TASA_UNITARIA_MARGEN',claveOriginal:'TUR_TOTAL_RESTA_INGRESOS_GASTOS',label:'Tasa unitaria — margen',categoria:'Rentabilidad total',nominal:null,esSupuesto:true,formula:'TOTAL_RESTA_INGRESOS_GASTOS / PROPUESTA.BV_ANUAL',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Resultante',history:[]},
 {id:'C057',idc:'C057',nombre:'COSTO_PERSONALIZACION_ADHOC',claveOriginal:'COSTO_PERSONALIZACION_ADHOC',label:'Costo de personalización adhoc',categoria:'Tarjetas y emisión',nominal:null,esSupuesto:true,formula:'SI PROPUESTA.COSTO_PERSONALIZACION_ADHOC=SI ENTONCES: (VALOR NOMINAL)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — costo',history:[]},
 {id:'C058',idc:'C058',nombre:'PESO_MENSUAL_SUMATORIA',claveOriginal:'PESO%_MES_SUMATORIA',label:'Peso % mensual (sumatoria)',categoria:'Parámetros de tiempo',nominal:3.87,esSupuesto:false,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Computada',history:[]},
-{id:'C059',idc:'C059',nombre:'EMISION_TARJETAS',claveOriginal:'EMISION_TARJETAS',label:'Emisión de tarjetas',categoria:'Tarjetas y emisión',nominal:null,esSupuesto:true,formula:'(VALOR NOMINAL* PROPUESTA.QTARJETAS)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Ingreso',history:[]},
+{id:'C059',idc:'C059',nombre:'EMISION_TARJETAS',claveOriginal:'EMISION_TARJETAS',label:'Emisión de tarjetas',categoria:'Tarjetas y emisión',nominal:null,esSupuesto:true,tarifaProvisional:true,formula:'(VALOR NOMINAL* PROPUESTA.QTARJETAS)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Ingreso',history:[]},
 {id:'C060',idc:'C060',nombre:'TIPO_REBATE',claveOriginal:'TIPO_REBATE',label:'Tipo de rebate',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'(PROPUESTA.TIPO_REBATE)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Computada',history:[]},
 {id:'C061',idc:'C061',nombre:'CALCULO_REBATE',claveOriginal:'CALCULO_REBATE',label:'Cálculo de rebate',categoria:'Comisiones e ingresos',nominal:null,esSupuesto:true,formula:'SI PROPUESTA.TIPO_REBATE=MONTO_FIJO_REBATE ENTONCES: (PROPUESTA.MONTO_FIJO_REBATE) SINO (PROPUESTA.%BV_REBATE * PROPUESTA.BV_ANUAL)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Computada',history:[]},
-{id:'C062',idc:'C062',nombre:'RATIO_REPOSICION',claveOriginal:'RATIO_REPOSICION',label:'Ratio de reposición',categoria:'Tarjetas y emisión',nominal:null,esSupuesto:true,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Computada',history:[]},
-{id:'C063',idc:'C063',nombre:'DISTRIBUCION',claveOriginal:'DISTRIBUCION',label:'Distribución',categoria:'Logística y entrega',nominal:null,esSupuesto:true,formula:'SI PROPUESTA.DISTRIBUCION!= EXONERADO ENTONCES: (DISTRIBUCION_LIMA + DISTRIBUCION_PROVINCIA) SINO 0',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — ingreso',history:[]},
-{id:'C064',idc:'C064',nombre:'DISTRIBUCION_LIMA',claveOriginal:'DISTRIBUCION_LIMA',label:'Distribución — Lima',categoria:'Logística y entrega',nominal:null,esSupuesto:true,formula:'(VALOR NOMINAL * PROPUESTA.CONDCOMERCIAL.QDESTINOS_PROVINCIA)',estado:'Activo',driver:'Punto de entrega',moneda:'SOLES',rent:'Computada',history:[]},
-{id:'C065',idc:'C065',nombre:'DISTRIBUCION_PROVINCIA',claveOriginal:'DISTRIBUCION_PROVINCIA',label:'Distribución — provincia',categoria:'Logística y entrega',nominal:null,esSupuesto:true,formula:'(VALOR NOMINAL * PROPUESTA.CONDCOMERCIAL.QDESTINOS_LIMA)',estado:'Activo',driver:'Punto de entrega',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C062',idc:'C062',nombre:'RATIO_REPOSICION',claveOriginal:'RATIO_REPOSICION',label:'Ratio de reposición',categoria:'Tarjetas y emisión',nominal:null,esSupuesto:true,tarifaProvisional:true,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C063',idc:'C063',nombre:'DISTRIBUCION',claveOriginal:'DISTRIBUCION',label:'Distribución',categoria:'Logística y entrega',nominal:null,esSupuesto:true,tarifaProvisional:true,formula:'SI PROPUESTA.DISTRIBUCION!= EXONERADO ENTONCES: (DISTRIBUCION_LIMA + DISTRIBUCION_PROVINCIA) SINO 0',estado:'Activo',driver:'—',moneda:'SOLES',rent:'Insumo de cálculo — ingreso',history:[]},
+{id:'C064',idc:'C064',nombre:'DISTRIBUCION_LIMA',claveOriginal:'DISTRIBUCION_LIMA',label:'Distribución — Lima',categoria:'Logística y entrega',nominal:null,esSupuesto:true,tarifaProvisional:true,formula:'(VALOR NOMINAL * PROPUESTA.CONDCOMERCIAL.QDESTINOS_PROVINCIA)',estado:'Activo',driver:'Punto de entrega',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C065',idc:'C065',nombre:'DISTRIBUCION_PROVINCIA',claveOriginal:'DISTRIBUCION_PROVINCIA',label:'Distribución — provincia',categoria:'Logística y entrega',nominal:null,esSupuesto:true,tarifaProvisional:true,formula:'(VALOR NOMINAL * PROPUESTA.CONDCOMERCIAL.QDESTINOS_LIMA)',estado:'Activo',driver:'Punto de entrega',moneda:'SOLES',rent:'Computada',history:[]},
 ];
 
 /* Clon profundo hacia el estado de trabajo: las ediciones/eliminaciones
@@ -3485,7 +3485,10 @@ function renderConceptosTable(){
 
     const dataRows = groupRows.map(d=>{
       let nominalCell;
-      if(d.nominal!==null){
+      if(d.tarifaProvisional){
+        const provVal = d.nominal!==null ? '<span>'+fmtNum(d.nominal, Number.isInteger(d.nominal)?0:2)+'</span>' : '<span>—</span>';
+        nominalCell = provVal+'<span class="mv-assumed"><span class="mv-assumed-warn" data-tooltip="Tarifa provisional — pendiente de confirmación del equipo de negocio">'+ICONS.warning+'</span>Tarifa provisional</span>';
+      } else if(d.nominal!==null){
         nominalCell = '<span>'+fmtNum(d.nominal, Number.isInteger(d.nominal)?0:2)+'</span>';
       } else if(d.esSupuesto){
         nominalCell = '<span>—</span><span class="mv-assumed"><span class="mv-assumed-warn" data-tooltip="Este valor es un supuesto, no está confirmado">'+ICONS.warning+'</span>Valor supuesto</span>';
@@ -3636,7 +3639,9 @@ function openFormulaModal(id){
   $('#mv-formula-title').textContent = d.label || d.nombre;
   const deps = findDependencies(d);
   const usedBy = findDependents(d);
-  const nominalLine = d.nominal!==null ? fmtNum(d.nominal,2) : (d.esSupuesto ? 'Valor supuesto (sin confirmar)' : 'Sin definir');
+  const nominalLine = d.tarifaProvisional
+    ? (d.nominal!==null ? fmtNum(d.nominal,2)+' · Tarifa provisional (pendiente de confirmación del equipo de negocio)' : 'Tarifa provisional (pendiente de confirmación del equipo de negocio)')
+    : (d.nominal!==null ? fmtNum(d.nominal,2) : (d.esSupuesto ? 'Valor supuesto (sin confirmar)' : 'Sin definir'));
   const depChips = (list)=>list.map(depId=>{
     const dd = byId(depId);
     return '<span class="mv-dep-item">'+
