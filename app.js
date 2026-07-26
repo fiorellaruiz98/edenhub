@@ -4812,8 +4812,8 @@ function simFormTemplate(){
     '<div class="mv-sim-field"><label>Valor facial (S/)</label><input type="number" min="0" step="0.01" data-field="valorFacial" value="'+P.valorFacial+'"></div>'+
     '<div class="mv-sim-field"><label>Cantidad de tarjetas activas</label><input type="number" min="0" data-field="cantidadTarjetas" value="'+P.cantidadTarjetas+'"></div>'+
     '<div class="mv-sim-field"><label>Cantidad de cargas / año</label><input type="number" min="0" step="1" data-field="cargasAnio" value="'+P.cargasAnio+'"></div>'+
-    '<div class="mv-sim-field"><label>BV mensual (derivado)</label><input type="number" id="mv-sim-bvMensual" value="'+fmtNum(calcBvCarga(P.valorFacial,P.cantidadTarjetas),2)+'" disabled></div>'+
-    '<div class="mv-sim-field"><label>BV anual (derivado)</label><input type="number" id="mv-sim-bvAnual" value="'+fmtNum(calcBvTotal(P.valorFacial,P.cantidadTarjetas,P.cargasAnio),2)+'" disabled></div>'+
+    '<div class="mv-sim-field"><label>BV mensual (derivado)</label><input type="number" id="mv-sim-bvMensual" value="'+calcBvCarga(P.valorFacial,P.cantidadTarjetas).toFixed(2)+'" disabled></div>'+
+    '<div class="mv-sim-field"><label>BV anual (derivado)</label><input type="number" id="mv-sim-bvAnual" value="'+calcBvTotal(P.valorFacial,P.cantidadTarjetas,P.cargasAnio).toFixed(2)+'" disabled></div>'+
     '<div class="mv-sim-field"><label>Tarjetas nuevas (Q)</label><input type="number" min="0" data-field="qTarjetasNuevas" value="'+P.qTarjetasNuevas+'"></div>'+
     '<div class="mv-sim-field"><label>N.º pedidos al año</label><input type="number" min="0" data-field="numeroPedidosAlAnio" value="'+P.numeroPedidosAlAnio+'"></div>'+
     '<div class="mv-sim-field"><label>Comisión cliente ejecutivo (%)</label><input type="number" min="0" step="0.1" data-field="comisionClienteEjecutivo" value="'+P.comisionClienteEjecutivo+'"></div>'+
@@ -4957,8 +4957,8 @@ function recalcSimBv(){
   SIM.bvAnual = calcBvTotal(SIM.valorFacial, SIM.cantidadTarjetas, SIM.cargasAnio);
   const bvMEl = document.getElementById('mv-sim-bvMensual');
   const bvAEl = document.getElementById('mv-sim-bvAnual');
-  if(bvMEl) bvMEl.value = fmtNum(SIM.bvMensual, 2);
-  if(bvAEl) bvAEl.value = fmtNum(SIM.bvAnual, 2);
+  if(bvMEl) bvMEl.value = SIM.bvMensual.toFixed(2);
+  if(bvAEl) bvAEl.value = SIM.bvAnual.toFixed(2);
 }
 
 function runSimulation(){
