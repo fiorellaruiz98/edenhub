@@ -3183,7 +3183,7 @@ const RAW_DATA = [
 {id:'C002',idc:'C002',nombre:'WELCOME_KIT',claveOriginal:'WELCOME_KIT',label:'Welcome kit',categoria:'Tarjetas y emisión',nominal:0.18,esSupuesto:false,formula:'(VALOR NOMINAL*PROPUESTA.QTARJETA)',estado:'Activo',driver:'Tarjeta',moneda:'SOLES',rent:'Computada',history:[]},
 {id:'C003',idc:'C003',nombre:'EMBOZADO',claveOriginal:'EMBOZADO',label:'Embozado',categoria:'Tarjetas y emisión',nominal:null,esSupuesto:true,formula:'(VALOR NOMINAL*PROPUESTA.QTARJETA)',estado:'Activo',driver:'Tarjeta',moneda:'SOLES',rent:'Computada',history:[]},
 {id:'C004',idc:'C004',nombre:'EMISION_TARJETAS_CON_AFINIDAD',claveOriginal:'EMISION_TARJETAS_CON_AFINIDAD',label:'Emisión de tarjetas con afinidad',categoria:'Tarjetas y emisión',nominal:0.1,esSupuesto:false,formula:'(VALOR NOMINAL*PROPUESTA.QTARJETA)',estado:'Activo',driver:'Tarjeta',moneda:'EURO',rent:'Computada',history:[]},
-{id:'C005',idc:'C005',nombre:'COSTO_PLASTICO_TARJETAS',claveOriginal:'COSTO_PLASTICO_DE_TARJETAS',label:'Costo del plástico de tarjetas',categoria:'Tarjetas y emisión',nominal:null,esSupuesto:true,formula:'(PROPUESTA.COSTO_PLASTICO_DE_TARJETAS)',estado:'Activo',driver:'Tarjeta',moneda:'SOLES',rent:'Computada',history:[]},
+{id:'C005',idc:'C005',nombre:'COSTO_PLASTICO_TARJETAS',claveOriginal:'COSTO_PLASTICO_DE_TARJETAS',label:'Costo del plástico de tarjetas',categoria:'Tarjetas y emisión',nominal:null,esSupuesto:true,formula:'(VALOR NOMINAL)',estado:'Activo',driver:'Tarjeta',moneda:'SOLES',rent:'Computada',history:[]},
 {id:'C006',idc:'C006',nombre:'ENVIO_TARJETAS_A_PROVINCIA',claveOriginal:'ENVIO_TARJETAS_PROVINCIA',label:'Envío de tarjetas a provincia',categoria:'Logística y entrega',nominal:18,esSupuesto:false,formula:'(VALOR NOMINAL * PROPUESTA.CONDCOMERCIAL.QDESTINOS_PROVINCIA)',estado:'Activo',driver:'Punto de entrega',moneda:'SOLES',rent:'Computada',history:[]},
 {id:'C007',idc:'C007',nombre:'ENVIO_TARJETAS_A_LIMA',claveOriginal:'ENVIO_TARJETAS_LIMA',label:'Envío de tarjetas a Lima',categoria:'Logística y entrega',nominal:10,esSupuesto:false,formula:'(VALOR NOMINAL * PROPUESTA.CONDCOMERCIAL.QDESTINOS_LIMA)',estado:'Activo',driver:'Punto de entrega',moneda:'SOLES',rent:'Computada',history:[]},
 {id:'C008',idc:'C008',nombre:'REPOSICION_POR_PERDIDA_O_ROBO',claveOriginal:'REPOSICION_POR_PERDIDA/ROBO',label:'Reposición por pérdida o robo',categoria:'Tarjetas y emisión',nominal:16.95,esSupuesto:false,formula:'SI PROPUESTA.REPOSICION!= EXONERADO ENTONCES (VALOR NOMINAL*RATIO_REPOSICION)',estado:'Activo',driver:'Tarjeta',moneda:'SOLES',rent:'Ingreso',history:[]},
@@ -4285,11 +4285,21 @@ function resolverConcepto(idConcepto, idServicio, recurrencia){
   return {precio: row.pct ? row.precio/100 : row.precio, encontrado:true};
 }
 
+/* Los 9 conceptos cuya (VALOR NOMINAL) se resuelve vía TarifarioStore en vez
+   de venir del catálogo estático — ver mvGetSelfValue(). C005 reemplaza por
+   completo su antiguo input manual (Tarea 4). */
+const TARIFA_CONCEPTOS = ['C001','C003','C005','C008','C012','C013','C014','C016','C049'];
+
+function tarifaServicioLabel(idServicio){
+  const r = SERVICIOS_REALES[idServicio];
+  return r ? (idServicio+' · '+r.nombre+' ('+r.producto+')') : idServicio;
+}
+
 const SIM_DEFAULTS = {
   solucion:'Food',
   tipoProducto:'FISICO', productoElegido:'Ticket Restaurant Clásico', recurrencia:'RECURRENTE',
   servicioLogoEmpresa:'SI', personalizacionFlyer:'NO',
-  adicionalAdhoc:'NO', costoPersonalizacionAdhoc:'NO', costoPlasticoTarjetas:0,
+  adicionalAdhoc:'NO', costoPersonalizacionAdhoc:'NO',
   destinoEntrega:'LIMA', destinoReposicion:'LIMA', reposicion:'AFECTO', renovacion:'EXONERADO', distribucion:'AFECTO',
   bvAnual:600000, bvMensual:50000, cantidadTarjetas:500, qTarjetasNuevas:120,
   numeroPedidosAlAnio:4, puntosLima:3, puntosProvincia:2, cantidadDeRepartos:12,
@@ -4298,8 +4308,17 @@ const SIM_DEFAULTS = {
   productoCustom:'NO', mdrNegociado:0,
   comisionClienteEjecutivo:3, rebate:0,
   tipoRebate:'PORCENTAJE_BV', montoFijoRebate:0, pctBvRebate:0,
+  /* Servicio seleccionado por concepto — default: el de menor código
+     (coincide, para los 7 casos con equivalente sembrado en Pricebook,
+     con el servicio ya usado ahí). */
+  tarifaServicio: Object.fromEntries(TARIFA_CONCEPTOS.map(id=>[id, tarifarioServiciosDe(id)[0]])),
 };
-let SIM = Object.assign({}, SIM_DEFAULTS);
+/* Object.assign es shallow: tarifaServicio (objeto anidado) debe clonarse
+   aparte en cada reset, si no SIM y SIM_DEFAULTS comparten la misma
+   referencia y "restaurar valores" propagaría los cambios del usuario en
+   vez de deshacerlos. */
+function freshSim(){ return Object.assign({}, SIM_DEFAULTS, {tarifaServicio: Object.assign({}, SIM_DEFAULTS.tarifaServicio)}); }
+let SIM = freshSim();
 
 /* =============================================================================
    MOTOR DE FÓRMULAS DINÁMICO (Fase 2 — aritmética + Fase 3 — condicionales)
@@ -4335,7 +4354,7 @@ const MV_PROPUESTA_MAP = {
   'PROPUESTA.CONDCOMERCIAL.QDESTINOS_LIMA':'puntosLima', 'PROPUESTA.CONDCOMERCIAL.QDESTINOS_PROVINCIA':'puntosProvincia',
   'PROPUESTA.MDR_NEGOCIADO':'mdrNegociado', 'PROPUESTA.COMISION_CLIENTE_EJECUTIVO':'comisionClienteEjecutivo',
   'PROPUESTA.ADICIONAL_ADHOC':'adicionalAdhoc', 'PROPUESTA.COSTO_PERSONALIZACION_ADHOC':'costoPersonalizacionAdhoc',
-  'PROPUESTA.COSTO_PLASTICO_DE_TARJETAS':'costoPlasticoTarjetas', 'PROPUESTA.DISTRIBUCION':'distribucion',
+  'PROPUESTA.DISTRIBUCION':'distribucion',
   'PROPUESTA.MONTO_FIJO_REBATE':'montoFijoRebate', 'PROPUESTA.TIPO_REBATE':'tipoRebate',
   'PROPUESTA.%BV_REBATE':'pctBvRebate', 'PROPUESTA.SOLUCION':'solucion',
   'PROPUESTA.RECURRENCIA':'recurrencia', 'PROPUESTA.REPOSICION':'reposicion',
@@ -4344,7 +4363,17 @@ const MV_PROPUESTA_MAP = {
   'PROPUESTA.DIAS_CRÉDITO':'diasCredito', 'PROPUESTA.DIAS_CREDITO':'diasCredito',
 };
 
-function mvGetSelfValue(d){ return d.nominal!==null ? d.nominal : 0; }
+/* Tarea 4 — Opción A: para los 9 conceptos de TARIFA_CONCEPTOS, el valor
+   de (VALOR NOMINAL) ya no viene del catálogo estático sino del servicio y
+   la recurrencia elegidos en el Simulador, resueltos en vivo contra
+   TarifarioStore. El resto de conceptos sigue igual que siempre. */
+function mvGetSelfValue(d){
+  if(TARIFA_CONCEPTOS.includes(d.id)){
+    const r = resolverConcepto(d.id, SIM.tarifaServicio[d.id], SIM.recurrencia);
+    return r.encontrado ? r.precio : 0;
+  }
+  return d.nominal!==null ? d.nominal : 0;
+}
 
 /* Resuelve un token de fórmula contra otro concepto: usa nameMap(), que ya
    prioriza claveOriginal sobre el nombre técnico normalizado (ver más abajo). */
@@ -4735,7 +4764,6 @@ function simFormTemplate(){
       '<option value="EXONERADO" '+(P.adicionalAdhoc==='EXONERADO'?'selected':'')+'>Exonerado</option>'+
     '</select></div>'+
     '<div class="mv-sim-field"><label>¿Costo de personalización adhoc?</label>'+toggle('costoPersonalizacionAdhoc',[{v:'SI',t:'Sí'},{v:'NO',t:'No'}])+'</div>'+
-    '<div class="mv-sim-field"><label>Costo del plástico de tarjetas (S/)</label><input type="number" min="0" step="0.01" data-field="costoPlasticoTarjetas" value="'+P.costoPlasticoTarjetas+'"></div>'+
   '</fieldset>'+
   '<fieldset>'+
     '<legend>Logística &amp; entrega</legend>'+
@@ -4841,13 +4869,27 @@ function calcRowHtml(d, value, pendingMsg){
     const formatted = isPct ? fmtPct(value) : fmtMoney(value,d.moneda);
     display = '<span class="mv-cr-value '+(value<0?'neg':'')+'">'+formatted+'</span>';
   }
+  /* Tarea 5: marcado visual de tarifa provisional — mismo tratamiento que
+     "Valor supuesto" (ícono ámbar + tooltip), texto distinto. Se omite si
+     ya se muestra el ícono de Pendiente, para no duplicar advertencias. */
+  const provWarn = (d.tarifaProvisional && value!==MV_PENDING)
+    ? '<span class="mv-assumed-warn" data-tooltip="Tarifa provisional — pendiente de confirmación del equipo de negocio">'+ICONS.warning+'</span>'
+    : '';
+  /* Tarea 3: selector de Servicio para los 9 conceptos con tarifa por
+     servicio — determina qué fila de TARIFARIO_DATA resuelve el nominal. */
+  const tarifaSelect = TARIFA_CONCEPTOS.includes(d.id)
+    ? '<select class="mv-tarifa-servicio" data-mv-tarifa-servicio="'+esc(d.id)+'" data-tooltip="Servicio (tarifa aplicable)">'+
+        tarifarioServiciosDe(d.id).map(sid=>'<option value="'+esc(sid)+'"'+(SIM.tarifaServicio[d.id]===sid?' selected':'')+'>'+esc(tarifaServicioLabel(sid))+'</option>').join('')+
+      '</select>'
+    : '';
   return (
   '<div class="mv-calc-row" data-mv-view="'+d.id+'" role="button" tabindex="0" title="Ver cómo se calcula">'+
     '<div class="mv-cr-left">'+
       '<span class="mv-cr-name">'+esc(d.label||d.nombre)+'</span>'+
       '<span class="mv-cr-formula">'+(d.resumen?esc(d.resumen):esc(d.id))+'</span>'+
+      tarifaSelect+
     '</div>'+
-    '<div class="mv-cr-right">'+display+'</div>'+
+    '<div class="mv-cr-right">'+provWarn+display+'</div>'+
   '</div>');
 }
 
@@ -5009,7 +5051,7 @@ function wireStatic(){
   /* Cabecera: simulador */
   $('#mv-btn-run').addEventListener('click', ()=>{ runSimulation(); mvToast('Cálculo actualizado','success'); });
   $('#mv-btn-reset').addEventListener('click', ()=>{
-    SIM = Object.assign({}, SIM_DEFAULTS);
+    SIM = freshSim();
     wireSimForm();
     runSimulation();
     mvToast('Valores restaurados','info');
@@ -5024,8 +5066,20 @@ function wireStatic(){
     simForm.addEventListener('submit', e=>e.preventDefault());
   }
 
+  /* Selector "Servicio" inline en las filas de cálculo (Tarea 3) — delegado
+     porque runSimulation() re-renderiza esas filas en cada corrida. */
+  root.addEventListener('change', (e)=>{
+    const sel = e.target.closest('[data-mv-tarifa-servicio]');
+    if(!sel) return;
+    SIM.tarifaServicio[sel.dataset.mvTarifaServicio] = sel.value;
+    runSimulation();
+  });
+
   /* Delegación de clics del módulo (acotada a la vista, no a document) */
   root.addEventListener('click', (e)=>{
+    /* El select de Servicio vive dentro de una fila clicable
+       (data-mv-view abre el modal de fórmula) — no debe abrirla. */
+    if(e.target.closest('[data-mv-tarifa-servicio]')) return;
     const catBtn = e.target.closest('[data-mv-cat]');
     if(catBtn){
       const cat = catBtn.dataset.mvCat;
@@ -5061,6 +5115,7 @@ function wireStatic(){
   /* Filas de cálculo accesibles con teclado */
   root.addEventListener('keydown', (e)=>{
     if(e.key!=='Enter' && e.key!==' ') return;
+    if(e.target.closest('[data-mv-tarifa-servicio]')) return; /* navegar el select, no abrir el modal */
     const row = e.target.closest('.mv-calc-row[data-mv-view], .mv-hero[data-mv-view]');
     if(row){ e.preventDefault(); openFormulaModal(row.dataset.mvView); }
   });

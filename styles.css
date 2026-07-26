@@ -2581,6 +2581,10 @@ table.approval-table{width:100%;border-collapse:collapse;}
 }
 #view-motor-variables .mv-cr-value.neg{color:var(--red-hero-dark);}
 #view-motor-variables .mv-cr-value.pending{color:var(--grey);font-size:11px;font-weight:500;font-style:italic;font-family:var(--font-body);}
+#view-motor-variables .mv-cr-left .mv-tarifa-servicio{
+  margin-top:3px;padding:3px 22px 3px 7px;font-size:10.5px;
+  border-radius:6px;max-width:230px;background-position:right 7px center;background-size:9px;
+}
 
 /* Métricas hero del resultado final */
 #view-motor-variables .mv-hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
