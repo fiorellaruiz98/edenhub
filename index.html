@@ -407,6 +407,126 @@
     <!-- /view-propuestas -->
 
     <!-- ============================================================
+         VISTA: COTIZACIONES — mismo patrón exacto que view-propuestas
+         (KPIs clicables, filtros avanzados, tabla con tarjeta apilada
+         en móvil). Las cotizaciones nacen de una propuesta rentable
+         (botón real en Propuestas, construido en otra sesión); aquí
+         se siembran ya en estado Generada o superior.
+         ============================================================ -->
+    <div class="app-view" id="view-cotizaciones">
+    <section class="kpi-row" aria-label="Indicadores clave de cotizaciones">
+      <div class="kpi-card kpi-total" id="kpiCotCardSent" role="button" tabindex="0" aria-label="Filtrar por cotizaciones enviadas">
+        <div class="kpi-ribbon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 4l16 8-16 8V4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="kpi-body">
+          <p class="kpi-label">Cotizaciones enviadas</p>
+          <p class="kpi-value" id="kpiCotSent">—</p>
+          <p class="kpi-sub">Del total generado</p>
+        </div>
+      </div>
+      <div class="kpi-card kpi-open" id="kpiCotCardPending" role="button" tabindex="0" aria-label="Filtrar por cotizaciones pendientes de respuesta">
+        <div class="kpi-ribbon">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3.5 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="kpi-body">
+          <p class="kpi-label">Pendientes de respuesta</p>
+          <p class="kpi-value" id="kpiCotPending">—</p>
+          <p class="kpi-sub">Enviadas, sin resolver</p>
+        </div>
+      </div>
+      <div class="kpi-card kpi-closed" id="kpiCotCardApproved" role="button" tabindex="0" aria-label="Filtrar por cotizaciones aprobadas este mes">
+        <div class="kpi-ribbon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="kpi-body">
+          <p class="kpi-label">Aprobadas este mes</p>
+          <p class="kpi-value" id="kpiCotApproved">—</p>
+          <p class="kpi-sub" id="kpiCotApprovedSub">—</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="filters-panel" aria-label="Filtros avanzados">
+      <div class="filters-head">
+        <button type="button" class="filters-toggle" aria-expanded="true">
+          <svg class="filters-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="filters-title">
+            Filtros avanzados<span class="filters-count" hidden></span>
+          </div>
+        </button>
+        <button class="filters-clear" id="btnClearCotFilters" type="button">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+          Limpiar filtros
+        </button>
+      </div>
+      <div class="filters-grid">
+        <div class="field-group">
+          <label for="fCotCliente">Cliente (Razón social o RUC)</label>
+          <div class="input-wrap">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <input type="text" id="fCotCliente" placeholder="Ej. Alicorp o 20100070970">
+          </div>
+        </div>
+        <div class="field-group">
+          <label for="fCotEstado">Estado</label>
+          <select id="fCotEstado">
+            <option value="">Todos</option>
+            <option value="Generada">Generada</option>
+            <option value="Enviada">Enviada</option>
+            <option value="Aprobada">Aprobada</option>
+            <option value="Rechazada">Rechazada</option>
+            <option value="Oportunidad perdida">Oportunidad perdida</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label for="fCotFechaIni">Fecha inicio</label>
+          <input type="date" id="fCotFechaIni">
+        </div>
+        <div class="field-group">
+          <label for="fCotFechaFin">Fecha fin</label>
+          <input type="date" id="fCotFechaFin">
+        </div>
+      </div>
+    </section>
+
+    <section class="table-panel" aria-label="Listado de cotizaciones">
+      <div class="table-toolbar">
+        <div class="table-toolbar-left">
+          <h3>Listado de cotizaciones</h3>
+          <p><strong id="cotResultCount">0</strong> resultados encontrados</p>
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Razón social</th>
+              <th>Propuesta origen</th>
+              <th>Solución</th>
+              <th class="num">Business Volume</th>
+              <th>Estado</th>
+              <th>Email</th>
+              <th>Generada el</th>
+              <th class="center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="cotTableBody">
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination-bar">
+        <p class="pagination-info">Mostrando <b id="cotPagFrom">0</b>–<b id="cotPagTo">0</b> de <b id="cotPagTotal">0</b> cotizaciones</p>
+        <div class="pagination-controls" id="cotPagControls"></div>
+      </div>
+    </section>
+    </div>
+    <!-- /view-cotizaciones -->
+
+    <!-- ============================================================
          VISTA: PLACEHOLDER (otros módulos del menú)
          ============================================================ -->
     <div class="app-view" id="view-placeholder">
@@ -1701,6 +1821,388 @@
     <div class="modal-footer">
       <button class="btn btn-secondary" data-close-modal="oportunidadSuccessModal" type="button">Quedarme aquí</button>
       <button class="btn btn-primary" id="btnGoToPropuesta" type="button">Ir a la propuesta</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     COTIZACIONES — Drawer de detalle (solo lectura) + modales
+     Mismo patrón de chrome que #drawer (Propuestas): clase .drawer
+     genérica (no #view-propuestas-scoped), overlay propio para no
+     interferir con el ciclo de vida del drawer de Propuestas.
+     ============================================================ -->
+<div class="overlay" id="cotOverlay"></div>
+
+<aside class="drawer" id="cotizacionDrawer" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="cotDrawerTitle">
+  <div class="drawer-header">
+    <div class="drawer-header-left">
+      <div class="drawer-icon">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M4 4h16v16H4z" stroke="none"/><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3v6h6M8 13h8M8 17h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </div>
+      <div class="drawer-title-block">
+        <p class="drawer-eyebrow" id="cotDrawerEyebrow">Cotización</p>
+        <h3 id="cotDrawerTitle">Cliente por definir</h3>
+        <p><b id="cotDrawerRuc">—</b> · Código <span id="cotDrawerCodigo">—</span> · desde <button type="button" class="cot-origin-chip" id="cotDrawerOrigen">—</button></p>
+      </div>
+    </div>
+    <div class="drawer-header-actions">
+      <button class="icon-btn" id="btnExpandCotDrawer" type="button" title="Ampliar panel">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M9 4H4v5M15 4h5v5M4 15v5h5M20 15v5h-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="icon-btn" id="btnCloseCotDrawer" type="button" title="Cerrar">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="drawer-body">
+    <nav class="drawer-nav" aria-label="Secciones de la cotización">
+      <button class="drawer-nav-item active" data-cot-target="cot-sec-empresa" type="button"><span class="nav-dot"></span>Datos de empresa</button>
+      <button class="drawer-nav-item" data-cot-target="cot-sec-oportunidad" type="button"><span class="nav-dot"></span>Oportunidad</button>
+      <button class="drawer-nav-item" data-cot-target="cot-sec-condiciones" type="button"><span class="nav-dot"></span>Condiciones comerciales</button>
+      <button class="drawer-nav-item" data-cot-target="cot-sec-distribucion" type="button"><span class="nav-dot"></span>Distribución</button>
+      <button class="drawer-nav-item" data-cot-target="cot-sec-personalizacion" type="button"><span class="nav-dot"></span>Personalización</button>
+      <button class="drawer-nav-item" data-cot-target="cot-sec-financieros" type="button"><span class="nav-dot"></span>Gastos financieros</button>
+      <button class="drawer-nav-item" data-cot-target="cot-sec-mdr" type="button"><span class="nav-dot"></span>MDR adicional</button>
+      <button class="drawer-nav-item" data-cot-target="cot-sec-seguimiento" type="button"><span class="nav-dot"></span>Estado y seguimiento</button>
+    </nav>
+
+    <form class="drawer-form" id="cotizacionForm" novalidate>
+
+      <!-- ============ 1. DATOS DE EMPRESA ============ -->
+      <section class="form-section" id="cot-sec-empresa">
+        <div class="form-section-head">
+          <span class="sec-num">1</span>
+          <h4>Datos de empresa</h4>
+          <span>Heredado de la propuesta</span>
+        </div>
+        <div class="form-grid">
+          <div class="field-group">
+            <label><svg class="icon-sm lock-ico" viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.8"/></svg> RUC</label>
+            <div class="locked-value" id="cq_ruc"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.8"/></svg><span class="lv-text"></span></div>
+          </div>
+          <div class="field-group">
+            <label><svg class="icon-sm lock-ico" viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.8"/></svg> Razón social</label>
+            <div class="locked-value" id="cq_razonSocial"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.8"/></svg><span class="lv-text"></span></div>
+          </div>
+          <div class="field-group">
+            <label><svg class="icon-sm lock-ico" viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.8"/></svg> Giro de negocio</label>
+            <div class="locked-value" id="cq_giro"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.8"/></svg><span class="lv-text"></span></div>
+          </div>
+          <div class="field-group">
+            <label><svg class="icon-sm lock-ico" viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.8"/></svg> Dirección fiscal</label>
+            <div class="locked-value" id="cq_direccion"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.8"/></svg><span class="lv-text"></span></div>
+          </div>
+          <div class="field-group">
+            <label><svg class="icon-sm lock-ico" viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.8"/></svg> ¿Es cliente?</label>
+            <div class="locked-value" id="cq_esCliente"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.8"/></svg><span class="lv-text"></span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 2. OPORTUNIDAD ============ -->
+      <section class="form-section" id="cot-sec-oportunidad">
+        <div class="form-section-head">
+          <span class="sec-num">2</span>
+          <h4>Oportunidad</h4>
+          <span>Heredado de la propuesta</span>
+        </div>
+        <div class="form-grid cols-3">
+          <div class="field-group"><label>Solución</label><div class="locked-value" id="cq_solucion"><span class="lv-text"></span></div></div>
+          <div class="field-group"><label>Marca</label><div class="locked-value" id="cq_marca"><span class="lv-text"></span></div></div>
+          <div class="field-group"><label>Sector</label><div class="locked-value" id="cq_sector"><span class="lv-text"></span></div></div>
+          <div class="field-group"><label>Categoría de producto</label><div class="locked-value" id="cq_categoria"><span class="lv-text"></span></div></div>
+          <div class="field-group"><label>Modalidad de pago</label><div class="locked-value" id="cq_modalidadPago"><span class="lv-text"></span></div></div>
+          <div class="field-group"><label>Días de crédito</label><div class="locked-value" id="cq_diasCredito"><span class="lv-text"></span></div></div>
+          <div class="field-group"><label>Tipo de producto</label><div class="locked-value" id="cq_tipoProducto"><span class="lv-text"></span></div></div>
+          <div class="field-group"><label>Valor facial</label><div class="locked-value" id="cq_valorFacial"><span class="lv-text"></span></div></div>
+          <div class="field-group"><label>Cantidad de tarjetas</label><div class="locked-value" id="cq_cantTarjetas"><span class="lv-text"></span></div></div>
+          <div class="field-group"><label>BV por carga</label><div class="locked-value" id="cq_bvCarga"><span class="lv-text"></span></div></div>
+          <div class="field-group"><label>Cantidad de cargas total</label><div class="locked-value" id="cq_cargasAnio"><span class="lv-text"></span></div></div>
+          <div class="field-group"><label>BV total</label><div class="locked-value" id="cq_bvTotal"><span class="lv-text"></span></div></div>
+        </div>
+        <div class="conditional-field open" id="cq_rebateWrap" style="margin-top:14px;">
+          <div class="form-grid">
+            <div class="field-group"><label>Tipo de rebate</label><div class="locked-value" id="cq_rebateTipo"><span class="lv-text"></span></div></div>
+            <div class="field-group"><label>Valor de rebate</label><div class="locked-value" id="cq_rebateValor"><span class="lv-text"></span></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 3. CONDICIONES COMERCIALES ============ -->
+      <section class="form-section" id="cot-sec-condiciones">
+        <div class="form-section-head">
+          <span class="sec-num">3</span>
+          <h4>Condiciones comerciales</h4>
+          <span>Heredado de la propuesta</span>
+        </div>
+        <div class="cond-table-wrap">
+          <table class="cond-table">
+            <thead><tr><th style="width:40%">Concepto</th><th style="width:20%">Tipo</th><th style="width:24%">Valor</th><th class="center" style="width:16%">Exonerado</th></tr></thead>
+            <tbody id="cq_condicionesBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ 4. DISTRIBUCIÓN ============ -->
+      <section class="form-section" id="cot-sec-distribucion">
+        <div class="form-section-head">
+          <span class="sec-num">4</span>
+          <h4>Distribución</h4>
+          <span>Heredado de la propuesta</span>
+        </div>
+        <div class="field-group field-full">
+          <label>Destino de entrega</label>
+          <div class="mini-table-wrap">
+            <table class="mini-table">
+              <thead><tr><th style="width:55%">Destino</th><th>Cantidad de puntos de entrega</th></tr></thead>
+              <tbody id="cq_distribucionBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 5. PERSONALIZACIÓN ============ -->
+      <section class="form-section" id="cot-sec-personalizacion">
+        <div class="form-section-head">
+          <span class="sec-num">5</span>
+          <h4>Personalización</h4>
+          <span>Heredado de la propuesta</span>
+        </div>
+        <div class="field-group">
+          <label>Servicio logo empresa</label>
+          <div class="locked-value" id="cq_logoEmpresa"><span class="lv-text"></span></div>
+        </div>
+      </section>
+
+      <!-- ============ 6. GASTOS FINANCIEROS ============ -->
+      <section class="form-section" id="cot-sec-financieros">
+        <div class="form-section-head">
+          <span class="sec-num">6</span>
+          <h4>Gastos financieros</h4>
+          <span>Heredado de la propuesta</span>
+        </div>
+        <div class="field-group">
+          <label>Carta fianza</label>
+          <div class="locked-value" id="cq_cartaFianza"><span class="lv-text"></span></div>
+        </div>
+        <div class="conditional-field open" id="cq_montoCartaFianzaWrap" style="margin-top:12px;">
+          <div class="field-group">
+            <label>Monto de carta fianza</label>
+            <div class="locked-value" id="cq_montoCartaFianza"><span class="lv-text"></span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 7. MDR ADICIONAL ============ -->
+      <section class="form-section" id="cot-sec-mdr">
+        <div class="form-section-head">
+          <span class="sec-num">7</span>
+          <h4>MDR adicional</h4>
+          <span>Heredado de la propuesta</span>
+        </div>
+        <div class="field-group">
+          <label>Producto custom</label>
+          <div class="locked-value" id="cq_productoCustom"><span class="lv-text"></span></div>
+        </div>
+        <div class="conditional-field open" id="cq_mdrNegociadoWrap" style="margin-top:12px;">
+          <div class="field-group">
+            <label>MDR negociado</label>
+            <div class="locked-value" id="cq_mdrNegociado"><span class="lv-text"></span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 8. ESTADO Y SEGUIMIENTO ============ -->
+      <section class="form-section" id="cot-sec-seguimiento">
+        <div class="form-section-head">
+          <span class="sec-num">8</span>
+          <h4>Estado y seguimiento</h4>
+        </div>
+        <div class="form-grid cols-3">
+          <div class="field-group"><label>Código de cotización</label><div class="locked-value" id="cq_codigo"><span class="lv-text"></span></div></div>
+          <div class="field-group"><label>Fecha de generación</label><div class="locked-value" id="cq_fechaGeneracion"><span class="lv-text"></span></div></div>
+          <div class="field-group"><label>Válida hasta</label><div class="locked-value" id="cq_validaHasta"><span class="lv-text"></span></div></div>
+          <div class="field-group"><label>Responsable comercial</label><div class="locked-value" id="cq_responsable"><span class="lv-text"></span></div></div>
+          <div class="field-group"><label>Estado</label><div id="cq_estadoBadgeWrap"></div></div>
+        </div>
+
+        <div id="cq_resultadoWrap" style="margin-top:14px;display:none;">
+          <div class="reeval-box" id="cq_resultadoBox"></div>
+        </div>
+
+        <div style="margin-top:18px;">
+          <label class="block-label">Historial de la cotización</label>
+          <ul class="timeline" id="cq_historyTimeline"></ul>
+        </div>
+      </section>
+
+    </form>
+  </div>
+
+  <!-- Estado de envío de email — visible siempre, independiente del scroll
+       de las secciones y del estado de la cotización (Tarea explícita:
+       "visible en todo momento"). Vive entre el body y el footer, mismo
+       criterio de posición que versionBanner en el drawer de Propuestas. -->
+  <div class="cot-email-bar" id="cotEmailBar">
+    <div class="cot-email-bar-left">
+      <span class="cot-email-icon" id="cotEmailIcon"></span>
+      <div>
+        <strong id="cotEmailStateText">Sin enviar</strong>
+        <span id="cotEmailSubText">Aún no se ha enviado esta cotización al cliente</span>
+      </div>
+    </div>
+    <button type="button" class="btn btn-secondary btn-sm" id="btnResendEmail" style="display:none;">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none"><path d="M4 4v6h6M20 20v-6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 15a7 7 0 0 0 12.3 2.5M18.5 9a7 7 0 0 0-12.3-2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Reenviar
+    </button>
+  </div>
+
+  <div class="drawer-footer">
+    <div class="drawer-footer-left" id="cotFooterLeft"></div>
+    <div class="drawer-footer-right" id="cotFooterRight"></div>
+  </div>
+</aside>
+
+<!-- ============================================================
+     MODAL — Rechazar cotización (idéntico patrón a rejectModal)
+     ============================================================ -->
+<div class="modal" id="cotRejectModal" role="dialog" aria-modal="true" aria-labelledby="cotRejectModalTitle">
+  <div class="modal-card w-sm">
+    <div class="modal-header">
+      <div>
+        <h3 id="cotRejectModalTitle">Rechazar cotización</h3>
+        <p>Código <b id="cotRejectCodigo">—</b></p>
+      </div>
+      <button class="close-x" data-close-modal="cotRejectModal" type="button">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="reject-icon">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+      </div>
+      <label class="block-label" for="cotRejectReason">Motivo del rechazo</label>
+      <textarea id="cotRejectReason" placeholder="Describe brevemente el motivo por el cual el cliente rechaza esta cotización…"></textarea>
+      <div class="warn-box">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M12 9v4M12 17h.01" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
+        Al rechazar, la cotización cambiará a estado <b>Rechazada</b> de forma definitiva.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-text" data-close-modal="cotRejectModal" type="button">Cancelar</button>
+      <button class="btn btn-primary" id="btnConfirmCotReject" type="button" style="background:var(--red-hero-dark);">Confirmar rechazo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL — Marcar como oportunidad perdida
+     ============================================================ -->
+<div class="modal" id="cotLostModal" role="dialog" aria-modal="true" aria-labelledby="cotLostModalTitle">
+  <div class="modal-card w-sm">
+    <div class="modal-header">
+      <div>
+        <h3 id="cotLostModalTitle">Marcar como oportunidad perdida</h3>
+        <p>Código <b id="cotLostCodigo">—</b></p>
+      </div>
+      <button class="close-x" data-close-modal="cotLostModal" type="button">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="reject-icon" style="background:var(--status-borrador-bg);color:var(--status-borrador-fg);">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none"><path d="M12 9v4M12 17h.01" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
+      </div>
+      <label class="block-label" for="cotLostComment">Comentario</label>
+      <textarea id="cotLostComment" placeholder="Describe brevemente por qué se pierde esta oportunidad…"></textarea>
+      <div class="warn-box" style="background:var(--status-borrador-bg);color:var(--status-borrador-fg);">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M12 9v4M12 17h.01" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
+        La cotización pasará a estado <b>Oportunidad perdida</b> de forma definitiva.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-text" data-close-modal="cotLostModal" type="button">Cancelar</button>
+      <button class="btn btn-primary" id="btnConfirmCotLost" type="button" style="background:var(--status-borrador-fg);">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL — Aprobar cotización (requiere documento de sustento)
+     ============================================================ -->
+<div class="modal" id="cotApproveModal" role="dialog" aria-modal="true" aria-labelledby="cotApproveModalTitle">
+  <div class="modal-card w-sm">
+    <div class="modal-header">
+      <div>
+        <h3 id="cotApproveModalTitle">Aprobar cotización</h3>
+        <p>Código <b id="cotApproveCodigo">—</b></p>
+      </div>
+      <button class="close-x" data-close-modal="cotApproveModal" type="button">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="reject-icon" style="background:var(--status-aprobada-bg);color:var(--status-aprobada-fg);">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <label class="block-label">Documento de sustento</label>
+      <p style="font-size:12px;color:var(--grey);margin:0 0 10px;">Obligatorio para aprobar — adjunta el documento que sustenta la aprobación del cliente.</p>
+      <div class="file-drop" id="cotApproveFileDrop">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M12 16V4M7 9l5-5 5 5M5 20h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Haz clic para adjuntar el documento de sustento
+      </div>
+      <div class="file-chip-list" id="cotApproveFileList"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-text" data-close-modal="cotApproveModal" type="button">Cancelar</button>
+      <button class="btn btn-primary" id="btnConfirmCotApprove" type="button" disabled>Confirmar aprobación</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL — Vista previa del email (simulación de envío)
+     ============================================================ -->
+<div class="modal" id="cotEmailModal" role="dialog" aria-modal="true" aria-labelledby="cotEmailModalTitle">
+  <div class="modal-card w-sm">
+    <div class="modal-header">
+      <div>
+        <h3 id="cotEmailModalTitle">Vista previa del email</h3>
+        <p>Código <b id="cotEmailModalCodigo">—</b></p>
+      </div>
+      <button class="close-x" data-close-modal="cotEmailModal" type="button">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="cot-demo-banner">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M12 9v4M12 17h.01" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
+        Vista previa del email — entorno de demostración. Ninguna comunicación real se envía.
+      </div>
+      <div class="cot-email-preview">
+        <div class="cot-email-meta">
+          <p><span>Para</span><b id="cotEmailTo">—</b></p>
+          <p><span>Asunto</span><b id="cotEmailSubject">—</b></p>
+        </div>
+        <div class="cot-email-body">
+          <p>Estimado(a) cliente,</p>
+          <p>Adjuntamos la cotización solicitada. Puedes revisar el detalle en el documento adjunto.</p>
+          <div class="cot-email-attachment">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 3v6h6" stroke="currentColor" stroke-width="1.6"/></svg>
+            <span id="cotEmailAttachmentName">Cotización_COD-XXXX.pdf</span>
+          </div>
+          <p style="margin-top:14px;">Por favor, indícanos tu decisión utilizando los siguientes enlaces:</p>
+          <div class="cot-email-links">
+            <button type="button" class="cot-email-link approve" id="cotEmailLinkApprove">Aprobar cotización</button>
+            <button type="button" class="cot-email-link reject" id="cotEmailLinkReject">Rechazar cotización</button>
+          </div>
+          <p class="cot-email-links-hint" id="cotEmailLinksHint"></p>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-close-modal="cotEmailModal" type="button">Cerrar</button>
     </div>
   </div>
 </div>

@@ -1782,17 +1782,800 @@ document.addEventListener("DOMContentLoaded", function(){
     if(e.key==="Escape"){
       closeAllModals();
       if(drawer.classList.contains("open")) closeDrawer();
+      if(cotizacionDrawer.classList.contains("open")) closeCotDrawer();
       closeSidebar();
       closeRowMenu();
     }
   });
+
+  initCotizacionesModule();
 });
+
+/* ============================================================
+   MÓDULO COTIZACIONES
+   Vive en el mismo IIFE que Propuestas (no en scope global ni en un
+   IIFE aparte) porque reutiliza directamente sus utilidades (money,
+   fmtDate, esc, showToast, closeModalById, closeAllModals, trapFocus,
+   badgeClass, findProposal, drawer/overlay) sin necesidad de
+   exponerlas en window — igual que ya hace el botón "Generar
+   Cotización" del validador de rentabilidad (ver más abajo en este
+   mismo archivo, dentro de este IIFE).
+
+   Una cotización no clona los datos de la propuesta: guarda solo
+   `propuestaCodigo` y resuelve todo lo demás en vivo vía
+   findProposalByCodigo() — una sola fuente de verdad para los campos
+   heredados (Datos de empresa, Oportunidad, Condiciones comerciales,
+   Distribución, Personalización, Gastos financieros, MDR adicional).
+   ============================================================ */
+function findProposalByCodigo(codigo){ return proposals.find(p=>p.codigo===codigo); }
+
+let cotSeq = 1;
+function nextCotId(){ return "cot" + (cotSeq++); }
+
+const COT_ESTADOS = ["Generada","Enviada","Aprobada","Rechazada","Oportunidad perdida"];
+const EMAIL_ESTADOS = ["Sin enviar","Enviando","Enviado","Entregado","Leído","Fallido"];
+
+/* Generada->badge-creada, Aprobada->badge-aprobada, Rechazada->badge-rechazada
+   y Oportunidad perdida->badge-borrador se reutilizan tal cual (mismo
+   significado semántico que ya tienen en Propuestas). Enviada es la
+   única sin equivalente — badge-enviada es la única clase CSS nueva
+   de todo el módulo. */
+function cotBadgeClass(estado){
+  return {"Generada":"badge-creada","Enviada":"badge-enviada","Aprobada":"badge-aprobada","Rechazada":"badge-rechazada","Oportunidad perdida":"badge-borrador"}[estado] || "badge-creada";
+}
+
+const quotations = [
+  {
+    id: nextCotId(), codigo:"COT-2026-001", propuestaCodigo:"COD-2026-001",
+    fechaGeneracion:"2026-07-10", validaHasta:"2026-07-25", responsable:"F. Ruiz",
+    estado:"Aprobada", motivoRechazo:null, comentarioPerdida:null,
+    documentoSustento:{nombreArchivo:"sustento_aprobacion_alicorp.pdf", fecha:"2026-07-16"},
+    email:{estado:"Leído", destinatario:"tesoreria@alicorp.com.pe", asunto:"Cotización COT-2026-001 · Edenred Perú",
+      intentos:[{fecha:"2026-07-10", resultado:"Enviado"}]},
+    historial:[
+      {fecha:"2026-07-10", usuario:"F. Ruiz", accion:"Cotización generada", detalle:"Generada a partir de la propuesta COD-2026-001, validada como rentable."},
+      {fecha:"2026-07-10", usuario:"F. Ruiz", accion:"Enviada al cliente", detalle:"Email enviado a tesoreria@alicorp.com.pe."},
+      {fecha:"2026-07-12", usuario:"Sistema", accion:"Email leído", detalle:"El cliente abrió el email de la cotización."},
+      {fecha:"2026-07-16", usuario:"F. Ruiz", accion:"Cotización aprobada", detalle:"Aprobada con documento de sustento adjunto."}
+    ]
+  },
+  {
+    id: nextCotId(), codigo:"COT-2026-002", propuestaCodigo:"COD-2026-005",
+    fechaGeneracion:"2026-07-18", validaHasta:"2026-08-02", responsable:"F. Ruiz",
+    estado:"Enviada", motivoRechazo:null, comentarioPerdida:null, documentoSustento:null,
+    email:{estado:"Leído", destinatario:"compras@falabella.com.pe", asunto:"Cotización COT-2026-002 · Edenred Perú",
+      intentos:[{fecha:"2026-07-18", resultado:"Enviado"}]},
+    historial:[
+      {fecha:"2026-07-18", usuario:"F. Ruiz", accion:"Cotización generada", detalle:"Generada a partir de la propuesta COD-2026-005, validada como rentable."},
+      {fecha:"2026-07-18", usuario:"F. Ruiz", accion:"Enviada al cliente", detalle:"Email enviado a compras@falabella.com.pe."},
+      {fecha:"2026-07-19", usuario:"Sistema", accion:"Email leído", detalle:"El cliente abrió el email de la cotización."}
+    ]
+  },
+  {
+    id: nextCotId(), codigo:"COT-2026-003", propuestaCodigo:"COD-2026-009",
+    fechaGeneracion:"2026-07-05", validaHasta:"2026-07-20", responsable:"F. Ruiz",
+    estado:"Rechazada", motivoRechazo:"El cliente indicó que el rebate ofrecido no alcanza el mínimo esperado para este periodo.", comentarioPerdida:null, documentoSustento:null,
+    email:{estado:"Leído", destinatario:"administracion@nufoods.com.pe", asunto:"Cotización COT-2026-003 · Edenred Perú",
+      intentos:[{fecha:"2026-07-05", resultado:"Enviado"}]},
+    historial:[
+      {fecha:"2026-07-05", usuario:"F. Ruiz", accion:"Cotización generada", detalle:"Generada a partir de la propuesta COD-2026-009, validada como rentable."},
+      {fecha:"2026-07-05", usuario:"F. Ruiz", accion:"Enviada al cliente", detalle:"Email enviado a administracion@nufoods.com.pe."},
+      {fecha:"2026-07-07", usuario:"Sistema", accion:"Email leído", detalle:"El cliente abrió el email de la cotización."},
+      {fecha:"2026-07-09", usuario:"F. Ruiz", accion:"Cotización rechazada", detalle:"El cliente indicó que el rebate ofrecido no alcanza el mínimo esperado para este periodo."}
+    ]
+  },
+  {
+    id: nextCotId(), codigo:"COT-2026-004", propuestaCodigo:"COD-2026-012",
+    fechaGeneracion:"2026-07-22", validaHasta:"2026-08-06", responsable:"F. Ruiz",
+    estado:"Generada", motivoRechazo:null, comentarioPerdida:null, documentoSustento:null,
+    email:{estado:"Sin enviar", destinatario:"contacto@tottus.com.pe", asunto:"Cotización COT-2026-004 · Edenred Perú", intentos:[]},
+    historial:[
+      {fecha:"2026-07-22", usuario:"F. Ruiz", accion:"Cotización generada", detalle:"Generada a partir de la propuesta COD-2026-012, validada como rentable."}
+    ]
+  },
+  {
+    id: nextCotId(), codigo:"COT-2026-005", propuestaCodigo:"COD-2026-002",
+    fechaGeneracion:"2026-07-19", validaHasta:"2026-08-03", responsable:"F. Ruiz",
+    estado:"Enviada", motivoRechazo:null, comentarioPerdida:null, documentoSustento:null,
+    email:{estado:"Entregado", destinatario:"finanzas@interbank.pe", asunto:"Cotización COT-2026-005 · Edenred Perú",
+      intentos:[{fecha:"2026-07-19", resultado:"Enviado"}]},
+    historial:[
+      {fecha:"2026-07-19", usuario:"F. Ruiz", accion:"Cotización generada", detalle:"Generada a partir de la propuesta COD-2026-002, validada como rentable."},
+      {fecha:"2026-07-19", usuario:"F. Ruiz", accion:"Enviada al cliente", detalle:"Email enviado a finanzas@interbank.pe."}
+    ]
+  },
+  {
+    id: nextCotId(), codigo:"COT-2026-006", propuestaCodigo:"COD-2026-006",
+    fechaGeneracion:"2026-07-14", validaHasta:"2026-07-29", responsable:"F. Ruiz",
+    estado:"Oportunidad perdida", motivoRechazo:null, comentarioPerdida:"El cliente decidió postergar el proyecto de Gift Card para el siguiente semestre.", documentoSustento:null,
+    email:{estado:"Entregado", destinatario:"compras@sodimac.com.pe", asunto:"Cotización COT-2026-006 · Edenred Perú",
+      intentos:[{fecha:"2026-07-14", resultado:"Enviado"}]},
+    historial:[
+      {fecha:"2026-07-14", usuario:"F. Ruiz", accion:"Cotización generada", detalle:"Generada a partir de la propuesta COD-2026-006, validada como rentable."},
+      {fecha:"2026-07-14", usuario:"F. Ruiz", accion:"Enviada al cliente", detalle:"Email enviado a compras@sodimac.com.pe."},
+      {fecha:"2026-07-21", usuario:"F. Ruiz", accion:"Oportunidad perdida", detalle:"El cliente decidió postergar el proyecto de Gift Card para el siguiente semestre."}
+    ]
+  },
+  {
+    id: nextCotId(), codigo:"COT-2026-007", propuestaCodigo:"COD-2026-010",
+    fechaGeneracion:"2026-07-21", validaHasta:"2026-08-05", responsable:"F. Ruiz",
+    estado:"Enviada", motivoRechazo:null, comentarioPerdida:null, documentoSustento:null,
+    email:{estado:"Fallido", destinatario:"contacto@compartamos.pe", asunto:"Cotización COT-2026-007 · Edenred Perú",
+      intentos:[{fecha:"2026-07-21", resultado:"Fallido"}]},
+    historial:[
+      {fecha:"2026-07-21", usuario:"F. Ruiz", accion:"Cotización generada", detalle:"Generada a partir de la propuesta COD-2026-010, validada como rentable."},
+      {fecha:"2026-07-21", usuario:"F. Ruiz", accion:"Enviada al cliente", detalle:"Intento de envío falló — error de entrega del proveedor de email."}
+    ]
+  },
+  {
+    id: nextCotId(), codigo:"COT-2026-008", propuestaCodigo:"COD-2026-004",
+    fechaGeneracion:"2026-07-23", validaHasta:"2026-08-07", responsable:"F. Ruiz",
+    estado:"Generada", motivoRechazo:null, comentarioPerdida:null, documentoSustento:null,
+    email:{estado:"Sin enviar", destinatario:"legal@rappi.com.pe", asunto:"Cotización COT-2026-008 · Edenred Perú", intentos:[]},
+    historial:[
+      {fecha:"2026-07-23", usuario:"F. Ruiz", accion:"Cotización generada", detalle:"Generada a partir de la propuesta COD-2026-004, validada como rentable."}
+    ]
+  },
+  {
+    id: nextCotId(), codigo:"COT-2026-009", propuestaCodigo:"COD-2026-007",
+    fechaGeneracion:"2026-07-24", validaHasta:"2026-08-08", responsable:"F. Ruiz",
+    estado:"Enviada", motivoRechazo:null, comentarioPerdida:null, documentoSustento:null,
+    email:{estado:"Enviado", destinatario:"gerencia@cineplanet.com.pe", asunto:"Cotización COT-2026-009 · Edenred Perú",
+      intentos:[{fecha:"2026-07-24", resultado:"Enviado"}]},
+    historial:[
+      {fecha:"2026-07-24", usuario:"F. Ruiz", accion:"Cotización generada", detalle:"Generada a partir de la propuesta COD-2026-007, validada como rentable."},
+      {fecha:"2026-07-24", usuario:"F. Ruiz", accion:"Enviada al cliente", detalle:"Email enviado a gerencia@cineplanet.com.pe."}
+    ]
+  },
+  {
+    id: nextCotId(), codigo:"COT-2026-010", propuestaCodigo:"COD-2026-011",
+    fechaGeneracion:"2026-07-08", validaHasta:"2026-07-23", responsable:"F. Ruiz",
+    estado:"Aprobada", motivoRechazo:null, comentarioPerdida:null,
+    documentoSustento:{nombreArchivo:"sustento_aprobacion_sanfernando.pdf", fecha:"2026-07-15"},
+    email:{estado:"Leído", destinatario:"tesoreria@sanfernando.com.pe", asunto:"Cotización COT-2026-010 · Edenred Perú",
+      intentos:[{fecha:"2026-07-08", resultado:"Enviado"}]},
+    historial:[
+      {fecha:"2026-07-08", usuario:"F. Ruiz", accion:"Cotización generada", detalle:"Generada a partir de la propuesta COD-2026-011, validada como rentable."},
+      {fecha:"2026-07-08", usuario:"F. Ruiz", accion:"Enviada al cliente", detalle:"Email enviado a tesoreria@sanfernando.com.pe."},
+      {fecha:"2026-07-10", usuario:"Sistema", accion:"Email leído", detalle:"El cliente abrió el email de la cotización."},
+      {fecha:"2026-07-15", usuario:"F. Ruiz", accion:"Cotización aprobada", detalle:"Aprobada con documento de sustento adjunto."}
+    ]
+  }
+];
+
+function findQuotation(id){ return quotations.find(q=>q.id===id); }
+
+/* ---------- Filtros + tabla ---------- */
+let filteredCot = quotations.slice();
+let cotCurrentPage = 1;
+const COT_PAGE_SIZE = 8;
+
+function applyCotFilters(){
+  const cliente = document.getElementById("fCotCliente").value.trim().toLowerCase();
+  const estado = document.getElementById("fCotEstado").value;
+  const fechaIni = document.getElementById("fCotFechaIni").value;
+  const fechaFin = document.getElementById("fCotFechaFin").value;
+
+  filteredCot = quotations.filter(q=>{
+    const p = findProposalByCodigo(q.propuestaCodigo);
+    if(cliente){
+      const hay = (p.razonSocial.toLowerCase().includes(cliente)) || p.ruc.includes(cliente);
+      if(!hay) return false;
+    }
+    if(estado && q.estado !== estado) return false;
+    if(fechaIni && q.fechaGeneracion < fechaIni) return false;
+    if(fechaFin && q.fechaGeneracion > fechaFin) return false;
+    return true;
+  });
+  cotCurrentPage = 1;
+  renderCotTable();
+}
+
+function clearCotFilters(){
+  document.getElementById("fCotCliente").value = "";
+  document.getElementById("fCotEstado").value = "";
+  document.getElementById("fCotFechaIni").value = "";
+  document.getElementById("fCotFechaFin").value = "";
+  const panel = document.getElementById("fCotCliente").closest(".filters-panel");
+  if(panel) updateFiltersCount(panel);
+  applyCotFilters();
+}
+
+function renderCotKPIs(){
+  const sent = quotations.filter(q=>q.estado!=="Generada").length;
+  const pending = quotations.filter(q=>q.estado==="Enviada").length;
+  const now = "2026-07"; // mes de referencia de la demo (Julio 2026), mismo criterio que "BV cerrado en el mes" de Propuestas
+  const approvedThisMonth = quotations.filter(q=>q.estado==="Aprobada" && q.fechaGeneracion.startsWith(now));
+  document.getElementById("kpiCotSent").textContent = intFmt(sent);
+  document.getElementById("kpiCotPending").textContent = intFmt(pending);
+  document.getElementById("kpiCotApproved").textContent = intFmt(approvedThisMonth.length);
+  document.getElementById("kpiCotApprovedSub").textContent = "Julio 2026";
+}
+
+function emailIconSvg(estado){
+  if(estado==="Enviando") return '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="2" stroke-dasharray="30 12"/></svg>';
+  if(estado==="Entregado") return '<svg viewBox="0 0 24 24" fill="none"><path d="M4 4l16 8-16 8V4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>';
+  if(estado==="Leído") return '<svg viewBox="0 0 24 24" fill="none"><path d="M4 12s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.2" stroke="currentColor" stroke-width="1.8"/></svg>';
+  if(estado==="Fallido") return '<svg viewBox="0 0 24 24" fill="none"><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>';
+  if(estado==="Enviado") return '<svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  return '<svg viewBox="0 0 24 24" fill="none"><rect x="4" y="6" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M4 7l8 6 8-6" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>';
+}
+
+function renderCotTable(){
+  const tbody = document.getElementById("cotTableBody");
+  document.getElementById("cotResultCount").textContent = filteredCot.length;
+
+  const totalPages = Math.max(1, Math.ceil(filteredCot.length / COT_PAGE_SIZE));
+  if(cotCurrentPage > totalPages) cotCurrentPage = totalPages;
+  const start = (cotCurrentPage-1)*COT_PAGE_SIZE;
+  const pageItems = filteredCot.slice(start, start+COT_PAGE_SIZE);
+
+  if(pageItems.length===0){
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">
+      <svg viewBox="0 0 24 24" width="40" height="40" fill="none"><rect x="3" y="6" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <strong>No se encontraron cotizaciones</strong>
+      <p>Ajusta los filtros de búsqueda para ver más resultados.</p>
+    </div></td></tr>`;
+  } else {
+    tbody.innerHTML = pageItems.map(q=>{
+      const p = findProposalByCodigo(q.propuestaCodigo);
+      return `
+      <tr data-cotid="${q.id}" role="button" tabindex="0" aria-label="Ver detalle de ${esc(q.codigo)}">
+        <td class="cell-codigo">${esc(q.codigo)}</td>
+        <td class="cell-empresa"><strong>${esc(p.razonSocial)}</strong><span>${esc(p.giro)}</span></td>
+        <td class="cell-hide-mobile">${esc(q.propuestaCodigo)}</td>
+        <td class="cell-hide-mobile"><span class="tag-neutral">${esc(p.solucion)}</span></td>
+        <td class="num cell-bv">${money(bvTotalFor(p))}</td>
+        <td class="cell-estado"><span class="badge ${cotBadgeClass(q.estado)}">${esc(q.estado)}</span></td>
+        <td class="cell-hide-mobile">${esc(q.email.estado)}</td>
+        <td class="cell-hide-mobile">${fmtDate(q.fechaGeneracion)}</td>
+        <td class="center cell-acciones">
+          <div class="row-actions">
+            <button type="button" class="icon-btn history" data-cotaction="view" data-cotid="${q.id}" title="Ver detalle">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M4 12s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.4" stroke="currentColor" stroke-width="1.7"/></svg>
+            </button>
+          </div>
+        </td>
+      </tr>`;
+    }).join("");
+  }
+
+  document.getElementById("cotPagFrom").textContent = filteredCot.length ? start+1 : 0;
+  document.getElementById("cotPagTo").textContent = Math.min(start+COT_PAGE_SIZE, filteredCot.length);
+  document.getElementById("cotPagTotal").textContent = filteredCot.length;
+  renderCotPagination(totalPages);
+  renderCotKPIs();
+}
+
+function renderCotPagination(totalPages){
+  const wrap = document.getElementById("cotPagControls");
+  let html = `<button class="page-btn" data-cotpage="prev" ${cotCurrentPage===1?"disabled":""}>
+      <svg viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>`;
+  for(let i=1;i<=totalPages;i++){
+    html += `<button class="page-btn ${i===cotCurrentPage?"active":""}" data-cotpage="${i}">${i}</button>`;
+  }
+  html += `<button class="page-btn" data-cotpage="next" ${cotCurrentPage===totalPages?"disabled":""}>
+      <svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>`;
+  wrap.innerHTML = html;
+}
+
+/* ---------- Drawer de detalle (solo lectura) ---------- */
+let cotDrawerTargetId = null;
+const cotizacionDrawer = document.getElementById("cotizacionDrawer");
+const cotOverlay = document.getElementById("cotOverlay");
+
+function setLockedValue(id, text){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.querySelector(".lv-text").textContent = text;
+}
+
+/* Reutiliza condRowsFromProposal(p) tal cual — la misma función que
+   arma la tabla editable de Propuestas — para no duplicar el mapeo de
+   comisión/factura mínima/gastos/condiciones extra en dos lugares. */
+function renderCotCondiciones(p){
+  const body = document.getElementById("cq_condicionesBody");
+  const rows = condRowsFromProposal(p);
+  body.innerHTML = rows.map(c=>`
+    <tr class="${c.exonerado ? "cond-row-exempt" : ""}">
+      <td>${esc(c.concepto)}</td>
+      <td><span class="tag-neutral">${c.tipo==="moneda" ? "Moneda" : "Porcentual"}</span></td>
+      <td>${c.tipo==="moneda" ? moneyDec(c.valor) : c.valor+"%"}</td>
+      <td class="center">${c.exonerado ? '<span class="cond-locked">Sí</span>' : "No"}</td>
+    </tr>`).join("");
+}
+
+function renderCotDistribucion(p){
+  const body = document.getElementById("cq_distribucionBody");
+  body.innerHTML = (p.distribucion||[]).map(d=>`
+    <tr><td>${esc(d.destino)}</td><td>${intFmt(d.cantidadPuntos)}</td></tr>`).join("");
+}
+
+function renderCotHistory(q){
+  const tl = document.getElementById("cq_historyTimeline");
+  const rev = q.historial.slice().reverse();
+  tl.innerHTML = rev.map((h,idx)=>`
+    <li class="timeline-item ${idx===0?"is-current":""}">
+      <span class="timeline-dot">${rev.length-idx}</span>
+      <div class="timeline-card">
+        <div class="timeline-card-head"><strong>${esc(h.accion)}</strong></div>
+        <p class="timeline-meta">${fmtDate(h.fecha)} · ${esc(h.usuario)}</p>
+        <p class="timeline-summary">${esc(h.detalle)}</p>
+      </div>
+    </li>`).join("");
+}
+
+function renderCotResultBox(q){
+  const wrap = document.getElementById("cq_resultadoWrap");
+  const box = document.getElementById("cq_resultadoBox");
+  if(q.estado==="Rechazada" && q.motivoRechazo){
+    wrap.style.display = "block";
+    box.innerHTML = `<h5>Motivo del rechazo</h5><p class="hint">"${esc(q.motivoRechazo)}"</p>`;
+  } else if(q.estado==="Oportunidad perdida" && q.comentarioPerdida){
+    wrap.style.display = "block";
+    box.innerHTML = `<h5>Comentario de oportunidad perdida</h5><p class="hint">"${esc(q.comentarioPerdida)}"</p>`;
+  } else if(q.estado==="Aprobada" && q.documentoSustento){
+    wrap.style.display = "block";
+    box.innerHTML = `<h5>Documento de sustento</h5>
+      <div class="file-chip-list"><span class="file-chip">${esc(q.documentoSustento.nombreArchivo)}</span></div>
+      <p class="hint" style="margin-top:8px;">Adjuntado el ${fmtDate(q.documentoSustento.fecha)}.</p>`;
+  } else {
+    wrap.style.display = "none";
+    box.innerHTML = "";
+  }
+}
+
+function renderCotEmailBar(q){
+  const icon = document.getElementById("cotEmailIcon");
+  const stateText = document.getElementById("cotEmailStateText");
+  const subText = document.getElementById("cotEmailSubText");
+  const resendBtn = document.getElementById("btnResendEmail");
+  const e = q.email.estado;
+
+  icon.className = "cot-email-icon" + (
+    e==="Enviando" ? " is-sending" :
+    e==="Entregado" ? " is-delivered" :
+    e==="Leído" ? " is-read" :
+    e==="Fallido" ? " is-failed" : ""
+  );
+  icon.innerHTML = emailIconSvg(e);
+  stateText.textContent = e;
+  const subs = {
+    "Sin enviar":"Aún no se ha enviado esta cotización al cliente",
+    "Enviando":"Enviando el email al cliente…",
+    "Enviado":"El email fue enviado, esperando confirmación de entrega",
+    "Entregado":"El email llegó a la casilla del cliente",
+    "Leído":"El cliente abrió el email de la cotización",
+    "Fallido":"No se pudo entregar el email — intenta reenviar"
+  };
+  subText.textContent = subs[e] || "";
+  resendBtn.style.display = (e==="Sin enviar" || e==="Enviando") ? "none" : "inline-flex";
+}
+
+function renderCotFooterButtons(q){
+  const left = document.getElementById("cotFooterLeft");
+  const right = document.getElementById("cotFooterRight");
+  let leftHtml = "", rightHtml = `<button class="btn-text" id="btnCloseCotDrawerFooter" type="button">Cerrar</button>`;
+
+  if(q.estado==="Generada"){
+    leftHtml = `<button class="btn btn-outline-danger" id="btnCotMarkLost" type="button">Marcar como oportunidad perdida</button>`;
+    rightHtml += `<button class="btn btn-primary" id="btnCotSend" type="button">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M4 4l16 8-16 8V4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      Enviar cotización al cliente
+    </button>`;
+  } else if(q.estado==="Enviada"){
+    leftHtml = `<button class="btn btn-outline-danger" id="btnCotReject" type="button">Rechazar cotización</button>
+      <button class="btn btn-secondary" id="btnCotMarkLost" type="button">Marcar como oportunidad perdida</button>`;
+    rightHtml += `<button class="btn btn-primary" id="btnCotApprove" type="button">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Aprobar cotización
+    </button>`;
+  }
+  left.innerHTML = leftHtml;
+  right.innerHTML = rightHtml;
+
+  document.getElementById("btnCloseCotDrawerFooter").addEventListener("click", closeCotDrawer);
+  const sendBtn = document.getElementById("btnCotSend");
+  if(sendBtn) sendBtn.addEventListener("click", ()=>sendCotEmail(q, {isResend:false}));
+  const rejectBtn = document.getElementById("btnCotReject");
+  if(rejectBtn) rejectBtn.addEventListener("click", ()=>openCotRejectModal(q));
+  const approveBtn = document.getElementById("btnCotApprove");
+  if(approveBtn) approveBtn.addEventListener("click", ()=>openCotApproveModal(q));
+  const lostBtn = document.getElementById("btnCotMarkLost");
+  if(lostBtn) lostBtn.addEventListener("click", ()=>openCotLostModal(q));
+}
+
+function openCotDrawer(id){
+  cotDrawerTargetId = id;
+  const q = findQuotation(id);
+  const p = findProposalByCodigo(q.propuestaCodigo);
+
+  document.getElementById("cotDrawerEyebrow").innerHTML = `Cotización · <span class="badge ${cotBadgeClass(q.estado)}" style="vertical-align:middle;">${esc(q.estado)}</span>`;
+  document.getElementById("cotDrawerTitle").textContent = p.razonSocial;
+  document.getElementById("cotDrawerRuc").textContent = p.ruc;
+  document.getElementById("cotDrawerCodigo").textContent = q.codigo;
+  document.getElementById("cotDrawerOrigen").textContent = q.propuestaCodigo;
+
+  setLockedValue("cq_ruc", p.ruc);
+  setLockedValue("cq_razonSocial", p.razonSocial);
+  setLockedValue("cq_giro", p.giro);
+  setLockedValue("cq_direccion", p.direccion);
+  setLockedValue("cq_esCliente", p.esCliente ? "Sí" : "No");
+
+  setLockedValue("cq_solucion", p.solucion);
+  setLockedValue("cq_marca", p.marca);
+  setLockedValue("cq_sector", p.sector);
+  setLockedValue("cq_categoria", p.categoria);
+  setLockedValue("cq_modalidadPago", p.modalidadPago);
+  setLockedValue("cq_diasCredito", p.modalidadPago==="Crédito" ? intFmt(p.diasCredito)+" días" : "No aplica");
+  setLockedValue("cq_tipoProducto", p.tipoProducto);
+  setLockedValue("cq_valorFacial", moneyDec(p.valorFacial));
+  setLockedValue("cq_cantTarjetas", intFmt(p.cantTarjetas));
+  setLockedValue("cq_bvCarga", money(calcBvCarga(p.valorFacial, p.cantTarjetas)));
+  setLockedValue("cq_cargasAnio", intFmt(p.cargasAnio));
+  setLockedValue("cq_bvTotal", money(bvTotalFor(p)));
+  const rebateWrap = document.getElementById("cq_rebateWrap");
+  if(p.rebate && p.rebate.activo){
+    rebateWrap.classList.add("open");
+    setLockedValue("cq_rebateTipo", p.rebate.tipo==="porcentaje" ? "% de BV" : "Monto fijo");
+    setLockedValue("cq_rebateValor", p.rebate.tipo==="porcentaje" ? p.rebate.valor+"%" : moneyDec(p.rebate.valor));
+  } else {
+    rebateWrap.classList.remove("open");
+  }
+
+  renderCotCondiciones(p);
+  renderCotDistribucion(p);
+
+  setLockedValue("cq_logoEmpresa", p.logoEmpresa ? "Sí" : "No");
+
+  setLockedValue("cq_cartaFianza", p.cartaFianza ? "Sí" : "No");
+  const cfWrap = document.getElementById("cq_montoCartaFianzaWrap");
+  if(p.cartaFianza){ cfWrap.classList.add("open"); setLockedValue("cq_montoCartaFianza", moneyDec(p.montoCartaFianza||0)); }
+  else cfWrap.classList.remove("open");
+
+  setLockedValue("cq_productoCustom", p.productoCustom ? "Sí" : "No");
+  const mdrWrap = document.getElementById("cq_mdrNegociadoWrap");
+  if(p.productoCustom){ mdrWrap.classList.add("open"); setLockedValue("cq_mdrNegociado", p.mdrNegociado+"%"); }
+  else mdrWrap.classList.remove("open");
+
+  setLockedValue("cq_codigo", q.codigo);
+  setLockedValue("cq_fechaGeneracion", fmtDate(q.fechaGeneracion));
+  setLockedValue("cq_validaHasta", fmtDate(q.validaHasta));
+  setLockedValue("cq_responsable", q.responsable);
+  document.getElementById("cq_estadoBadgeWrap").innerHTML = `<span class="badge ${cotBadgeClass(q.estado)}">${esc(q.estado)}</span>`;
+
+  renderCotResultBox(q);
+  renderCotHistory(q);
+  renderCotEmailBar(q);
+  renderCotFooterButtons(q);
+
+  document.querySelectorAll("#cotizacionDrawer .drawer-nav-item").forEach((b,i)=>b.classList.toggle("active", i===0));
+  document.getElementById("cotizacionForm").scrollTop = 0;
+
+  cotizacionDrawer.classList.add("open");
+  cotizacionDrawer.setAttribute("aria-hidden","false");
+  cotOverlay.classList.add("visible");
+  trapFocus(cotizacionDrawer);
+}
+
+function closeCotDrawer(){
+  releaseFocusTrap(cotizacionDrawer);
+  cotizacionDrawer.classList.remove("open");
+  cotizacionDrawer.classList.remove("expanded");
+  cotizacionDrawer.setAttribute("aria-hidden","true");
+  cotOverlay.classList.remove("visible");
+}
+
+/* Refresca todo lo que puede haber cambiado sin re-abrir el drawer
+   (estado, footer, barra de email, historial) — usado después de
+   cualquier acción que transicione la cotización mientras el drawer
+   sigue abierto. */
+function refreshCotDrawerIfOpen(q){
+  if(cotDrawerTargetId !== q.id) return;
+  document.getElementById("cotDrawerEyebrow").innerHTML = `Cotización · <span class="badge ${cotBadgeClass(q.estado)}" style="vertical-align:middle;">${esc(q.estado)}</span>`;
+  document.getElementById("cq_estadoBadgeWrap").innerHTML = `<span class="badge ${cotBadgeClass(q.estado)}">${esc(q.estado)}</span>`;
+  renderCotResultBox(q);
+  renderCotHistory(q);
+  renderCotEmailBar(q);
+  renderCotFooterButtons(q);
+}
+
+/* ---------- Simulación de envío de email (fetch + delay + spinner) ---------- */
+function cotSetButtonLoading(btn, label){
+  if(!btn) return;
+  btn.dataset.originalHtml = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `<span class="btn-spinner"></span> ${label}`;
+}
+function cotRestoreButton(btn){
+  if(!btn) return;
+  btn.disabled = false;
+  if(btn.dataset.originalHtml){ btn.innerHTML = btn.dataset.originalHtml; delete btn.dataset.originalHtml; }
+}
+
+/* fetch() simulado: nunca llama a una red real, solo envuelve el delay
+   artificial en una Promise para que el flujo se sienta como una
+   llamada asíncrona real (misma técnica pedida explícitamente). */
+function simulateEmailFetch(){
+  return new Promise(resolve=>{
+    setTimeout(()=>{
+      const failed = Math.random() < 0.15;
+      resolve(failed ? "Fallido" : "Enviado");
+    }, 1200 + Math.random()*600);
+  });
+}
+
+function sendCotEmail(q, opts){
+  const isResend = !!(opts && opts.isResend);
+  const btn = isResend ? document.getElementById("btnResendEmail") : document.getElementById("btnCotSend");
+  cotSetButtonLoading(btn, isResend ? "Reenviando…" : "Enviando…");
+  q.email.estado = "Enviando";
+  refreshCotDrawerIfOpen(q);
+
+  simulateEmailFetch().then(resultado=>{
+    q.email.estado = resultado;
+    q.email.intentos.push({fecha:"2026-07-25", resultado});
+    cotRestoreButton(btn);
+
+    if(resultado==="Enviado" && !isResend){
+      q.estado = "Enviada";
+      q.historial.push({fecha:"2026-07-25", usuario:"F. Ruiz", accion:"Enviada al cliente", detalle:`Email enviado a ${q.email.destinatario}.`});
+    } else if(resultado==="Enviado" && isResend){
+      q.historial.push({fecha:"2026-07-25", usuario:"F. Ruiz", accion:"Email reenviado", detalle:`Reenvío exitoso a ${q.email.destinatario}.`});
+    } else {
+      q.historial.push({fecha:"2026-07-25", usuario:"F. Ruiz", accion:"Envío fallido", detalle:"Error de entrega del proveedor de email — se puede reintentar."});
+    }
+
+    refreshCotDrawerIfOpen(q);
+    renderCotTable();
+    showToast(resultado==="Enviado" ? `Email ${isResend?"reenviado":"enviado"} correctamente.` : "No se pudo enviar el email. Puedes reintentar.", resultado==="Enviado" ? "success" : "danger");
+
+    if(resultado==="Enviado"){
+      if(!isResend) openCotEmailPreview(q);
+      // Simula el webhook asíncrono de entrega (Infobip), independiente de si el drawer sigue abierto
+      setTimeout(()=>{
+        if(q.email.estado==="Enviado"){
+          q.email.estado = "Entregado";
+          q.historial.push({fecha:"2026-07-25", usuario:"Sistema", accion:"Email entregado", detalle:"Confirmación de entrega recibida del proveedor de email."});
+          refreshCotDrawerIfOpen(q);
+          renderCotTable();
+        }
+      }, 2000);
+    }
+  });
+}
+
+function openCotEmailPreview(q){
+  document.getElementById("cotEmailModalCodigo").textContent = q.codigo;
+  document.getElementById("cotEmailTo").textContent = q.email.destinatario;
+  document.getElementById("cotEmailSubject").textContent = q.email.asunto;
+  document.getElementById("cotEmailAttachmentName").textContent = `Cotizacion_${q.codigo}.pdf`;
+
+  const canAct = q.email.estado==="Enviado" || q.email.estado==="Entregado" || q.email.estado==="Leído";
+  const canRespond = canAct && q.estado==="Enviada";
+  const approveLink = document.getElementById("cotEmailLinkApprove");
+  const rejectLink = document.getElementById("cotEmailLinkReject");
+  approveLink.disabled = !canRespond;
+  rejectLink.disabled = !canRespond;
+  document.getElementById("cotEmailLinksHint").textContent = canRespond
+    ? ""
+    : (canAct ? "Esta cotización ya fue resuelta — los enlaces quedan inactivos." : "Los enlaces se activan una vez que el email se haya enviado correctamente.");
+
+  if(canAct && q.email.estado!=="Leído"){
+    q.email.estado = "Leído";
+    q.historial.push({fecha:"2026-07-25", usuario:"Sistema", accion:"Email leído", detalle:"El cliente abrió el email de la cotización (simulado)."});
+    refreshCotDrawerIfOpen(q);
+    renderCotTable();
+  }
+
+  document.getElementById("cotEmailModal").classList.add("open");
+  cotOverlay.classList.add("visible");
+  trapFocus(document.getElementById("cotEmailModal"));
+}
+
+/* ---------- Modales de acción (Rechazar / Perdida / Aprobar) ---------- */
+function openCotRejectModal(q){
+  closeModalById("cotEmailModal");
+  document.getElementById("cotRejectCodigo").textContent = q.codigo;
+  document.getElementById("cotRejectReason").value = "";
+  document.getElementById("cotRejectModal").classList.add("open");
+  cotOverlay.classList.add("visible");
+  trapFocus(document.getElementById("cotRejectModal"));
+}
+function confirmCotReject(){
+  const q = findQuotation(cotDrawerTargetId);
+  const motivo = document.getElementById("cotRejectReason").value.trim();
+  if(!motivo){ document.getElementById("cotRejectReason").focus(); return; }
+  q.estado = "Rechazada";
+  q.motivoRechazo = motivo;
+  q.historial.push({fecha:"2026-07-25", usuario:"F. Ruiz", accion:"Cotización rechazada", detalle:motivo});
+  closeModalById("cotRejectModal");
+  refreshCotDrawerIfOpen(q);
+  renderCotTable();
+  showToast(`Cotización ${q.codigo} marcada como Rechazada.`, "danger");
+}
+
+function openCotLostModal(q){
+  closeModalById("cotEmailModal");
+  document.getElementById("cotLostCodigo").textContent = q.codigo;
+  document.getElementById("cotLostComment").value = "";
+  document.getElementById("cotLostModal").classList.add("open");
+  cotOverlay.classList.add("visible");
+  trapFocus(document.getElementById("cotLostModal"));
+}
+function confirmCotLost(){
+  const q = findQuotation(cotDrawerTargetId);
+  const comentario = document.getElementById("cotLostComment").value.trim();
+  if(!comentario){ document.getElementById("cotLostComment").focus(); return; }
+  q.estado = "Oportunidad perdida";
+  q.comentarioPerdida = comentario;
+  q.historial.push({fecha:"2026-07-25", usuario:"F. Ruiz", accion:"Oportunidad perdida", detalle:comentario});
+  closeModalById("cotLostModal");
+  refreshCotDrawerIfOpen(q);
+  renderCotTable();
+  showToast(`Cotización ${q.codigo} marcada como Oportunidad perdida.`, "info");
+}
+
+let cotApproveFiles = [];
+function renderCotApproveFiles(){
+  const list = document.getElementById("cotApproveFileList");
+  list.innerHTML = cotApproveFiles.map((f,i)=>`<span class="file-chip">${esc(f)}<button type="button" data-cotfileidx="${i}">
+    <svg viewBox="0 0 24 24" width="11" height="11" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  </button></span>`).join("");
+  list.querySelectorAll("button[data-cotfileidx]").forEach(btn=>{
+    btn.addEventListener("click", e=>{
+      cotApproveFiles.splice(+e.currentTarget.dataset.cotfileidx, 1);
+      renderCotApproveFiles();
+      document.getElementById("btnConfirmCotApprove").disabled = cotApproveFiles.length===0;
+    });
+  });
+}
+function openCotApproveModal(q){
+  closeModalById("cotEmailModal");
+  cotApproveFiles = [];
+  renderCotApproveFiles();
+  document.getElementById("cotApproveCodigo").textContent = q.codigo;
+  document.getElementById("btnConfirmCotApprove").disabled = true;
+  document.getElementById("cotApproveModal").classList.add("open");
+  cotOverlay.classList.add("visible");
+  trapFocus(document.getElementById("cotApproveModal"));
+}
+function confirmCotApprove(){
+  const q = findQuotation(cotDrawerTargetId);
+  if(!cotApproveFiles.length) return;
+  q.estado = "Aprobada";
+  q.documentoSustento = {nombreArchivo:cotApproveFiles[0], fecha:"2026-07-25"};
+  q.historial.push({fecha:"2026-07-25", usuario:"F. Ruiz", accion:"Cotización aprobada", detalle:"Aprobada con documento de sustento adjunto."});
+  closeModalById("cotApproveModal");
+  refreshCotDrawerIfOpen(q);
+  renderCotTable();
+  showToast(`Cotización ${q.codigo} marcada como Aprobada.`, "success");
+}
+
+/* ---------- Init ---------- */
+function initCotizacionesModule(){
+  renderCotTable();
+
+  document.getElementById("fCotCliente").addEventListener("input", applyCotFilters);
+  ["fCotEstado","fCotFechaIni","fCotFechaFin"].forEach(id=>{
+    document.getElementById(id).addEventListener("change", applyCotFilters);
+  });
+  document.getElementById("btnClearCotFilters").addEventListener("click", clearCotFilters);
+
+  function applyCotKpiFilter(estadoValue){
+    clearCotFilters();
+    document.getElementById("fCotEstado").value = estadoValue;
+    applyCotFilters();
+    document.querySelector('#view-cotizaciones .table-panel').scrollIntoView({behavior:"smooth", block:"start"});
+  }
+  [["kpiCotCardPending", ()=>applyCotKpiFilter("Enviada")],
+   ["kpiCotCardApproved", ()=>applyCotKpiFilter("Aprobada")]].forEach(([id, handler])=>{
+    const el = document.getElementById(id);
+    el.addEventListener("click", handler);
+    el.addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); handler(); } });
+  });
+  document.getElementById("kpiCotCardSent").addEventListener("click", ()=>{
+    clearCotFilters();
+    document.querySelector('#view-cotizaciones .table-panel').scrollIntoView({behavior:"smooth", block:"start"});
+  });
+
+  document.getElementById("cotTableBody").addEventListener("click", function(e){
+    const btn = e.target.closest("button[data-cotaction]");
+    const row = e.target.closest("tr[data-cotid]");
+    const id = btn ? btn.dataset.cotid : (row ? row.dataset.cotid : null);
+    if(id) openCotDrawer(id);
+  });
+  document.getElementById("cotTableBody").addEventListener("keydown", function(e){
+    if(e.key!=="Enter" && e.key!==" ") return;
+    const row = e.target.closest("tr[data-cotid]");
+    if(row){ e.preventDefault(); openCotDrawer(row.dataset.cotid); }
+  });
+
+  document.getElementById("cotPagControls").addEventListener("click", function(e){
+    const btn = e.target.closest("button[data-cotpage]");
+    if(!btn || btn.disabled) return;
+    const p = btn.dataset.cotpage;
+    const totalPages = Math.max(1, Math.ceil(filteredCot.length / COT_PAGE_SIZE));
+    if(p==="prev") cotCurrentPage = Math.max(1, cotCurrentPage-1);
+    else if(p==="next") cotCurrentPage = Math.min(totalPages, cotCurrentPage+1);
+    else cotCurrentPage = +p;
+    renderCotTable();
+    document.querySelector('#view-cotizaciones .table-panel').scrollIntoView({behavior:"smooth", block:"nearest"});
+  });
+
+  // Drawer chrome
+  document.getElementById("btnCloseCotDrawer").addEventListener("click", closeCotDrawer);
+  document.getElementById("btnExpandCotDrawer").addEventListener("click", ()=>cotizacionDrawer.classList.toggle("expanded"));
+  cotOverlay.addEventListener("click", ()=>{ closeCotDrawer(); closeAllModals(); });
+  document.getElementById("cotDrawerOrigen").addEventListener("click", ()=>{
+    const q = findQuotation(cotDrawerTargetId);
+    closeCotDrawer();
+    openDrawer("edit", findProposalByCodigo(q.propuestaCodigo).id);
+  });
+
+  // Drawer nav scroll-spy — scopeado a #cotizacionDrawer, independiente
+  // del scroll-spy de Propuestas (mismo criterio que evitó el bug de
+  // Fase 4 con ".form-section" sin acotar).
+  cotizacionDrawer.querySelectorAll(".drawer-nav-item").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      document.getElementById(btn.dataset.cotTarget).scrollIntoView({behavior:"smooth", block:"start"});
+      cotizacionDrawer.querySelectorAll(".drawer-nav-item").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      scrollNavItemIntoView(btn);
+    });
+  });
+  document.getElementById("cotizacionForm").addEventListener("scroll", function(){
+    const sections = [...cotizacionDrawer.querySelectorAll("#cotizacionForm .form-section")];
+    const scrollTop = this.scrollTop;
+    let activeIdx = 0;
+    sections.forEach((s,i)=>{ if(s.offsetTop - 80 <= scrollTop) activeIdx = i; });
+    let activeBtn = null;
+    cotizacionDrawer.querySelectorAll(".drawer-nav-item").forEach((b,i)=>{
+      const isActive = i===activeIdx;
+      b.classList.toggle("active", isActive);
+      if(isActive) activeBtn = b;
+    });
+    if(activeBtn) scrollNavItemIntoView(activeBtn);
+  });
+
+  // Email bar — Reenviar
+  document.getElementById("btnResendEmail").addEventListener("click", ()=>{
+    sendCotEmail(findQuotation(cotDrawerTargetId), {isResend:true});
+  });
+
+  // Email preview modal — links simulados. Abren el modal real
+  // correspondiente (con su motivo/documento obligatorio) en vez de
+  // transicionar el estado a ciegas — así una respuesta "del cliente"
+  // vía email sigue las mismas reglas de datos que una acción manual.
+  document.getElementById("cotEmailLinkApprove").addEventListener("click", function(){
+    if(this.disabled) return;
+    closeModalById("cotEmailModal");
+    openCotApproveModal(findQuotation(cotDrawerTargetId));
+  });
+  document.getElementById("cotEmailLinkReject").addEventListener("click", function(){
+    if(this.disabled) return;
+    closeModalById("cotEmailModal");
+    openCotRejectModal(findQuotation(cotDrawerTargetId));
+  });
+
+  // Modales de acción
+  document.getElementById("btnConfirmCotReject").addEventListener("click", confirmCotReject);
+  document.getElementById("btnConfirmCotLost").addEventListener("click", confirmCotLost);
+  document.getElementById("btnConfirmCotApprove").addEventListener("click", confirmCotApprove);
+  document.getElementById("cotApproveFileDrop").addEventListener("click", ()=>{
+    const n = cotApproveFiles.length + 1;
+    cotApproveFiles.push(`sustento_cotizacion_0${n}.pdf`);
+    renderCotApproveFiles();
+    document.getElementById("btnConfirmCotApprove").disabled = false;
+  });
+}
 
 /* ============================================================
    NAVEGACIÓN LATERAL (Sidebar) — cambio de vista y responsive
    ============================================================ */
 const PLACEHOLDER_COPY = {
-  "cotizaciones": {crumb:"Gestión comercial › Cotizaciones", title:"Cotizaciones", heading:"Cotizaciones", body:"Próximamente podrás dar seguimiento a las cotizaciones generadas a partir de propuestas rentables."},
   "orden-comercial": {crumb:"Gestión comercial › Orden Comercial", title:"Orden Comercial", heading:"Orden Comercial", body:"Próximamente podrás gestionar la orden comercial generada a partir de una propuesta o cotización aprobada."},
   "linea-credito": {crumb:"Flujos de Aprobación › Línea de Crédito", title:"Línea de Crédito", heading:"Línea de Crédito", body:"Próximamente podrás revisar de forma consolidada las solicitudes de línea de crédito de todas las propuestas."},
   "excepciones": {crumb:"Flujos de Aprobación › Excepciones", title:"Excepciones", heading:"Excepciones", body:"Próximamente podrás revisar de forma consolidada las solicitudes de excepción de todas las propuestas."},
@@ -1886,6 +2669,10 @@ function initSidebarNav(){
     "propuestas": {
       crumb: 'Gestión comercial <b>›</b> Propuestas',
       title: "Propuestas comerciales"
+    },
+    "cotizaciones": {
+      crumb: 'Gestión comercial <b>›</b> Cotizaciones',
+      title: "Cotizaciones comerciales"
     },
     "pricebook": {
       crumb: 'Pricebook <b>›</b> Servicios y Tarifas',

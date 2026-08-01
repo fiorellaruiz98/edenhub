@@ -3068,3 +3068,119 @@ table.approval-table{width:100%;border-collapse:collapse;}
     min-height:44px;
   }
 }
+
+/* ============================================================
+   MÓDULO COTIZACIONES (#view-cotizaciones + #cotizacionDrawer)
+   Reutiliza en su totalidad los componentes genéricos del host
+   (.kpi-card, .filters-panel, .data-table, .drawer, .form-section,
+   .locked-value, .cond-table, .mini-table, .timeline, .file-drop,
+   .reject-icon, .warn-box, .modal) — aquí solo viven los pocos
+   elementos sin equivalente previo: el badge "Enviada", el chip de
+   propuesta de origen, la barra de estado de email y el preview del
+   email simulado.
+   ============================================================ */
+
+/* Badge de estado — Generada/Aprobada/Rechazada reutilizan
+   badge-creada/badge-aprobada/badge-rechazada tal cual; Oportunidad
+   perdida reutiliza badge-borrador (mismo gris neutro). Solo
+   "Enviada" no tiene equivalente y necesita una clase nueva. */
+.badge-enviada{background:#FFF3D6;color:#8A5A00;}
+.badge-enviada::before{background:#8A5A00;}
+
+/* Chip de propuesta de origen, en el header del drawer */
+.cot-origin-chip{
+  display:inline;background:none;border:none;padding:0;
+  color:var(--red-hero-dark);font-weight:700;font-size:inherit;
+  text-decoration:underline;cursor:pointer;
+}
+.cot-origin-chip:hover{color:var(--red-hero);}
+
+/* Barra de estado de email — siempre visible entre el body y el
+   footer del drawer, independiente del scroll de las secciones. */
+.cot-email-bar{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:12px 24px;
+  border-top:1px solid var(--border-soft);
+  background:var(--cold-white);
+  flex:0 0 auto;
+}
+.cot-email-bar-left{display:flex;align-items:center;gap:10px;}
+.cot-email-bar-left strong{display:block;font-size:12.5px;font-weight:700;color:var(--black);}
+.cot-email-bar-left span#cotEmailSubText{display:block;font-size:11px;color:var(--grey);margin-top:1px;}
+.cot-email-icon{
+  width:30px;height:30px;border-radius:50%;flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--light-grey);color:var(--grey);
+}
+.cot-email-icon svg{width:15px;height:15px;}
+.cot-email-icon.is-sending{background:#FFF3D6;color:#8A5A00;}
+.cot-email-icon.is-sending svg{animation:btn-spin 1s linear infinite;}
+.cot-email-icon.is-delivered{background:var(--status-creada-bg);color:var(--status-creada-fg);}
+.cot-email-icon.is-read{background:var(--status-aprobada-bg);color:var(--status-aprobada-fg);}
+.cot-email-icon.is-failed{background:var(--status-rechazada-bg);color:var(--status-rechazada-fg);}
+
+/* Demo banner + preview dentro del modal de email simulado */
+.cot-demo-banner{
+  display:flex;gap:9px;align-items:flex-start;
+  background:#FFF3D6;color:#8A5A00;
+  border-radius:var(--radius-s);
+  padding:10px 12px;font-size:11.5px;font-weight:600;
+  margin-bottom:14px;
+}
+.cot-demo-banner svg{flex:0 0 auto;margin-top:1px;}
+.cot-email-preview{border:1px solid var(--border-soft);border-radius:var(--radius-m);overflow:hidden;}
+.cot-email-meta{padding:12px 14px;border-bottom:1px solid var(--border-soft);background:var(--surface-muted);}
+.cot-email-meta p{display:flex;gap:8px;margin:0;font-size:12px;}
+.cot-email-meta p + p{margin-top:4px;}
+.cot-email-meta p span{color:var(--grey);min-width:48px;}
+.cot-email-meta p b{color:var(--black);font-weight:700;}
+.cot-email-body{padding:14px;font-size:12.5px;color:var(--black);line-height:1.55;}
+.cot-email-body p{margin:0 0 8px;}
+.cot-email-attachment{
+  display:inline-flex;align-items:center;gap:8px;
+  border:1px solid var(--border-soft);border-radius:var(--radius-s);
+  padding:8px 12px;margin:6px 0;font-size:12px;font-weight:600;color:var(--grey);
+  background:var(--surface-muted);
+}
+.cot-email-links{display:flex;gap:10px;margin-top:8px;}
+.cot-email-link{
+  border-radius:var(--radius-s);padding:9px 14px;font-size:12.5px;font-weight:700;
+  cursor:pointer;text-decoration:underline;background:none;border:none;
+}
+.cot-email-link.approve{color:var(--status-aprobada-fg);}
+.cot-email-link.reject{color:var(--red-hero-dark);}
+.cot-email-link:disabled{color:var(--grey);cursor:not-allowed;text-decoration:none;}
+.cot-email-links-hint{font-size:11px;color:var(--grey);margin:8px 0 0;}
+
+/* ---------- Fase 3 (tarjeta apilada en móvil) — mismo patrón que
+   Propuestas, adaptado a las columnas propias de Cotizaciones.
+   Visible en la tarjeta: Código, Razón social, Business Volume,
+   Estado, Acciones — el resto ya está disponible dentro del drawer
+   de detalle, igual que en Propuestas. ---------- */
+@media (max-width: 639px){
+  #view-cotizaciones .table-scroll{overflow-x:visible;}
+  #view-cotizaciones .data-table{min-width:0;width:100%;}
+  #view-cotizaciones .data-table thead{display:none;}
+  #view-cotizaciones .data-table tbody{display:block;}
+  #view-cotizaciones .data-table tbody tr{
+    display:block;cursor:pointer;
+    border:1px solid var(--border-soft);
+    border-radius:var(--radius-m);
+    padding:14px 16px;
+    margin-bottom:12px;
+    box-shadow:var(--shadow-card);
+    background:var(--white);
+  }
+  #view-cotizaciones .data-table tbody tr:hover{background:var(--white);}
+  #view-cotizaciones .data-table tbody td{
+    display:block;padding:0;border:none;white-space:normal;text-align:left;
+  }
+  #view-cotizaciones .data-table tbody td.cell-hide-mobile{display:none;}
+  #view-cotizaciones .data-table tbody td.cell-codigo{font-size:11px;color:var(--grey);margin-bottom:2px;}
+  #view-cotizaciones .data-table tbody td.cell-empresa{margin-bottom:8px;}
+  #view-cotizaciones .data-table tbody td.cell-bv{font-size:16px;font-weight:700;margin-bottom:8px;}
+  #view-cotizaciones .data-table tbody td.cell-estado{margin-bottom:10px;}
+  #view-cotizaciones .data-table tbody td.cell-acciones{padding-top:10px;border-top:1px solid var(--border-soft);}
+  #view-cotizaciones .data-table tbody .row-actions{justify-content:flex-start;gap:12px;}
+  #view-cotizaciones .data-table tbody .row-actions .icon-btn{width:44px;height:44px;}
+}
