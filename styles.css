@@ -3184,3 +3184,82 @@ table.approval-table{width:100%;border-collapse:collapse;}
   #view-cotizaciones .data-table tbody .row-actions{justify-content:flex-start;gap:12px;}
   #view-cotizaciones .data-table tbody .row-actions .icon-btn{width:44px;height:44px;}
 }
+
+/* ============================================================
+   MÓDULOS PERMISOS Y ROLES + USUARIOS
+   (#view-permisos + #roleDrawer, #view-usuarios + #userDrawer)
+   Reutilizan en su totalidad los componentes genéricos del host
+   (.kpi-card, .kpi-total/.kpi-open/.kpi-closed, .filters-panel,
+   .data-table, .drawer, .form-grid, .field-group, .locked-value,
+   .btn-outline-danger) — aquí solo viven la grilla de tarjetas de
+   rol y la tabla de matriz de permisos, sin equivalente previo.
+   ============================================================ */
+
+/* Grilla de tarjetas de rol */
+.role-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+  gap:14px;
+}
+.role-card{
+  display:flex;flex-direction:column;gap:10px;
+  background:var(--white);
+  border:1px solid var(--border-soft);
+  border-radius:var(--radius-m);
+  padding:16px;
+  cursor:pointer;
+  transition:box-shadow .2s ease,border-color .2s ease,transform .2s ease;
+}
+.role-card:hover{box-shadow:var(--shadow-card);border-color:var(--light-grey);transform:translateY(-1px);}
+.role-card-head{display:flex;align-items:center;gap:10px;}
+.role-card-icon{
+  width:38px;height:38px;border-radius:50%;flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--light-pink);color:var(--red-hero-dark);
+}
+.role-card-icon svg{width:18px;height:18px;}
+.role-card-name{font-size:14px;font-weight:700;color:var(--black);}
+.role-card-desc{font-size:12px;color:var(--grey);line-height:1.5;flex:1 1 auto;}
+.role-card-count{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:11.5px;font-weight:700;color:var(--grey);
+  padding-top:10px;border-top:1px solid var(--border-soft);
+}
+.role-card-count svg{width:13px;height:13px;}
+
+/* Tabla de matriz de permisos, dentro del drawer de rol */
+.perm-matrix-wrap{
+  border:1px solid var(--border-soft);
+  border-radius:var(--radius-s);
+  overflow-x:auto;
+  background:var(--white);
+}
+table.perm-matrix-table{width:100%;min-width:620px;border-collapse:collapse;}
+.perm-matrix-table thead th{
+  background:var(--surface-muted);
+  font-size:10.5px;font-weight:700;color:var(--grey);
+  text-transform:uppercase;letter-spacing:.03em;
+  padding:8px 10px;text-align:left;
+  border-bottom:1px solid var(--border-soft);
+  white-space:nowrap;
+}
+.perm-matrix-table thead th.center{text-align:center;}
+.perm-matrix-table tbody td{
+  padding:9px 10px;
+  border-bottom:1px solid var(--border-soft);
+  vertical-align:middle;
+  font-size:12.5px;
+}
+.perm-matrix-table tbody tr:last-child td{border-bottom:none;}
+.perm-matrix-table tbody tr:hover{background:var(--cold-white);}
+.perm-matrix-table tbody td.center{text-align:center;}
+.perm-matrix-table tbody td.module-name{font-weight:700;color:var(--black);white-space:nowrap;}
+.perm-matrix-table tbody td.na-cell{text-align:center;color:var(--light-grey);}
+.perm-matrix-table input[type="checkbox"]{width:16px;height:16px;cursor:pointer;accent-color:var(--red-hero);}
+.perm-matrix-table select{padding:6px 8px;font-size:12px;min-width:110px;}
+
+@media (max-width: 639px){
+  .role-grid{grid-template-columns:1fr;}
+  .perm-matrix-table thead th,.perm-matrix-table tbody td{padding:7px 6px;font-size:11.5px;}
+  .perm-matrix-table select{min-width:90px;}
+}

@@ -527,6 +527,138 @@
     <!-- /view-cotizaciones -->
 
     <!-- ============================================================
+         VISTA: PERMISOS Y ROLES — grid de 11 tarjetas de rol (sin
+         filtros/paginación, no aplica para una lista fija y corta).
+         Click en una tarjeta abre el drawer con la matriz editable.
+         ============================================================ -->
+    <div class="app-view" id="view-permisos">
+    <section class="table-panel" aria-label="Roles del sistema">
+      <div class="table-toolbar">
+        <div class="table-toolbar-left">
+          <h3>Roles del sistema</h3>
+          <p><strong id="rolesResultCount">0</strong> roles configurados</p>
+        </div>
+      </div>
+      <div class="role-grid" id="roleGrid"></div>
+    </section>
+    </div>
+    <!-- /view-permisos -->
+
+    <!-- ============================================================
+         VISTA: USUARIOS — mismo patrón exacto que Propuestas/Cotizaciones
+         ============================================================ -->
+    <div class="app-view" id="view-usuarios">
+    <section class="kpi-row" aria-label="Indicadores clave de usuarios">
+      <div class="kpi-card kpi-total" id="kpiUserCardActive" role="button" tabindex="0" aria-label="Filtrar por usuarios activos">
+        <div class="kpi-ribbon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="kpi-body">
+          <p class="kpi-label">Usuarios activos</p>
+          <p class="kpi-value" id="kpiUserActive">—</p>
+          <p class="kpi-sub">Con acceso habilitado</p>
+        </div>
+      </div>
+      <div class="kpi-card kpi-open" id="kpiUserCardInvited" role="button" tabindex="0" aria-label="Filtrar por usuarios invitados">
+        <div class="kpi-ribbon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 4l16 8-16 8V4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="kpi-body">
+          <p class="kpi-label">Invitados pendientes</p>
+          <p class="kpi-value" id="kpiUserInvited">—</p>
+          <p class="kpi-sub">Aún no inician sesión</p>
+        </div>
+      </div>
+      <div class="kpi-card kpi-closed" id="kpiUserCardInactive" role="button" tabindex="0" aria-label="Filtrar por usuarios inactivos">
+        <div class="kpi-ribbon">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 9v4M12 17h.01" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+        </div>
+        <div class="kpi-body">
+          <p class="kpi-label">Inactivos</p>
+          <p class="kpi-value" id="kpiUserInactive">—</p>
+          <p class="kpi-sub">Acceso deshabilitado</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="filters-panel" aria-label="Filtros avanzados">
+      <div class="filters-head">
+        <button type="button" class="filters-toggle" aria-expanded="true">
+          <svg class="filters-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="filters-title">
+            Filtros avanzados<span class="filters-count" hidden></span>
+          </div>
+        </button>
+        <button class="filters-clear" id="btnClearUserFilters" type="button">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+          Limpiar filtros
+        </button>
+      </div>
+      <div class="filters-grid">
+        <div class="field-group">
+          <label for="fUserBusqueda">Nombre o email</label>
+          <div class="input-wrap">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <input type="text" id="fUserBusqueda" placeholder="Ej. Fiorella o fiorella.ruiz@edenred.com.pe">
+          </div>
+        </div>
+        <div class="field-group">
+          <label for="fUserRol">Rol</label>
+          <select id="fUserRol"><option value="">Todos</option></select>
+        </div>
+        <div class="field-group">
+          <label for="fUserEstado">Estado</label>
+          <select id="fUserEstado">
+            <option value="">Todos</option>
+            <option value="Activo">Activo</option>
+            <option value="Inactivo">Inactivo</option>
+            <option value="Invitado">Invitado</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section class="table-panel" aria-label="Listado de usuarios">
+      <div class="table-toolbar">
+        <div class="table-toolbar-left">
+          <h3>Listado de usuarios</h3>
+          <p><strong id="userResultCount">0</strong> resultados encontrados</p>
+        </div>
+        <div class="table-toolbar-actions">
+          <button class="btn-ribbon" id="btnNewUser" type="button">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+            Nuevo usuario
+          </button>
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Área</th>
+              <th>Estado</th>
+              <th>Último acceso</th>
+              <th class="center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="userTableBody">
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination-bar">
+        <p class="pagination-info">Mostrando <b id="userPagFrom">0</b>–<b id="userPagTo">0</b> de <b id="userPagTotal">0</b> usuarios</p>
+        <div class="pagination-controls" id="userPagControls"></div>
+      </div>
+    </section>
+    </div>
+    <!-- /view-usuarios -->
+
+    <!-- ============================================================
          VISTA: PLACEHOLDER (otros módulos del menú)
          ============================================================ -->
     <div class="app-view" id="view-placeholder">
@@ -2206,6 +2338,131 @@
     </div>
   </div>
 </div>
+
+<!-- ============================================================
+     PERMISOS Y ROLES — Drawer de matriz (editable)
+     ============================================================ -->
+<div class="overlay" id="roleOverlay"></div>
+<aside class="drawer" id="roleDrawer" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="roleDrawerTitle">
+  <div class="drawer-header">
+    <div class="drawer-header-left">
+      <div class="drawer-icon">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.8"/></svg>
+      </div>
+      <div class="drawer-title-block">
+        <p class="drawer-eyebrow">Matriz de permisos</p>
+        <h3 id="roleDrawerTitle">Administrador</h3>
+        <p><span id="roleDrawerCount">0 usuarios</span> con este rol</p>
+      </div>
+    </div>
+    <div class="drawer-header-actions">
+      <button class="icon-btn" id="btnCloseRoleDrawer" type="button" title="Cerrar">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="drawer-body" style="display:block;overflow-y:auto;padding:20px 24px;">
+    <p style="font-size:12px;color:var(--grey);margin:0 0 16px;">Los cambios se aplican a todos los usuarios asignados a este rol.</p>
+    <form id="roleForm" novalidate>
+      <div class="perm-matrix-wrap">
+        <table class="perm-matrix-table">
+          <thead>
+            <tr>
+              <th>Módulo</th>
+              <th class="center">Ver</th>
+              <th class="center">Crear</th>
+              <th class="center">Editar</th>
+              <th class="center">Eliminar</th>
+              <th class="center">Aprobar</th>
+              <th>Alcance</th>
+            </tr>
+          </thead>
+          <tbody id="permMatrixBody"></tbody>
+        </table>
+      </div>
+    </form>
+  </div>
+  <div class="drawer-footer">
+    <div class="drawer-footer-left"></div>
+    <div class="drawer-footer-right">
+      <button class="btn-text" id="btnCancelRoleDrawer" type="button">Cancelar</button>
+      <button class="btn btn-primary" id="btnSaveRoleDrawer" type="button">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Guardar cambios
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- ============================================================
+     USUARIOS — Drawer de detalle/edición
+     ============================================================ -->
+<div class="overlay" id="userOverlay"></div>
+<aside class="drawer" id="userDrawer" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="userDrawerTitle">
+  <div class="drawer-header">
+    <div class="drawer-header-left">
+      <div class="drawer-icon">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c0-4 3.5-6 8-6s8 2 8 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </div>
+      <div class="drawer-title-block">
+        <p class="drawer-eyebrow" id="userDrawerEyebrow">Nuevo usuario</p>
+        <h3 id="userDrawerTitle">Usuario por definir</h3>
+        <p><span id="userDrawerEmail">—</span></p>
+      </div>
+    </div>
+    <div class="drawer-header-actions">
+      <button class="icon-btn" id="btnCloseUserDrawer" type="button" title="Cerrar">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="drawer-body" style="display:block;overflow-y:auto;padding:20px 24px;">
+    <form id="userForm" novalidate>
+      <div class="form-grid">
+        <div class="field-group">
+          <label for="u_nombre">Nombre completo</label>
+          <input type="text" id="u_nombre" placeholder="Ej. Fiorella Ruiz">
+        </div>
+        <div class="field-group">
+          <label for="u_email">Email</label>
+          <input type="email" id="u_email" placeholder="nombre.apellido@edenred.com.pe">
+        </div>
+        <div class="field-group">
+          <label for="u_rol">Rol</label>
+          <select id="u_rol"></select>
+        </div>
+        <div class="field-group">
+          <label for="u_area">Área</label>
+          <input type="text" id="u_area" placeholder="Ej. Comercial">
+        </div>
+        <div class="field-group">
+          <label for="u_estado">Estado</label>
+          <select id="u_estado">
+            <option value="Activo">Activo</option>
+            <option value="Inactivo">Inactivo</option>
+            <option value="Invitado">Invitado</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label><svg class="icon-sm lock-ico" viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.8"/></svg> Último acceso</label>
+          <div class="locked-value" id="u_ultimoAcceso"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.8"/></svg><span class="lv-text"></span></div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="drawer-footer">
+    <div class="drawer-footer-left">
+      <button class="btn btn-outline-danger" id="btnDeleteUser" type="button">Eliminar usuario</button>
+    </div>
+    <div class="drawer-footer-right">
+      <button class="btn-text" id="btnCancelUserDrawer" type="button">Cancelar</button>
+      <button class="btn btn-primary" id="btnSaveUserDrawer" type="button">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Guardar cambios
+      </button>
+    </div>
+  </div>
+</aside>
 
 <!-- ============================================================
      TOAST STACK

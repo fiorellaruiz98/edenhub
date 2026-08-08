@@ -1783,12 +1783,15 @@ document.addEventListener("DOMContentLoaded", function(){
       closeAllModals();
       if(drawer.classList.contains("open")) closeDrawer();
       if(cotizacionDrawer.classList.contains("open")) closeCotDrawer();
+      if(document.getElementById("roleDrawer").classList.contains("open")) closeRoleDrawer();
+      if(document.getElementById("userDrawer").classList.contains("open")) closeUserDrawer();
       closeSidebar();
       closeRowMenu();
     }
   });
 
   initCotizacionesModule();
+  initPermisosUsuariosModule();
 });
 
 /* ============================================================
@@ -2573,14 +2576,466 @@ function initCotizacionesModule(){
 }
 
 /* ============================================================
+   MÓDULOS PERMISOS Y ROLES + USUARIOS
+   (#view-permisos + #roleDrawer, #view-usuarios + #userDrawer)
+   Reutiliza en su totalidad los componentes genéricos del host
+   (.kpi-card, .filters-panel, .data-table, .drawer, .form-grid,
+   .field-group, .locked-value) — ver PASO 0 confirmado por el
+   usuario para el detalle de la matriz de 11 roles × 9 módulos.
+   ============================================================ */
+const PERM_MODULOS = [
+  {key:"propuestas", label:"Propuestas", aprobable:true},
+  {key:"cotizaciones", label:"Cotizaciones", aprobable:true},
+  {key:"orden-comercial", label:"Orden Comercial", aprobable:false},
+  {key:"servicios-tarifas", label:"Servicios y Tarifas", aprobable:false},
+  {key:"motor-variables", label:"Motor de Variables", aprobable:false},
+  {key:"linea-credito", label:"Línea de Crédito", aprobable:true},
+  {key:"excepciones", label:"Excepciones", aprobable:true},
+  {key:"usuarios", label:"Usuarios", aprobable:false},
+  {key:"permisos", label:"Permisos y Roles", aprobable:false}
+];
+const PERM_ALCANCES = ["Propio","Equipo","Todos"];
+
+function perm(ver,crear,editar,eliminar,aprobar,alcance){
+  return {ver:!!ver, crear:!!crear, editar:!!editar, eliminar:!!eliminar, aprobar:!!aprobar, alcance: alcance||null};
+}
+const NONE_PERM = perm(false,false,false,false,false,null);
+function verOnly(alcance){ return perm(true,false,false,false,false,alcance); }
+function verTodosModulos(){
+  const m = {};
+  PERM_MODULOS.forEach(mod=>{ m[mod.key] = verOnly("Todos"); });
+  return m;
+}
+function fullAccess(alcance){ return perm(true,true,true,true,true,alcance); }
+
+const ROLES = [
+  {id:"administrador", nombre:"Administrador", descripcion:"Acceso total a todos los módulos y a la configuración de roles y usuarios.", icon:"shield",
+    permisos: (()=>{ const m={}; PERM_MODULOS.forEach(mod=>{ m[mod.key]=fullAccess("Todos"); }); return m; })()},
+  {id:"head-comercial", nombre:"Head Comercial", descripcion:"Supervisa propuestas y cotizaciones de todo el equipo comercial, con potestad de aprobación.", icon:"briefcase",
+    permisos:{
+      "propuestas": perm(true,true,true,false,true,"Todos"),
+      "cotizaciones": perm(true,true,true,false,true,"Todos"),
+      "orden-comercial": verOnly("Todos"),
+      "servicios-tarifas": verOnly("Todos"),
+      "motor-variables": verOnly("Todos"),
+      "linea-credito": perm(true,false,false,false,true,"Todos"),
+      "excepciones": perm(true,false,false,false,true,"Todos"),
+      "usuarios": NONE_PERM, "permisos": NONE_PERM
+    }},
+  {id:"ejecutivos-comerciales", nombre:"Ejecutivos Comerciales", descripcion:"Crean y gestionan sus propias propuestas y cotizaciones.", icon:"user",
+    permisos:{
+      "propuestas": perm(true,true,true,false,false,"Propio"),
+      "cotizaciones": perm(true,true,true,false,false,"Propio"),
+      "orden-comercial": verOnly("Propio"),
+      "servicios-tarifas": verOnly("Todos"),
+      "motor-variables": NONE_PERM,
+      "linea-credito": verOnly("Propio"),
+      "excepciones": verOnly("Propio"),
+      "usuarios": NONE_PERM, "permisos": NONE_PERM
+    }},
+  {id:"head-customer", nombre:"Head Customer", descripcion:"Supervisa la postventa y las excepciones de su equipo, con potestad de aprobación de excepciones.", icon:"briefcase",
+    permisos:{
+      "propuestas": verOnly("Equipo"),
+      "cotizaciones": verOnly("Equipo"),
+      "orden-comercial": perm(true,false,true,false,false,"Equipo"),
+      "servicios-tarifas": verOnly("Todos"),
+      "motor-variables": NONE_PERM,
+      "linea-credito": verOnly("Equipo"),
+      "excepciones": perm(true,false,false,false,true,"Equipo"),
+      "usuarios": NONE_PERM, "permisos": NONE_PERM
+    }},
+  {id:"ejecutivos-customer", nombre:"Ejecutivos Customer", descripcion:"Gestionan la orden comercial y el seguimiento postventa de sus propias cuentas.", icon:"user",
+    permisos:{
+      "propuestas": verOnly("Propio"),
+      "cotizaciones": verOnly("Propio"),
+      "orden-comercial": perm(true,false,true,false,false,"Propio"),
+      "servicios-tarifas": verOnly("Todos"),
+      "motor-variables": NONE_PERM,
+      "linea-credito": verOnly("Propio"),
+      "excepciones": verOnly("Propio"),
+      "usuarios": NONE_PERM, "permisos": NONE_PERM
+    }},
+  {id:"finanzas", nombre:"Finanzas", descripcion:"Administra tarifas y variables de costo, y aprueba línea de crédito y excepciones.", icon:"chart",
+    permisos:{
+      "propuestas": verOnly("Todos"),
+      "cotizaciones": verOnly("Todos"),
+      "orden-comercial": verOnly("Todos"),
+      "servicios-tarifas": perm(true,false,true,false,false,"Todos"),
+      "motor-variables": perm(true,false,true,false,false,"Todos"),
+      "linea-credito": perm(true,false,false,false,true,"Todos"),
+      "excepciones": perm(true,false,false,false,true,"Todos"),
+      "usuarios": NONE_PERM, "permisos": NONE_PERM
+    }},
+  {id:"producto", nombre:"Producto", descripcion:"Dueño del catálogo de servicios/tarifas y de las fórmulas del motor de variables.", icon:"box",
+    permisos:{
+      "propuestas": verOnly("Todos"),
+      "cotizaciones": verOnly("Todos"),
+      "orden-comercial": verOnly("Todos"),
+      "servicios-tarifas": perm(true,true,true,false,false,"Todos"),
+      "motor-variables": perm(true,true,true,false,false,"Todos"),
+      "linea-credito": NONE_PERM,
+      "excepciones": NONE_PERM,
+      "usuarios": NONE_PERM, "permisos": NONE_PERM
+    }},
+  {id:"operaciones", nombre:"Operaciones", descripcion:"Ejecuta la orden comercial generada a partir de propuestas y cotizaciones aprobadas.", icon:"gear",
+    permisos:{
+      "propuestas": verOnly("Todos"),
+      "cotizaciones": verOnly("Todos"),
+      "orden-comercial": perm(true,true,true,false,false,"Todos"),
+      "servicios-tarifas": verOnly("Todos"),
+      "motor-variables": verOnly("Todos"),
+      "linea-credito": verOnly("Todos"),
+      "excepciones": verOnly("Todos"),
+      "usuarios": NONE_PERM, "permisos": NONE_PERM
+    }},
+  {id:"cobranzas", nombre:"Cobranzas", descripcion:"Gestiona el estado de línea de crédito y el seguimiento de cobranza.", icon:"coins",
+    permisos:{
+      "propuestas": verOnly("Todos"),
+      "cotizaciones": NONE_PERM,
+      "orden-comercial": verOnly("Todos"),
+      "servicios-tarifas": NONE_PERM,
+      "motor-variables": NONE_PERM,
+      "linea-credito": perm(true,false,true,false,false,"Todos"),
+      "excepciones": verOnly("Todos"),
+      "usuarios": NONE_PERM, "permisos": NONE_PERM
+    }},
+  {id:"tecnologia", nombre:"Tecnología", descripcion:"Visibilidad total de solo lectura sobre todos los módulos, para soporte y depuración.", icon:"code",
+    permisos: verTodosModulos()},
+  {id:"contabilidad", nombre:"Contabilidad", descripcion:"Visibilidad de solo lectura para reconocimiento de ingresos, cartera y excepciones de crédito.", icon:"receipt",
+    permisos: verTodosModulos()}
+];
+function findRole(id){ return ROLES.find(r=>r.id===id); }
+
+const USERS = [
+  {id:"u1", nombre:"Fiorella Ruiz", email:"fiorella.ruiz@edenred.com.pe", rolId:"administrador", area:"Tecnología", estado:"Activo", fechaUltimoAcceso:"2026-08-08 09:12"},
+  {id:"u2", nombre:"Marco Salazar", email:"marco.salazar@edenred.com.pe", rolId:"head-comercial", area:"Comercial", estado:"Activo", fechaUltimoAcceso:"2026-08-07 18:40"},
+  {id:"u3", nombre:"Daniela Vega", email:"daniela.vega@edenred.com.pe", rolId:"ejecutivos-comerciales", area:"Comercial", estado:"Activo", fechaUltimoAcceso:"2026-08-08 08:05"},
+  {id:"u4", nombre:"Renzo Huamán", email:"renzo.huaman@edenred.com.pe", rolId:"ejecutivos-comerciales", area:"Comercial", estado:"Activo", fechaUltimoAcceso:"2026-08-06 14:22"},
+  {id:"u5", nombre:"Claudia Espinoza", email:"claudia.espinoza@edenred.com.pe", rolId:"head-customer", area:"Customer Success", estado:"Activo", fechaUltimoAcceso:"2026-08-07 11:15"},
+  {id:"u6", nombre:"Jorge Paredes", email:"jorge.paredes@edenred.com.pe", rolId:"ejecutivos-customer", area:"Customer Success", estado:"Activo", fechaUltimoAcceso:"2026-08-08 07:50"},
+  {id:"u7", nombre:"Valeria Castro", email:"valeria.castro@edenred.com.pe", rolId:"finanzas", area:"Finanzas", estado:"Activo", fechaUltimoAcceso:"2026-08-05 16:30"},
+  {id:"u8", nombre:"Álvaro Torres", email:"alvaro.torres@edenred.com.pe", rolId:"producto", area:"Producto", estado:"Activo", fechaUltimoAcceso:"2026-08-08 10:02"},
+  {id:"u9", nombre:"Milagros Quispe", email:"milagros.quispe@edenred.com.pe", rolId:"operaciones", area:"Operaciones", estado:"Activo", fechaUltimoAcceso:"2026-08-04 09:47"},
+  {id:"u10", nombre:"Sebastián Ríos", email:"sebastian.rios@edenred.com.pe", rolId:"cobranzas", area:"Cobranzas", estado:"Inactivo", fechaUltimoAcceso:"2026-06-30 12:00"},
+  {id:"u11", nombre:"Patricia Núñez", email:"patricia.nunez@edenred.com.pe", rolId:"tecnologia", area:"Tecnología", estado:"Activo", fechaUltimoAcceso:"2026-08-08 08:58"},
+  {id:"u12", nombre:"Diego Flores", email:"diego.flores@edenred.com.pe", rolId:"contabilidad", area:"Contabilidad", estado:"Activo", fechaUltimoAcceso:"2026-08-07 15:10"},
+  {id:"u13", nombre:"Carla Medina", email:"carla.medina@edenred.com.pe", rolId:"ejecutivos-comerciales", area:"Comercial", estado:"Invitado", fechaUltimoAcceso:"—"}
+];
+function findUser(id){ return USERS.find(u=>u.id===id); }
+function roleUserCount(roleId){ return USERS.filter(u=>u.rolId===roleId).length; }
+
+const ROLE_ICONS = {
+  shield: '<path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>',
+  briefcase: '<rect x="3" y="8" width="18" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 8V6a2 2 0 012-2h4a2 2 0 012 2v2" stroke="currentColor" stroke-width="1.8"/>',
+  user: '<circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M4 20c0-4 3.5-6 8-6s8 2 8 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
+  chart: '<path d="M4 20V10M12 20V4M20 20v-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
+  box: '<path d="M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>',
+  gear: '<circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
+  coins: '<circle cx="9" cy="9" r="5" stroke="currentColor" stroke-width="1.8"/><path d="M13.5 12.5A5 5 0 1010.5 4" stroke="currentColor" stroke-width="1.8"/>',
+  code: '<path d="M8 6l-5 6 5 6M16 6l5 6-5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
+  receipt: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 8h6M9 12h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
+};
+const ICON_TEAM = '<svg viewBox="0 0 24 24" fill="none"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.8"/><circle cx="17" cy="9" r="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M2 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5M15.5 20c0-2.4-1.3-4.3-3.2-5.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+const roleOverlay = document.getElementById("roleOverlay");
+const userOverlay = document.getElementById("userOverlay");
+
+function renderRoleGrid(){
+  const grid = document.getElementById("roleGrid");
+  const countEl = document.getElementById("rolesResultCount");
+  if(countEl) countEl.textContent = ROLES.length;
+  grid.innerHTML = ROLES.map(r=>`
+    <div class="role-card" data-roleid="${r.id}" tabindex="0" role="button" aria-label="Ver matriz de permisos de ${esc(r.nombre)}">
+      <div class="role-card-head">
+        <span class="role-card-icon"><svg viewBox="0 0 24 24">${ROLE_ICONS[r.icon]||ROLE_ICONS.user}</svg></span>
+        <span class="role-card-name">${esc(r.nombre)}</span>
+      </div>
+      <p class="role-card-desc">${esc(r.descripcion)}</p>
+      <span class="role-card-count">${ICON_TEAM} ${roleUserCount(r.id)} usuario${roleUserCount(r.id)===1?"":"s"}</span>
+    </div>
+  `).join("");
+}
+
+let roleDrawerTargetId = null;
+function renderPermMatrixBody(role){
+  const tbody = document.getElementById("permMatrixBody");
+  tbody.innerHTML = PERM_MODULOS.map(mod=>{
+    const p = role.permisos[mod.key] || NONE_PERM;
+    const cell = (action)=>{
+      if(action==="aprobar" && !mod.aprobable) return `<td class="center na-cell">—</td>`;
+      return `<td class="center"><input type="checkbox" data-permaction="${action}" data-permmod="${mod.key}" ${p[action]?"checked":""}></td>`;
+    };
+    const hasAny = p.ver||p.crear||p.editar||p.eliminar||p.aprobar;
+    return `<tr>
+      <td class="module-name">${esc(mod.label)}</td>
+      ${cell("ver")}${cell("crear")}${cell("editar")}${cell("eliminar")}${cell("aprobar")}
+      <td>
+        <select data-permalcance="${mod.key}" ${hasAny?"":"disabled"}>
+          ${PERM_ALCANCES.map(a=>`<option value="${a}" ${p.alcance===a?"selected":""}>${a}</option>`).join("")}
+        </select>
+      </td>
+    </tr>`;
+  }).join("");
+
+  tbody.querySelectorAll('input[data-permaction]').forEach(chk=>{
+    chk.addEventListener("change", ()=>{
+      const modKey = chk.dataset.permmod;
+      const row = chk.closest("tr");
+      const anyChecked = Array.from(row.querySelectorAll('input[data-permaction]')).some(i=>i.checked);
+      const sel = row.querySelector('select[data-permalcance]');
+      sel.disabled = !anyChecked;
+      if(anyChecked && !sel.value) sel.value = "Propio";
+    });
+  });
+}
+function openRoleDrawer(roleId){
+  const role = findRole(roleId);
+  if(!role) return;
+  roleDrawerTargetId = roleId;
+  document.getElementById("roleDrawerTitle").textContent = role.nombre;
+  const n = roleUserCount(roleId);
+  document.getElementById("roleDrawerCount").textContent = n + (n===1?" usuario":" usuarios");
+  renderPermMatrixBody(role);
+  document.getElementById("roleDrawer").classList.add("open");
+  roleOverlay.classList.add("visible");
+  trapFocus(document.getElementById("roleDrawer"));
+}
+function closeRoleDrawer(){
+  document.getElementById("roleDrawer").classList.remove("open");
+  roleOverlay.classList.remove("visible");
+  roleDrawerTargetId = null;
+}
+function saveRoleDrawer(){
+  const role = findRole(roleDrawerTargetId);
+  if(!role) return;
+  document.querySelectorAll('#permMatrixBody tr').forEach(row=>{
+    const modKey = row.querySelector('select[data-permalcance]').dataset.permalcance;
+    const p = {ver:false,crear:false,editar:false,eliminar:false,aprobar:false,alcance:null};
+    row.querySelectorAll('input[data-permaction]').forEach(chk=>{ p[chk.dataset.permaction] = chk.checked; });
+    const sel = row.querySelector('select[data-permalcance]');
+    p.alcance = sel.disabled ? null : sel.value;
+    role.permisos[modKey] = p;
+  });
+  closeRoleDrawer();
+  showToast("Matriz de permisos de \"" + role.nombre + "\" actualizada.", "success");
+}
+
+/* ---------- Usuarios ---------- */
+let filteredUsers = USERS.slice();
+let userCurrentPage = 1;
+const USER_PAGE_SIZE = 8;
+let userDrawerTargetId = null;
+
+function userBadgeClass(estado){
+  return {"Activo":"badge-aprobada","Inactivo":"badge-rechazada","Invitado":"badge-enviada"}[estado] || "badge-creada";
+}
+function populateUserRoleFilter(){
+  const sel = document.getElementById("fUserRol");
+  ROLES.forEach(r=>{
+    const opt = document.createElement("option");
+    opt.value = r.id; opt.textContent = r.nombre;
+    sel.appendChild(opt);
+  });
+}
+function applyUserFilters(){
+  const q = (document.getElementById("fUserBusqueda").value||"").trim().toLowerCase();
+  const rol = document.getElementById("fUserRol").value;
+  const estado = document.getElementById("fUserEstado").value;
+  filteredUsers = USERS.filter(u=>{
+    if(q && !(u.nombre.toLowerCase().includes(q) || u.email.toLowerCase().includes(q))) return false;
+    if(rol && u.rolId!==rol) return false;
+    if(estado && u.estado!==estado) return false;
+    return true;
+  });
+  userCurrentPage = 1;
+  renderUserTable();
+}
+function clearUserFilters(){
+  document.getElementById("fUserBusqueda").value = "";
+  document.getElementById("fUserRol").value = "";
+  document.getElementById("fUserEstado").value = "";
+  applyUserFilters();
+}
+function renderUserKPIs(){
+  document.getElementById("kpiUserActive").textContent = USERS.filter(u=>u.estado==="Activo").length;
+  document.getElementById("kpiUserInvited").textContent = USERS.filter(u=>u.estado==="Invitado").length;
+  document.getElementById("kpiUserInactive").textContent = USERS.filter(u=>u.estado==="Inactivo").length;
+}
+function renderUserTable(){
+  renderUserKPIs();
+  const tbody = document.getElementById("userTableBody");
+  const total = filteredUsers.length;
+  document.getElementById("userResultCount").textContent = total;
+  const totalPages = Math.max(1, Math.ceil(total / USER_PAGE_SIZE));
+  if(userCurrentPage > totalPages) userCurrentPage = totalPages;
+  const from = total===0 ? 0 : (userCurrentPage-1)*USER_PAGE_SIZE + 1;
+  const to = Math.min(total, userCurrentPage*USER_PAGE_SIZE);
+  document.getElementById("userPagFrom").textContent = from;
+  document.getElementById("userPagTo").textContent = to;
+  document.getElementById("userPagTotal").textContent = total;
+  const pageItems = filteredUsers.slice(from-1<0?0:from-1, to);
+  if(pageItems.length===0){
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--grey);padding:24px;">No se encontraron usuarios con estos filtros.</td></tr>`;
+  } else {
+    tbody.innerHTML = pageItems.map(u=>{
+      const role = findRole(u.rolId);
+      return `<tr data-userid="${u.id}" tabindex="0">
+        <td>${esc(u.nombre)}</td>
+        <td>${esc(u.email)}</td>
+        <td>${esc(role?role.nombre:"—")}</td>
+        <td>${esc(u.area)}</td>
+        <td><span class="badge ${userBadgeClass(u.estado)}">${esc(u.estado)}</span></td>
+        <td>${esc(u.fechaUltimoAcceso)}</td>
+        <td class="center">
+          <div class="row-actions">
+            <button class="icon-btn" data-useraction="edit" data-userid="${u.id}" title="Ver / editar" type="button">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M4 20l3.6-1 10-10-2.6-2.6-10 10L4 20z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </td>
+      </tr>`;
+    }).join("");
+  }
+  renderUserPagination(totalPages);
+}
+function renderUserPagination(totalPages){
+  const ctr = document.getElementById("userPagControls");
+  let html = `<button data-userpage="prev" ${userCurrentPage===1?"disabled":""} type="button">‹</button>`;
+  for(let i=1;i<=totalPages;i++){
+    html += `<button data-userpage="${i}" class="${i===userCurrentPage?"active":""}" type="button">${i}</button>`;
+  }
+  html += `<button data-userpage="next" ${userCurrentPage===totalPages?"disabled":""} type="button">›</button>`;
+  ctr.innerHTML = html;
+}
+function openUserDrawer(id){
+  userDrawerTargetId = id;
+  const sel = document.getElementById("u_rol");
+  sel.innerHTML = ROLES.map(r=>`<option value="${r.id}">${esc(r.nombre)}</option>`).join("");
+  const u = id ? findUser(id) : null;
+  document.getElementById("userDrawerEyebrow").textContent = u ? "Editar usuario" : "Nuevo usuario";
+  document.getElementById("userDrawerTitle").textContent = u ? u.nombre : "Usuario nuevo";
+  document.getElementById("userDrawerEmail").textContent = u ? u.email : "—";
+  document.getElementById("u_nombre").value = u ? u.nombre : "";
+  document.getElementById("u_email").value = u ? u.email : "";
+  sel.value = u ? u.rolId : ROLES[ROLES.length-1].id;
+  document.getElementById("u_area").value = u ? u.area : "";
+  document.getElementById("u_estado").value = u ? u.estado : "Invitado";
+  document.getElementById("u_ultimoAcceso").querySelector(".lv-text").textContent = u ? u.fechaUltimoAcceso : "—";
+  document.getElementById("btnDeleteUser").style.display = u ? "" : "none";
+  document.getElementById("userDrawer").classList.add("open");
+  userOverlay.classList.add("visible");
+  trapFocus(document.getElementById("userDrawer"));
+}
+function closeUserDrawer(){
+  document.getElementById("userDrawer").classList.remove("open");
+  userOverlay.classList.remove("visible");
+  userDrawerTargetId = null;
+}
+function saveUserDrawer(){
+  const nombre = document.getElementById("u_nombre").value.trim();
+  const email = document.getElementById("u_email").value.trim();
+  if(!nombre || !email){
+    showToast("Nombre y email son obligatorios.", "danger");
+    return;
+  }
+  const rolId = document.getElementById("u_rol").value;
+  const area = document.getElementById("u_area").value.trim();
+  const estado = document.getElementById("u_estado").value;
+  if(userDrawerTargetId){
+    const u = findUser(userDrawerTargetId);
+    Object.assign(u, {nombre, email, rolId, area, estado});
+    showToast("Usuario \"" + nombre + "\" actualizado.", "success");
+  } else {
+    USERS.push({id:"u"+(USERS.length+1)+"_"+Date.now(), nombre, email, rolId, area, estado, fechaUltimoAcceso:"—"});
+    showToast("Usuario \"" + nombre + "\" creado.", "success");
+  }
+  closeUserDrawer();
+  renderRoleGrid();
+  applyUserFilters();
+}
+function deleteUser(){
+  const u = findUser(userDrawerTargetId);
+  if(!u) return;
+  if(!confirm("¿Confirmas eliminar al usuario \"" + u.nombre + "\"? Esta acción no se puede deshacer.")) return;
+  const idx = USERS.findIndex(x=>x.id===u.id);
+  if(idx>-1) USERS.splice(idx,1);
+  closeUserDrawer();
+  renderRoleGrid();
+  applyUserFilters();
+  showToast("Usuario eliminado.", "success");
+}
+
+function initPermisosUsuariosModule(){
+  renderRoleGrid();
+  document.getElementById("roleGrid").addEventListener("click", e=>{
+    const card = e.target.closest(".role-card");
+    if(card) openRoleDrawer(card.dataset.roleid);
+  });
+  document.getElementById("roleGrid").addEventListener("keydown", e=>{
+    if(e.key!=="Enter" && e.key!==" ") return;
+    const card = e.target.closest(".role-card");
+    if(card){ e.preventDefault(); openRoleDrawer(card.dataset.roleid); }
+  });
+  document.getElementById("btnCloseRoleDrawer").addEventListener("click", closeRoleDrawer);
+  document.getElementById("btnCancelRoleDrawer").addEventListener("click", closeRoleDrawer);
+  document.getElementById("btnSaveRoleDrawer").addEventListener("click", saveRoleDrawer);
+  roleOverlay.addEventListener("click", closeRoleDrawer);
+
+  populateUserRoleFilter();
+  renderUserTable();
+  document.getElementById("fUserBusqueda").addEventListener("input", applyUserFilters);
+  ["fUserRol","fUserEstado"].forEach(id=>document.getElementById(id).addEventListener("change", applyUserFilters));
+  document.getElementById("btnClearUserFilters").addEventListener("click", clearUserFilters);
+  document.getElementById("btnNewUser").addEventListener("click", ()=>openUserDrawer(null));
+
+  [["kpiUserCardActive","Activo"],["kpiUserCardInvited","Invitado"],["kpiUserCardInactive","Inactivo"]].forEach(([id,estado])=>{
+    const el = document.getElementById(id);
+    const handler = ()=>{
+      clearUserFilters();
+      document.getElementById("fUserEstado").value = estado;
+      applyUserFilters();
+      document.querySelector('#view-usuarios .table-panel').scrollIntoView({behavior:"smooth", block:"start"});
+    };
+    el.addEventListener("click", handler);
+    el.addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); handler(); } });
+  });
+
+  document.getElementById("userTableBody").addEventListener("click", e=>{
+    const btn = e.target.closest("button[data-useraction]");
+    const row = e.target.closest("tr[data-userid]");
+    const id = btn ? btn.dataset.userid : (row ? row.dataset.userid : null);
+    if(id) openUserDrawer(id);
+  });
+  document.getElementById("userTableBody").addEventListener("keydown", e=>{
+    if(e.key!=="Enter" && e.key!==" ") return;
+    const row = e.target.closest("tr[data-userid]");
+    if(row){ e.preventDefault(); openUserDrawer(row.dataset.userid); }
+  });
+  document.getElementById("userPagControls").addEventListener("click", e=>{
+    const btn = e.target.closest("button[data-userpage]");
+    if(!btn || btn.disabled) return;
+    const p = btn.dataset.userpage;
+    const totalPages = Math.max(1, Math.ceil(filteredUsers.length / USER_PAGE_SIZE));
+    if(p==="prev") userCurrentPage = Math.max(1, userCurrentPage-1);
+    else if(p==="next") userCurrentPage = Math.min(totalPages, userCurrentPage+1);
+    else userCurrentPage = +p;
+    renderUserTable();
+    document.querySelector('#view-usuarios .table-panel').scrollIntoView({behavior:"smooth", block:"nearest"});
+  });
+
+  document.getElementById("btnCloseUserDrawer").addEventListener("click", closeUserDrawer);
+  document.getElementById("btnCancelUserDrawer").addEventListener("click", closeUserDrawer);
+  document.getElementById("btnSaveUserDrawer").addEventListener("click", saveUserDrawer);
+  document.getElementById("btnDeleteUser").addEventListener("click", deleteUser);
+  userOverlay.addEventListener("click", closeUserDrawer);
+}
+
+/* ============================================================
    NAVEGACIÓN LATERAL (Sidebar) — cambio de vista y responsive
    ============================================================ */
 const PLACEHOLDER_COPY = {
   "orden-comercial": {crumb:"Gestión comercial › Orden Comercial", title:"Orden Comercial", heading:"Orden Comercial", body:"Próximamente podrás gestionar la orden comercial generada a partir de una propuesta o cotización aprobada."},
   "linea-credito": {crumb:"Flujos de Aprobación › Línea de Crédito", title:"Línea de Crédito", heading:"Línea de Crédito", body:"Próximamente podrás revisar de forma consolidada las solicitudes de línea de crédito de todas las propuestas."},
-  "excepciones": {crumb:"Flujos de Aprobación › Excepciones", title:"Excepciones", heading:"Excepciones", body:"Próximamente podrás revisar de forma consolidada las solicitudes de excepción de todas las propuestas."},
-  "usuarios": {crumb:"Usuarios › Usuarios", title:"Usuarios", heading:"Usuarios", body:"Próximamente podrás crear, editar y desactivar usuarios del sistema."},
-  "permisos": {crumb:"Usuarios › Permisos y Roles", title:"Permisos y Roles", heading:"Permisos y Roles", body:"Próximamente podrás configurar roles y permisos granulares por módulo."}
+  "excepciones": {crumb:"Flujos de Aprobación › Excepciones", title:"Excepciones", heading:"Excepciones", body:"Próximamente podrás revisar de forma consolidada las solicitudes de excepción de todas las propuestas."}
 };
 
 function closeSidebar(){
@@ -2673,6 +3128,14 @@ function initSidebarNav(){
     "cotizaciones": {
       crumb: 'Gestión comercial <b>›</b> Cotizaciones',
       title: "Cotizaciones comerciales"
+    },
+    "permisos": {
+      crumb: 'Usuarios <b>›</b> Permisos y Roles',
+      title: "Permisos y Roles"
+    },
+    "usuarios": {
+      crumb: 'Usuarios <b>›</b> Usuarios',
+      title: "Usuarios"
     },
     "pricebook": {
       crumb: 'Pricebook <b>›</b> Servicios y Tarifas',
