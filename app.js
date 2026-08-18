@@ -1840,7 +1840,7 @@ const quotations = [
     id: nextCotId(), codigo:"COT-2026-001", propuestaCodigo:"COD-2026-001",
     fechaGeneracion:"2026-07-10", validaHasta:"2026-07-25", responsable:"F. Ruiz",
     estado:"Aprobada", motivoRechazo:null, comentarioPerdida:null,
-    documentoSustento:{nombreArchivo:"sustento_aprobacion_alicorp.pdf", fecha:"2026-07-16"},
+    documentoSustento:{nombreArchivo:"sustento_aprobacion_alicorp.pdf", fecha:"2026-07-16", cargadoPor:"F. Ruiz"},
     email:{estado:"Leído", destinatario:"tesoreria@alicorp.com.pe", asunto:"Cotización COT-2026-001 · Edenred Perú",
       intentos:[{fecha:"2026-07-10", resultado:"Enviado"}]},
     historial:[
@@ -1942,7 +1942,7 @@ const quotations = [
     id: nextCotId(), codigo:"COT-2026-010", propuestaCodigo:"COD-2026-011",
     fechaGeneracion:"2026-07-08", validaHasta:"2026-07-23", responsable:"F. Ruiz",
     estado:"Aprobada", motivoRechazo:null, comentarioPerdida:null,
-    documentoSustento:{nombreArchivo:"sustento_aprobacion_sanfernando.pdf", fecha:"2026-07-15"},
+    documentoSustento:{nombreArchivo:"sustento_aprobacion_sanfernando.pdf", fecha:"2026-07-15", cargadoPor:"F. Ruiz"},
     email:{estado:"Leído", destinatario:"tesoreria@sanfernando.com.pe", asunto:"Cotización COT-2026-010 · Edenred Perú",
       intentos:[{fecha:"2026-07-08", resultado:"Enviado"}]},
     historial:[
@@ -2127,6 +2127,54 @@ function openCotHistoryModal(q){
   trapFocus(document.getElementById("cotHistoryModal"));
 }
 
+const DOC_ICON_PDF = '<svg viewBox="0 0 24 24" fill="none"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3v6h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const DOC_ICON_FILE = '<svg viewBox="0 0 24 24" fill="none"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3v6h6M9 13h6M9 17h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+/* Reutiliza datos que ya existen en el modelo — no inventa campos
+   paralelos. "Documento propuesta" es el mismo PDF que se adjunta al
+   enviar el email (mismo nombre "Cotizacion_<codigo>.pdf" que arma
+   openCotEmailPreview) y solo existe una vez la cotización se envió
+   al menos una vez (q.estado ya no es "Generada"). "Documento de
+   sustento" es el archivo cargado obligatoriamente al aprobar
+   (q.documentoSustento) — solo existe si la cotización ya fue
+   aprobada. */
+function renderCotDocumentacion(q){
+  const grid = document.getElementById("cq_documentacionGrid");
+  const propuestaCard = q.estado !== "Generada"
+    ? `<div class="doc-card">
+        <span class="doc-card-icon">${DOC_ICON_PDF}</span>
+        <div class="doc-card-body">
+          <strong>Documento propuesta</strong>
+          <p class="doc-card-file">Cotizacion_${esc(q.codigo)}.pdf</p>
+          <p class="doc-card-meta">Generado el ${fmtDate(q.fechaGeneracion)}<br>${esc(q.responsable)}</p>
+        </div>
+      </div>`
+    : `<div class="doc-card doc-card-empty">
+        <span class="doc-card-icon">${DOC_ICON_PDF}</span>
+        <div class="doc-card-body">
+          <strong>Documento propuesta</strong>
+          <p class="doc-card-empty-text">Se generará al enviar la cotización al cliente.</p>
+        </div>
+      </div>`;
+  const sustentoCard = q.documentoSustento
+    ? `<div class="doc-card">
+        <span class="doc-card-icon">${DOC_ICON_FILE}</span>
+        <div class="doc-card-body">
+          <strong>Documento de sustento</strong>
+          <p class="doc-card-file">${esc(q.documentoSustento.nombreArchivo)}</p>
+          <p class="doc-card-meta">Cargado el ${fmtDate(q.documentoSustento.fecha)}<br>${esc(q.documentoSustento.cargadoPor || "F. Ruiz")}</p>
+        </div>
+      </div>`
+    : `<div class="doc-card doc-card-empty">
+        <span class="doc-card-icon">${DOC_ICON_FILE}</span>
+        <div class="doc-card-body">
+          <strong>Documento de sustento</strong>
+          <p class="doc-card-empty-text">Se cargará al aprobar la cotización.</p>
+        </div>
+      </div>`;
+  grid.innerHTML = propuestaCard + sustentoCard;
+}
+
 function renderCotResultBox(q){
   const wrap = document.getElementById("cq_resultadoWrap");
   const box = document.getElementById("cq_resultadoBox");
@@ -2136,11 +2184,6 @@ function renderCotResultBox(q){
   } else if(q.estado==="Oportunidad perdida" && q.comentarioPerdida){
     wrap.style.display = "block";
     box.innerHTML = `<h5>Comentario de oportunidad perdida</h5><p class="hint">"${esc(q.comentarioPerdida)}"</p>`;
-  } else if(q.estado==="Aprobada" && q.documentoSustento){
-    wrap.style.display = "block";
-    box.innerHTML = `<h5>Documento de sustento</h5>
-      <div class="file-chip-list"><span class="file-chip">${esc(q.documentoSustento.nombreArchivo)}</span></div>
-      <p class="hint" style="margin-top:8px;">Adjuntado el ${fmtDate(q.documentoSustento.fecha)}.</p>`;
   } else {
     wrap.style.display = "none";
     box.innerHTML = "";
@@ -2220,6 +2263,7 @@ function openCotDrawer(id){
   document.getElementById("cotDrawerTitle").textContent = p.razonSocial;
   document.getElementById("cotDrawerRuc").textContent = p.ruc;
   document.getElementById("cotDrawerCodigo").textContent = q.codigo;
+  document.getElementById("cotDrawerValidaHasta").textContent = fmtDate(q.validaHasta);
   document.getElementById("cotDrawerOrigen").textContent = q.propuestaCodigo;
 
   setLockedValue("cq_ruc", p.ruc);
@@ -2265,12 +2309,7 @@ function openCotDrawer(id){
   if(p.productoCustom){ mdrWrap.classList.add("open"); setLockedValue("cq_mdrNegociado", p.mdrNegociado+"%"); }
   else mdrWrap.classList.remove("open");
 
-  setLockedValue("cq_codigo", q.codigo);
-  setLockedValue("cq_fechaGeneracion", fmtDate(q.fechaGeneracion));
-  setLockedValue("cq_validaHasta", fmtDate(q.validaHasta));
-  setLockedValue("cq_responsable", q.responsable);
-  document.getElementById("cq_estadoBadgeWrap").innerHTML = `<span class="badge ${cotBadgeClass(q.estado)}">${esc(q.estado)}</span>`;
-
+  renderCotDocumentacion(q);
   renderCotResultBox(q);
   renderCotEmailBar(q);
   renderCotFooterButtons(q);
@@ -2299,7 +2338,7 @@ function closeCotDrawer(){
 function refreshCotDrawerIfOpen(q){
   if(cotDrawerTargetId !== q.id) return;
   document.getElementById("cotDrawerEyebrow").innerHTML = `Cotización · <span class="badge ${cotBadgeClass(q.estado)}" style="vertical-align:middle;">${esc(q.estado)}</span>`;
-  document.getElementById("cq_estadoBadgeWrap").innerHTML = `<span class="badge ${cotBadgeClass(q.estado)}">${esc(q.estado)}</span>`;
+  renderCotDocumentacion(q);
   renderCotResultBox(q);
   renderCotHistory(q);
   renderCotEmailBar(q);
@@ -2487,7 +2526,7 @@ function confirmCotApprove(){
   const q = findQuotation(cotDrawerTargetId);
   if(!cotApproveFiles.length) return;
   q.estado = "Aprobada";
-  q.documentoSustento = {nombreArchivo:cotApproveFiles[0], fecha:"2026-07-25"};
+  q.documentoSustento = {nombreArchivo:cotApproveFiles[0], fecha:"2026-07-25", cargadoPor:"F. Ruiz"};
   q.historial.push({fecha:"2026-07-25", usuario:"F. Ruiz", accion:"Cotización aprobada", detalle:"Aprobada con documento de sustento adjunto."});
   closeModalById("cotApproveModal");
   refreshCotDrawerIfOpen(q);

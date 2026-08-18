@@ -1987,7 +1987,7 @@
       <div class="drawer-title-block">
         <p class="drawer-eyebrow" id="cotDrawerEyebrow">Cotización</p>
         <h3 id="cotDrawerTitle">Cliente por definir</h3>
-        <p><b id="cotDrawerRuc">—</b> · Código <span id="cotDrawerCodigo">—</span> · desde <button type="button" class="cot-origin-chip" id="cotDrawerOrigen">—</button></p>
+        <p><b id="cotDrawerRuc">—</b> · Código <span id="cotDrawerCodigo">—</span> · Válida hasta <span id="cotDrawerValidaHasta">—</span> · desde <button type="button" class="cot-origin-chip" id="cotDrawerOrigen">—</button></p>
       </div>
     </div>
     <div class="drawer-header-actions">
@@ -2009,7 +2009,7 @@
       <button class="drawer-nav-item" data-cot-target="cot-sec-financieros" type="button"><span class="nav-dot"></span>Gastos financieros</button>
       <button class="drawer-nav-item" data-cot-target="cot-sec-mdr" type="button"><span class="nav-dot"></span>MDR adicional</button>
       <button class="drawer-nav-item" data-cot-target="cot-sec-condiciones" type="button"><span class="nav-dot"></span>Condiciones comerciales</button>
-      <button class="drawer-nav-item" data-cot-target="cot-sec-seguimiento" type="button"><span class="nav-dot"></span>Estado y seguimiento</button>
+      <button class="drawer-nav-item" data-cot-target="cot-sec-seguimiento" type="button"><span class="nav-dot"></span>Documentación</button>
     </nav>
 
     <form class="drawer-form" id="cotizacionForm" novalidate>
@@ -2159,19 +2159,13 @@
         </div>
       </section>
 
-      <!-- ============ 8. ESTADO Y SEGUIMIENTO ============ -->
+      <!-- ============ 8. DOCUMENTACIÓN ============ -->
       <section class="form-section" id="cot-sec-seguimiento">
         <div class="form-section-head">
           <span class="sec-num">8</span>
-          <h4>Estado y seguimiento</h4>
+          <h4>Documentación</h4>
         </div>
-        <div class="form-grid cols-3">
-          <div class="field-group"><label>Código de cotización</label><div class="locked-value" id="cq_codigo"><span class="lv-text"></span></div></div>
-          <div class="field-group"><label>Fecha de generación</label><div class="locked-value" id="cq_fechaGeneracion"><span class="lv-text"></span></div></div>
-          <div class="field-group"><label>Válida hasta</label><div class="locked-value" id="cq_validaHasta"><span class="lv-text"></span></div></div>
-          <div class="field-group"><label>Responsable comercial</label><div class="locked-value" id="cq_responsable"><span class="lv-text"></span></div></div>
-          <div class="field-group"><label>Estado</label><div id="cq_estadoBadgeWrap"></div></div>
-        </div>
+        <div class="doc-grid" id="cq_documentacionGrid"></div>
 
         <div id="cq_resultadoWrap" style="margin-top:14px;display:none;">
           <div class="reeval-box" id="cq_resultadoBox"></div>
