@@ -35,7 +35,7 @@ const proposals = [
     giro:"Consumo masivo", esCliente:true, direccion:"Av. Argentina 4793, Carmen de la Legua, Callao",
     representantes:[{tipoDoc:"DNI",numDoc:"09541278",nombres:"Rosa",apellidos:"Vidal Torres",cargo:"General Manager"}],
     solucion:"Food", marca:"Mastercard", sector:"Privado", categoria:"Esencial",
-    bvMes:185000, cantTarjetas:1200, cargasAnio:12, tipoProducto:"Físico", valorFacial:154,
+    bvMes:185000, cantBeneficiarios:1200, cantTarjetas:1200, cargasAnio:12, tipoProducto:"Físico", valorFacial:154,
     modalidadPago:"Crédito", diasCredito:30,
     rebate:{activo:true,tipo:"porcentaje",valor:1.5},
     comisionCliente:2.5, facturaMinima:1500,
@@ -59,7 +59,7 @@ const proposals = [
     giro:"Financiero", esCliente:true, direccion:"Av. Carlos Villarán 140, La Victoria, Lima",
     representantes:[{tipoDoc:"DNI",numDoc:"41235690",nombres:"Diego",apellidos:"Cárdenas Luna",cargo:"Apoderado legal"}],
     solucion:"Gift", marca:"Visa", sector:"Privado", categoria:"No aplica",
-    bvMes:92000, cantTarjetas:450, cargasAnio:4, tipoProducto:"Virtual", valorFacial:204,
+    bvMes:92000, cantBeneficiarios:450, cantTarjetas:450, cargasAnio:4, tipoProducto:"Virtual", valorFacial:204,
     modalidadPago:"Al contado", diasCredito:0,
     rebate:{activo:false,tipo:"monto",valor:0},
     comisionCliente:3.2, facturaMinima:900,
@@ -74,7 +74,7 @@ const proposals = [
     giro:"Alimentos y bebidas", esCliente:true, direccion:"Av. Nicolás Ayllón 3986, Ate, Lima",
     representantes:[{tipoDoc:"DNI",numDoc:"08774521",nombres:"Manuel",apellidos:"Sotelo Braga",cargo:"General Manager"},{tipoDoc:"CE",numDoc:"00123456",nombres:"Laura",apellidos:"Ibáñez Ruiz",cargo:"Apoderado legal"}],
     solucion:"Food", marca:"Mastercard", sector:"Privado", categoria:"Estándar",
-    bvMes:310000, cantTarjetas:2100, cargasAnio:12, tipoProducto:"Físico", valorFacial:147,
+    bvMes:310000, cantBeneficiarios:2100, cantTarjetas:2100, cargasAnio:12, tipoProducto:"Físico", valorFacial:147,
     modalidadPago:"Crédito", diasCredito:45,
     rebate:{activo:true,tipo:"monto",valor:5200},
     comisionCliente:2.0, facturaMinima:2200,
@@ -95,7 +95,7 @@ const proposals = [
     giro:"Tecnología", esCliente:false, direccion:"Av. Santa Cruz 830, Miraflores, Lima",
     representantes:[{tipoDoc:"CE",numDoc:"00456789",nombres:"Andrés",apellidos:"Gómez Peña",cargo:"General Manager"}],
     solucion:"Mobility", marca:"Visa", sector:"Privado", categoria:"No aplica",
-    bvMes:45000, cantTarjetas:300, cargasAnio:6, tipoProducto:"Físico", valorFacial:150,
+    bvMes:45000, cantBeneficiarios:300, cantTarjetas:300, cargasAnio:6, tipoProducto:"Físico", valorFacial:150,
     modalidadPago:"Al contado", diasCredito:0,
     rebate:{activo:false,tipo:"monto",valor:0},
     comisionCliente:2.8, facturaMinima:600,
@@ -113,7 +113,7 @@ const proposals = [
     giro:"Retail", esCliente:true, direccion:"Av. Angamos Este 1805, Surquillo, Lima",
     representantes:[{tipoDoc:"DNI",numDoc:"07896541",nombres:"Patricia",apellidos:"León Salazar",cargo:"General Manager"}],
     solucion:"Food", marca:"Mastercard", sector:"Privado", categoria:"Esencial",
-    bvMes:210000, cantTarjetas:1500, cargasAnio:12, tipoProducto:"Físico", valorFacial:140,
+    bvMes:210000, cantBeneficiarios:1500, cantTarjetas:1500, cargasAnio:12, tipoProducto:"Físico", valorFacial:140,
     modalidadPago:"Crédito", diasCredito:30,
     rebate:{activo:true,tipo:"porcentaje",valor:1.0},
     comisionCliente:2.4, facturaMinima:1800,
@@ -131,7 +131,7 @@ const proposals = [
     giro:"Retail", esCliente:true, direccion:"Av. Angamos Este 1805, Surquillo, Lima",
     representantes:[{tipoDoc:"DNI",numDoc:"06541237",nombres:"Jorge",apellidos:"Paredes Ito",cargo:"Apoderado legal"}],
     solucion:"Gift", marca:"Visa", sector:"Privado", categoria:"No aplica",
-    bvMes:67000, cantTarjetas:380, cargasAnio:2, tipoProducto:"Físico", valorFacial:176,
+    bvMes:67000, cantBeneficiarios:380, cantTarjetas:380, cargasAnio:2, tipoProducto:"Físico", valorFacial:176,
     modalidadPago:"Al contado", diasCredito:0,
     rebate:{activo:false,tipo:"monto",valor:0},
     comisionCliente:3.0, facturaMinima:700,
@@ -146,7 +146,7 @@ const proposals = [
     giro:"Entretenimiento", esCliente:true, direccion:"Av. Óscar R. Benavides 3866, Callao",
     representantes:[{tipoDoc:"DNI",numDoc:"05412369",nombres:"Valeria",apellidos:"Nuñez Campos",cargo:"General Manager"}],
     solucion:"Mobility", marca:"Mastercard", sector:"Privado", categoria:"No aplica",
-    bvMes:28000, cantTarjetas:210, cargasAnio:4, tipoProducto:"Virtual", valorFacial:133,
+    bvMes:28000, cantBeneficiarios:210, cantTarjetas:210, cargasAnio:4, tipoProducto:"Virtual", valorFacial:133,
     modalidadPago:"Crédito", diasCredito:15,
     rebate:{activo:false,tipo:"monto",valor:0},
     comisionCliente:2.6, facturaMinima:400,
@@ -167,7 +167,7 @@ const proposals = [
     giro:"Servicios", esCliente:true, direccion:"Av. Elmer Faucett 3348, Callao",
     representantes:[{tipoDoc:"DNI",numDoc:"04123698",nombres:"Ricardo",apellidos:"Cabrera Solís",cargo:"Apoderado legal"}],
     solucion:"Food", marca:"Visa", sector:"Privado", categoria:"Estándar",
-    bvMes:156000, cantTarjetas:980, cargasAnio:12, tipoProducto:"Físico", valorFacial:159,
+    bvMes:156000, cantBeneficiarios:980, cantTarjetas:980, cargasAnio:12, tipoProducto:"Físico", valorFacial:159,
     modalidadPago:"Crédito", diasCredito:30,
     rebate:{activo:false,tipo:"monto",valor:0},
     comisionCliente:2.3, facturaMinima:1200,
@@ -182,7 +182,7 @@ const proposals = [
     giro:"Alimentos y bebidas", esCliente:true, direccion:"Av. República de Panamá 3055, San Isidro, Lima",
     representantes:[{tipoDoc:"DNI",numDoc:"03698521",nombres:"Camila",apellidos:"Herrera Díaz",cargo:"General Manager"}],
     solucion:"Food", marca:"Mastercard", sector:"Privado", categoria:"Esencial",
-    bvMes:74000, cantTarjetas:520, cargasAnio:12, tipoProducto:"Físico", valorFacial:142,
+    bvMes:74000, cantBeneficiarios:520, cantTarjetas:520, cargasAnio:12, tipoProducto:"Físico", valorFacial:142,
     modalidadPago:"Al contado", diasCredito:0,
     rebate:{activo:true,tipo:"porcentaje",valor:0.8},
     comisionCliente:2.7, facturaMinima:800,
@@ -200,7 +200,7 @@ const proposals = [
     giro:"Financiero", esCliente:false, direccion:"Av. República de Panamá 3591, San Isidro, Lima",
     representantes:[{tipoDoc:"DNI",numDoc:"02147896",nombres:"Hugo",apellidos:"Ferrer Vega",cargo:"Apoderado legal"}],
     solucion:"Gift", marca:"Visa", sector:"Privado", categoria:"No aplica",
-    bvMes:39000, cantTarjetas:260, cargasAnio:2, tipoProducto:"Virtual", valorFacial:150,
+    bvMes:39000, cantBeneficiarios:260, cantTarjetas:260, cargasAnio:2, tipoProducto:"Virtual", valorFacial:150,
     modalidadPago:"Crédito", diasCredito:20,
     rebate:{activo:false,tipo:"monto",valor:0},
     comisionCliente:3.1, facturaMinima:500,
@@ -215,7 +215,7 @@ const proposals = [
     giro:"Alimentos y bebidas", esCliente:true, direccion:"Calle Amador Merino Reyna 267, San Isidro, Lima",
     representantes:[{tipoDoc:"DNI",numDoc:"01236547",nombres:"Elena",apellidos:"Osorio Vargas",cargo:"General Manager"}],
     solucion:"Food", marca:"Mastercard", sector:"Privado", categoria:"Estándar",
-    bvMes:198000, cantTarjetas:1340, cargasAnio:12, tipoProducto:"Físico", valorFacial:148,
+    bvMes:198000, cantBeneficiarios:1340, cantTarjetas:1340, cargasAnio:12, tipoProducto:"Físico", valorFacial:148,
     modalidadPago:"Crédito", diasCredito:30,
     rebate:{activo:false,tipo:"monto",valor:0},
     comisionCliente:2.2, facturaMinima:1600,
@@ -230,7 +230,7 @@ const proposals = [
     giro:"Retail", esCliente:true, direccion:"Av. Angamos Este 1803, Surquillo, Lima",
     representantes:[{tipoDoc:"DNI",numDoc:"09638527",nombres:"Sergio",apellidos:"Malpartida Ruiz",cargo:"Apoderado legal"}],
     solucion:"Mobility", marca:"Visa", sector:"Privado", categoria:"No aplica",
-    bvMes:52000, cantTarjetas:340, cargasAnio:6, tipoProducto:"Físico", valorFacial:153,
+    bvMes:52000, cantBeneficiarios:340, cantTarjetas:340, cargasAnio:6, tipoProducto:"Físico", valorFacial:153,
     modalidadPago:"Al contado", diasCredito:0,
     rebate:{activo:false,tipo:"monto",valor:0},
     comisionCliente:2.9, facturaMinima:650,
@@ -793,10 +793,10 @@ function updateConditionalFields(){
 
 function recalcDrawerBv(){
   const valorFacial = +document.getElementById("f_valorFacial").value || 0;
-  const cantTarjetas = +document.getElementById("f_cantTarjetas").value || 0;
+  const cantBeneficiarios = +document.getElementById("f_cantBeneficiarios").value || 0;
   const cargas = +document.getElementById("f_cargasAnio").value || 0;
-  document.getElementById("f_bvCarga").value = calcBvCarga(valorFacial, cantTarjetas).toFixed(2);
-  document.getElementById("f_bvTotal").value = calcBvTotal(valorFacial, cantTarjetas, cargas).toFixed(2);
+  document.getElementById("f_bvCarga").value = calcBvCarga(valorFacial, cantBeneficiarios).toFixed(2);
+  document.getElementById("f_bvTotal").value = calcBvTotal(valorFacial, cantBeneficiarios, cargas).toFixed(2);
 }
 
 function fillForm(p){
@@ -812,12 +812,13 @@ function fillForm(p){
   setLockedValue("f_marca", p.marca);
   setLockedValue("f_sector", p.sector);
   setLockedValue("f_categoria", p.categoria);
+  document.getElementById("f_cantBeneficiarios").value = p.cantBeneficiarios;
   document.getElementById("f_cantTarjetas").value = p.cantTarjetas;
   document.getElementById("f_cargasAnio").value = p.cargasAnio;
   document.getElementById("f_tipoProducto").value = p.tipoProducto;
   document.getElementById("f_valorFacial").value = p.valorFacial;
-  document.getElementById("f_bvCarga").value = calcBvCarga(p.valorFacial, p.cantTarjetas).toFixed(2);
-  document.getElementById("f_bvTotal").value = calcBvTotal(p.valorFacial, p.cantTarjetas, p.cargasAnio).toFixed(2);
+  document.getElementById("f_bvCarga").value = calcBvCarga(p.valorFacial, p.cantBeneficiarios).toFixed(2);
+  document.getElementById("f_bvTotal").value = calcBvTotal(p.valorFacial, p.cantBeneficiarios, p.cargasAnio).toFixed(2);
   document.getElementById("f_modalidadPago").value = p.modalidadPago;
   document.getElementById("f_diasCredito").value = p.diasCredito;
   document.getElementById("f_rebateToggle").checked = !!p.rebate.activo;
@@ -843,10 +844,12 @@ function fillForm(p){
 
 /* BV por carga / BV total: campos calculados y no editables (ver
    sección "Oportunidad" del drawer y el modal de Nueva oportunidad).
-   Se recalculan en vivo a partir de Valor facial, Cantidad de tarjetas
-   y Cantidad de cargas total — nunca se guardan como un número aparte. */
-function calcBvCarga(valorFacial, cantTarjetas){ return (+valorFacial||0) * (+cantTarjetas||0); }
-function calcBvTotal(valorFacial, cantTarjetas, cargas){ return calcBvCarga(valorFacial, cantTarjetas) * (+cargas||0); }
+   Se recalculan en vivo a partir de Valor facial, Cantidad de
+   beneficiarios y Cantidad de cargas total — nunca se guardan como un
+   número aparte. Cantidad de tarjetas es un campo independiente que NO
+   participa en este cálculo (ver separación Beneficiarios/Tarjetas). */
+function calcBvCarga(valorFacial, cantBeneficiarios){ return (+valorFacial||0) * (+cantBeneficiarios||0); }
+function calcBvTotal(valorFacial, cantBeneficiarios, cargas){ return calcBvCarga(valorFacial, cantBeneficiarios) * (+cargas||0); }
 /* Expuestas en window: este IIFE (Propuestas) es el único dueño del
    cálculo de BV, pero Motor de Variables (otro módulo, fuera de este
    IIFE) también lo necesita para su Simulador — ver Tarea 6. */
@@ -856,7 +859,7 @@ window.calcBvTotal = calcBvTotal;
    total de la propuesta se atribuye al periodo en que se aprobó, no un
    ritmo mensual. Siempre BV total, nunca bvMes (que hoy equivale a BV
    por carga, un cálculo distinto). */
-function bvTotalFor(p){ return calcBvTotal(p.valorFacial, p.cantTarjetas, p.cargasAnio); }
+function bvTotalFor(p){ return calcBvTotal(p.valorFacial, p.cantBeneficiarios, p.cargasAnio); }
 
 function deriveProducto(data){
   return data.solucion==="Food" ? "Tarjeta Alimentación " + (data.categoria!=="No aplica"?data.categoria:"Estándar")
@@ -881,7 +884,7 @@ function blankTemplate(){
     ruc:"", razonSocial:"Cliente por definir", giro:GIRO_OPTIONS[0], esCliente:false,
     direccion:"", representantes:[],
     solucion:"Food", marca:"Mastercard", sector:"Privado", categoria:"Esencial",
-    bvMes:0, cantTarjetas:0, cargasAnio:0, tipoProducto:"Físico", valorFacial:0,
+    bvMes:0, cantBeneficiarios:0, cantTarjetas:0, cargasAnio:0, tipoProducto:"Físico", valorFacial:0,
     modalidadPago:"Crédito", diasCredito:0,
     rebate:{activo:false,tipo:"monto",valor:0},
     comisionCliente:0, facturaMinima:0,
@@ -907,6 +910,7 @@ function collectFormData(){
     marca: getLockedValue("f_marca"),
     sector: getLockedValue("f_sector"),
     categoria: getLockedValue("f_categoria"),
+    cantBeneficiarios: +document.getElementById("f_cantBeneficiarios").value || 0,
     cantTarjetas: +document.getElementById("f_cantTarjetas").value || 0,
     cargasAnio: +document.getElementById("f_cargasAnio").value || 0,
     tipoProducto: document.getElementById("f_tipoProducto").value,
@@ -914,7 +918,7 @@ function collectFormData(){
     /* bvMes es internamente "BV por carga" (usado solo por computeRentabilidad).
        El "Business Volume" mostrado en listado/dashboards es BV total —
        ver bvTotalFor(), un cálculo distinto que no depende de este campo. */
-    bvMes: calcBvCarga(+document.getElementById("f_valorFacial").value || 0, +document.getElementById("f_cantTarjetas").value || 0),
+    bvMes: calcBvCarga(+document.getElementById("f_valorFacial").value || 0, +document.getElementById("f_cantBeneficiarios").value || 0),
     modalidadPago: document.getElementById("f_modalidadPago").value,
     diasCredito: +document.getElementById("f_diasCredito").value || 0,
     rebate:{
@@ -1402,10 +1406,10 @@ function resetOportunidadForm(){
 
 function recalcOportunidadBv(){
   const valorFacial = +document.getElementById("op_valorFacial").value || 0;
-  const cantTarjetas = +document.getElementById("op_cantTarjetas").value || 0;
+  const cantBeneficiarios = +document.getElementById("op_cantBeneficiarios").value || 0;
   const cargas = +document.getElementById("op_cargasAnio").value || 0;
-  document.getElementById("op_bvCarga").value = calcBvCarga(valorFacial, cantTarjetas).toFixed(2);
-  document.getElementById("op_bvTotal").value = calcBvTotal(valorFacial, cantTarjetas, cargas).toFixed(2);
+  document.getElementById("op_bvCarga").value = calcBvCarga(valorFacial, cantBeneficiarios).toFixed(2);
+  document.getElementById("op_bvTotal").value = calcBvTotal(valorFacial, cantBeneficiarios, cargas).toFixed(2);
 }
 
 function setStaticValue(id, text, empty){
@@ -1474,6 +1478,9 @@ function validateOportunidadForm(){
   const valorFacial = document.getElementById("op_valorFacial").value;
   if(valorFacial === "" || +valorFacial <= 0){ errors.push("Ingresa un valor facial válido."); markError("op_valorFacial"); }
 
+  const cantBeneficiarios = document.getElementById("op_cantBeneficiarios").value;
+  if(cantBeneficiarios === "" || +cantBeneficiarios <= 0 || !Number.isInteger(+cantBeneficiarios)){ errors.push("Ingresa una cantidad de beneficiarios válida."); markError("op_cantBeneficiarios"); }
+
   const cantTarjetas = document.getElementById("op_cantTarjetas").value;
   if(cantTarjetas === "" || +cantTarjetas <= 0 || !Number.isInteger(+cantTarjetas)){ errors.push("Ingresa una cantidad de tarjetas válida."); markError("op_cantTarjetas"); }
 
@@ -1511,11 +1518,12 @@ function saveOportunidad(){
     marca: document.getElementById("op_marca").value,
     sector: document.getElementById("op_sector").value,
     categoria: document.getElementById("op_categoria").value,
+    cantBeneficiarios: +document.getElementById("op_cantBeneficiarios").value || 0,
     cantTarjetas: +document.getElementById("op_cantTarjetas").value || 0,
     cargasAnio: +document.getElementById("op_cargasAnio").value || 0,
     tipoProducto: document.getElementById("op_tipoProducto").value,
     valorFacial: +document.getElementById("op_valorFacial").value || 0,
-    bvMes: calcBvCarga(+document.getElementById("op_valorFacial").value || 0, +document.getElementById("op_cantTarjetas").value || 0),
+    bvMes: calcBvCarga(+document.getElementById("op_valorFacial").value || 0, +document.getElementById("op_cantBeneficiarios").value || 0),
     modalidadPago: document.getElementById("op_modalidadPago").value,
     diasCredito: document.getElementById("op_modalidadPago").value==="Crédito" ? (+document.getElementById("op_diasCredito").value || 0) : 0,
     rebate:{activo:false, tipo:"monto", valor:0},
@@ -1645,7 +1653,7 @@ document.addEventListener("DOMContentLoaded", function(){
   document.getElementById("op_ruc").addEventListener("input", ()=>{ oportunidadDirty = true; handleRucLookup(); });
   document.getElementById("op_modalidadPago").addEventListener("change", ()=>{ oportunidadDirty = true; updateDiasCreditoVisibility(); });
   document.getElementById("op_valorFacial").addEventListener("input", recalcOportunidadBv);
-  document.getElementById("op_cantTarjetas").addEventListener("input", recalcOportunidadBv);
+  document.getElementById("op_cantBeneficiarios").addEventListener("input", recalcOportunidadBv);
   document.getElementById("op_cargasAnio").addEventListener("input", recalcOportunidadBv);
   document.getElementById("oportunidadForm").addEventListener("input", ()=>{ oportunidadDirty = true; });
   document.getElementById("oportunidadForm").addEventListener("change", ()=>{ oportunidadDirty = true; });
@@ -1708,7 +1716,7 @@ document.addEventListener("DOMContentLoaded", function(){
 
   // BV por carga / BV total: recalculo en vivo, campos siempre calculados
   document.getElementById("f_valorFacial").addEventListener("input", recalcDrawerBv);
-  document.getElementById("f_cantTarjetas").addEventListener("input", recalcDrawerBv);
+  document.getElementById("f_cantBeneficiarios").addEventListener("input", recalcDrawerBv);
   document.getElementById("f_cargasAnio").addEventListener("input", recalcDrawerBv);
 
   // Distribución add row
@@ -2097,7 +2105,7 @@ function renderCotDistribucion(p){
 }
 
 function renderCotHistory(q){
-  const tl = document.getElementById("cq_historyTimeline");
+  const tl = document.getElementById("cotHistoryTimeline");
   const rev = q.historial.slice().reverse();
   tl.innerHTML = rev.map((h,idx)=>`
     <li class="timeline-item ${idx===0?"is-current":""}">
@@ -2108,6 +2116,15 @@ function renderCotHistory(q){
         <p class="timeline-summary">${esc(h.detalle)}</p>
       </div>
     </li>`).join("");
+}
+
+function openCotHistoryModal(q){
+  document.getElementById("cotHistoryCliente").textContent = findProposalByCodigo(q.propuestaCodigo).razonSocial;
+  document.getElementById("cotHistoryCodigo").textContent = q.codigo;
+  renderCotHistory(q);
+  document.getElementById("cotHistoryModal").classList.add("open");
+  cotOverlay.classList.add("visible");
+  trapFocus(document.getElementById("cotHistoryModal"));
 }
 
 function renderCotResultBox(q){
@@ -2160,7 +2177,10 @@ function renderCotEmailBar(q){
 function renderCotFooterButtons(q){
   const left = document.getElementById("cotFooterLeft");
   const right = document.getElementById("cotFooterRight");
-  let leftHtml = "", rightHtml = `<button class="btn-text" id="btnCloseCotDrawerFooter" type="button">Cerrar</button>`;
+  let leftHtml = "", rightHtml = `<button class="btn btn-secondary" id="btnCotHistory" type="button">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
+      Ver historial
+    </button><button class="btn-text" id="btnCloseCotDrawerFooter" type="button">Cerrar</button>`;
 
   if(q.estado==="Generada"){
     leftHtml = `<button class="btn btn-outline-danger" id="btnCotMarkLost" type="button">Marcar como oportunidad perdida</button>`;
@@ -2180,6 +2200,7 @@ function renderCotFooterButtons(q){
   right.innerHTML = rightHtml;
 
   document.getElementById("btnCloseCotDrawerFooter").addEventListener("click", closeCotDrawer);
+  document.getElementById("btnCotHistory").addEventListener("click", ()=>openCotHistoryModal(q));
   const sendBtn = document.getElementById("btnCotSend");
   if(sendBtn) sendBtn.addEventListener("click", ()=>sendCotEmail(q, {isResend:false}));
   const rejectBtn = document.getElementById("btnCotReject");
@@ -2215,8 +2236,9 @@ function openCotDrawer(id){
   setLockedValue("cq_diasCredito", p.modalidadPago==="Crédito" ? intFmt(p.diasCredito)+" días" : "No aplica");
   setLockedValue("cq_tipoProducto", p.tipoProducto);
   setLockedValue("cq_valorFacial", moneyDec(p.valorFacial));
+  setLockedValue("cq_cantBeneficiarios", intFmt(p.cantBeneficiarios));
   setLockedValue("cq_cantTarjetas", intFmt(p.cantTarjetas));
-  setLockedValue("cq_bvCarga", money(calcBvCarga(p.valorFacial, p.cantTarjetas)));
+  setLockedValue("cq_bvCarga", money(calcBvCarga(p.valorFacial, p.cantBeneficiarios)));
   setLockedValue("cq_cargasAnio", intFmt(p.cargasAnio));
   setLockedValue("cq_bvTotal", money(bvTotalFor(p)));
   const rebateWrap = document.getElementById("cq_rebateWrap");
@@ -2250,7 +2272,6 @@ function openCotDrawer(id){
   document.getElementById("cq_estadoBadgeWrap").innerHTML = `<span class="badge ${cotBadgeClass(q.estado)}">${esc(q.estado)}</span>`;
 
   renderCotResultBox(q);
-  renderCotHistory(q);
   renderCotEmailBar(q);
   renderCotFooterButtons(q);
 
@@ -2387,6 +2408,22 @@ function openCotRejectModal(q){
   cotOverlay.classList.add("visible");
   trapFocus(document.getElementById("cotRejectModal"));
 }
+/* Rechazo en cascada: la propuesta de origen pasa a Rechazada también,
+   replicando exactamente lo que hace confirmReject() (estado +
+   historial) — sin disparar el flujo de "Generar nueva versión", que
+   sigue siendo 100% manual (el botón aparece solo en el listado de
+   Propuestas por estar p.estado==="Rechazada", igual que un rechazo
+   directo). */
+function cascadeRejectProposal(q, motivo){
+  const p = findProposalByCodigo(q.propuestaCodigo);
+  if(!p || p.estado === "Rechazada") return;
+  p.estado = "Rechazada";
+  p.fecha = new Date().toISOString().slice(0,10);
+  p.historial.push({version:p.version, fecha:p.fecha, estado:"Rechazada", usuario:"F. Ruiz", resumen:"Propuesta rechazada automáticamente al rechazarse la cotización " + q.codigo + " generada a partir de ella.", motivo});
+  flashRow(p.id);
+  applyProposalsFilters();
+}
+
 function confirmCotReject(){
   const q = findQuotation(cotDrawerTargetId);
   const motivo = document.getElementById("cotRejectReason").value.trim();
@@ -2394,10 +2431,11 @@ function confirmCotReject(){
   q.estado = "Rechazada";
   q.motivoRechazo = motivo;
   q.historial.push({fecha:"2026-07-25", usuario:"F. Ruiz", accion:"Cotización rechazada", detalle:motivo});
+  cascadeRejectProposal(q, motivo);
   closeModalById("cotRejectModal");
   refreshCotDrawerIfOpen(q);
   renderCotTable();
-  showToast(`Cotización ${q.codigo} marcada como Rechazada.`, "danger");
+  showToast(`Cotización ${q.codigo} marcada como Rechazada. La propuesta de origen también pasó a Rechazada.`, "danger");
 }
 
 function openCotLostModal(q){
@@ -5570,7 +5608,7 @@ const SIM_DEFAULTS = {
      reproducen exactamente los defaults anteriores: 100×500=50000 mensual,
      50000×12=600000 anual. */
   valorFacial:100, cargasAnio:12,
-  bvAnual:600000, bvMensual:50000, cantidadTarjetas:500, qTarjetasNuevas:120,
+  bvAnual:600000, bvMensual:50000, cantidadBeneficiarios:500, cantidadTarjetas:500, qTarjetasNuevas:120,
   numeroPedidosAlAnio:4, puntosLima:3, puntosProvincia:2, cantidadDeRepartos:12,
   sector:'PRIVADO', cartaFianza:'NO', emitioCartaFianza:'NO',
   modalidadPago:'CREDITO', diasCredito:30,
@@ -6063,10 +6101,11 @@ function simFormTemplate(){
   '<fieldset>'+
     '<legend>Volumen comercial (BV)</legend>'+
     '<div class="mv-sim-field"><label>Valor facial (S/)</label><input type="number" min="0" step="0.01" data-field="valorFacial" value="'+P.valorFacial+'"></div>'+
-    '<div class="mv-sim-field"><label>Cantidad de tarjetas activas</label><input type="number" min="0" data-field="cantidadTarjetas" value="'+P.cantidadTarjetas+'"></div>'+
+    '<div class="mv-sim-field"><label>Cantidad de beneficiarios</label><input type="number" min="0" data-field="cantidadBeneficiarios" value="'+P.cantidadBeneficiarios+'"></div>'+
+    '<div class="mv-sim-field"><label>Cantidad de tarjetas</label><input type="number" min="0" data-field="cantidadTarjetas" value="'+P.cantidadTarjetas+'"></div>'+
     '<div class="mv-sim-field"><label>Cantidad de cargas / año</label><input type="number" min="0" step="1" data-field="cargasAnio" value="'+P.cargasAnio+'"></div>'+
-    '<div class="mv-sim-field"><label>BV mensual (derivado)</label><input type="number" id="mv-sim-bvMensual" value="'+calcBvCarga(P.valorFacial,P.cantidadTarjetas).toFixed(2)+'" disabled></div>'+
-    '<div class="mv-sim-field"><label>BV anual (derivado)</label><input type="number" id="mv-sim-bvAnual" value="'+calcBvTotal(P.valorFacial,P.cantidadTarjetas,P.cargasAnio).toFixed(2)+'" disabled></div>'+
+    '<div class="mv-sim-field"><label>BV mensual (derivado)</label><input type="number" id="mv-sim-bvMensual" value="'+calcBvCarga(P.valorFacial,P.cantidadBeneficiarios).toFixed(2)+'" disabled></div>'+
+    '<div class="mv-sim-field"><label>BV anual (derivado)</label><input type="number" id="mv-sim-bvAnual" value="'+calcBvTotal(P.valorFacial,P.cantidadBeneficiarios,P.cargasAnio).toFixed(2)+'" disabled></div>'+
     '<div class="mv-sim-field"><label>Tarjetas nuevas (Q)</label><input type="number" min="0" data-field="qTarjetasNuevas" value="'+P.qTarjetasNuevas+'"></div>'+
     '<div class="mv-sim-field"><label>N.º pedidos al año</label><input type="number" min="0" data-field="numeroPedidosAlAnio" value="'+P.numeroPedidosAlAnio+'"></div>'+
     '<div class="mv-sim-field"><label>Comisión cliente ejecutivo (%)</label><input type="number" min="0" step="0.1" data-field="comisionClienteEjecutivo" value="'+P.comisionClienteEjecutivo+'"></div>'+
@@ -6323,8 +6362,8 @@ function renderPnlColumn(v){
    en cada corrida — más liviano que un wireSimForm() completo, y necesario
    porque runSimulation() nunca re-renderiza la columna 1 del formulario. */
 function recalcSimBv(){
-  SIM.bvMensual = calcBvCarga(SIM.valorFacial, SIM.cantidadTarjetas);
-  SIM.bvAnual = calcBvTotal(SIM.valorFacial, SIM.cantidadTarjetas, SIM.cargasAnio);
+  SIM.bvMensual = calcBvCarga(SIM.valorFacial, SIM.cantidadBeneficiarios);
+  SIM.bvAnual = calcBvTotal(SIM.valorFacial, SIM.cantidadBeneficiarios, SIM.cargasAnio);
   const bvMEl = document.getElementById('mv-sim-bvMensual');
   const bvAEl = document.getElementById('mv-sim-bvAnual');
   if(bvMEl) bvMEl.value = SIM.bvMensual.toFixed(2);

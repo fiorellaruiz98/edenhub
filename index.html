@@ -1395,11 +1395,11 @@
     <nav class="drawer-nav" aria-label="Secciones del formulario">
       <button class="drawer-nav-item active" data-target="sec-empresa" type="button"><span class="nav-dot"></span>Datos de empresa</button>
       <button class="drawer-nav-item" data-target="sec-oportunidad" type="button"><span class="nav-dot"></span>Oportunidad</button>
-      <button class="drawer-nav-item" data-target="sec-condiciones" type="button"><span class="nav-dot"></span>Condiciones comerciales</button>
       <button class="drawer-nav-item" data-target="sec-distribucion" type="button"><span class="nav-dot"></span>Distribución</button>
       <button class="drawer-nav-item" data-target="sec-personalizacion" type="button"><span class="nav-dot"></span>Personalización</button>
       <button class="drawer-nav-item" data-target="sec-financieros" type="button"><span class="nav-dot"></span>Gastos financieros</button>
       <button class="drawer-nav-item" data-target="sec-mdr" type="button"><span class="nav-dot"></span>MDR adicional</button>
+      <button class="drawer-nav-item" data-target="sec-condiciones" type="button"><span class="nav-dot"></span>Condiciones comerciales</button>
       <button class="drawer-nav-item" data-target="sec-aprobaciones" type="button"><span class="nav-dot"></span>Flujos de aprobación</button>
     </nav>
 
@@ -1492,13 +1492,13 @@
             <div class="input-currency"><input type="number" id="f_valorFacial" min="0" placeholder="0.00"></div>
           </div>
           <div class="field-group">
-            <label for="f_cantTarjetas">Cantidad de tarjetas</label>
-            <input type="number" id="f_cantTarjetas" min="0" placeholder="0">
+            <label for="f_cantBeneficiarios">Cantidad de beneficiarios</label>
+            <input type="number" id="f_cantBeneficiarios" min="0" placeholder="0">
           </div>
           <div class="field-group">
             <label for="f_bvCarga">BV por carga</label>
             <div class="input-currency"><input type="number" id="f_bvCarga" min="0" placeholder="0.00" disabled></div>
-            <span class="field-hint">Calculado: Valor facial × Cantidad de tarjetas</span>
+            <span class="field-hint">Calculado: Valor facial × Cantidad de beneficiarios</span>
           </div>
           <div class="field-group">
             <label for="f_cargasAnio">Cantidad de cargas total</label>
@@ -1530,39 +1530,20 @@
             </div>
           </div>
         </div>
-      </section>
 
-      <!-- ============ 3. CONDICIONES COMERCIALES ============ -->
-      <section class="form-section" id="sec-condiciones">
-        <div class="form-section-head">
-          <span class="sec-num">3</span>
-          <h4>Condiciones comerciales</h4>
-          <span>Editable en tabla</span>
-        </div>
-        <div class="cond-table-wrap">
-          <table class="cond-table">
-            <thead>
-              <tr>
-                <th style="width:32%">Concepto</th>
-                <th style="width:16%">Tipo</th>
-                <th style="width:20%">Valor</th>
-                <th class="center" style="width:16%">Exonerar</th>
-                <th class="center" style="width:40px"></th>
-              </tr>
-            </thead>
-            <tbody id="condicionesBody"></tbody>
-          </table>
-          <button type="button" class="cond-table-add" id="btnAddCondicion">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
-            Agregar condición comercial
-          </button>
+        <div class="form-grid" style="margin-top:14px;">
+          <div class="field-group">
+            <label for="f_cantTarjetas">Cantidad de tarjetas</label>
+            <input type="number" id="f_cantTarjetas" min="0" placeholder="0">
+            <span class="field-hint">Tarjetas físicas/virtuales emitidas — independiente de Cantidad de beneficiarios, no afecta el BV</span>
+          </div>
         </div>
       </section>
 
-      <!-- ============ 4. DATOS DE DISTRIBUCIÓN ============ -->
+      <!-- ============ 3. DATOS DE DISTRIBUCIÓN ============ -->
       <section class="form-section" id="sec-distribucion">
         <div class="form-section-head">
-          <span class="sec-num">4</span>
+          <span class="sec-num">3</span>
           <h4>Datos de distribución</h4>
         </div>
         <div class="field-group field-full">
@@ -1583,7 +1564,7 @@
       <!-- ============ 5. DATOS DE PERSONALIZACIÓN ============ -->
       <section class="form-section" id="sec-personalizacion">
         <div class="form-section-head">
-          <span class="sec-num">5</span>
+          <span class="sec-num">4</span>
           <h4>Datos de personalización</h4>
         </div>
         <div class="toggle-row">
@@ -1595,10 +1576,10 @@
         </div>
       </section>
 
-      <!-- ============ 6. GASTOS FINANCIEROS ============ -->
+      <!-- ============ 5. GASTOS FINANCIEROS ============ -->
       <section class="form-section" id="sec-financieros">
         <div class="form-section-head">
-          <span class="sec-num">6</span>
+          <span class="sec-num">5</span>
           <h4>Gastos financieros</h4>
         </div>
         <div class="toggle-row">
@@ -1616,10 +1597,10 @@
         </div>
       </section>
 
-      <!-- ============ 7. MDR ADICIONAL ============ -->
+      <!-- ============ 6. MDR ADICIONAL ============ -->
       <section class="form-section" id="sec-mdr">
         <div class="form-section-head">
-          <span class="sec-num">7</span>
+          <span class="sec-num">6</span>
           <h4>MDR adicional</h4>
         </div>
         <div class="toggle-row">
@@ -1634,6 +1615,33 @@
             <label for="f_mdrNegociado">MDR negociado</label>
             <div class="input-percent"><input type="number" id="f_mdrNegociado" min="0" max="100" step="0.01" placeholder="0.00" disabled></div>
           </div>
+        </div>
+      </section>
+
+      <!-- ============ 7. CONDICIONES COMERCIALES ============ -->
+      <section class="form-section" id="sec-condiciones">
+        <div class="form-section-head">
+          <span class="sec-num">7</span>
+          <h4>Condiciones comerciales</h4>
+          <span>Editable en tabla</span>
+        </div>
+        <div class="cond-table-wrap">
+          <table class="cond-table">
+            <thead>
+              <tr>
+                <th style="width:32%">Concepto</th>
+                <th style="width:16%">Tipo</th>
+                <th style="width:20%">Valor</th>
+                <th class="center" style="width:16%">Exonerar</th>
+                <th class="center" style="width:40px"></th>
+              </tr>
+            </thead>
+            <tbody id="condicionesBody"></tbody>
+          </table>
+          <button type="button" class="cond-table-add" id="btnAddCondicion">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+            Agregar condición comercial
+          </button>
         </div>
       </section>
 
@@ -1898,13 +1906,18 @@
               <div class="input-currency"><input type="number" id="op_valorFacial" min="0" step="0.01" placeholder="0.00"></div>
             </div>
             <div class="field-group">
+              <label for="op_cantBeneficiarios">Cantidad de beneficiarios <span class="req">*</span></label>
+              <input type="number" id="op_cantBeneficiarios" min="0" step="1" placeholder="0">
+            </div>
+            <div class="field-group">
               <label for="op_cantTarjetas">Cantidad de tarjetas <span class="req">*</span></label>
               <input type="number" id="op_cantTarjetas" min="0" step="1" placeholder="0">
+              <span class="field-hint">Tarjetas físicas/virtuales emitidas — independiente de Cantidad de beneficiarios</span>
             </div>
             <div class="field-group">
               <label for="op_bvCarga">BV por carga</label>
               <div class="input-currency"><input type="number" id="op_bvCarga" min="0" step="0.01" placeholder="0.00" disabled></div>
-              <span class="field-hint">Calculado: Valor facial × Cantidad de tarjetas</span>
+              <span class="field-hint">Calculado: Valor facial × Cantidad de beneficiarios</span>
             </div>
             <div class="field-group">
               <label for="op_cargasAnio">Cantidad de cargas total <span class="req">*</span></label>
@@ -1991,11 +2004,11 @@
     <nav class="drawer-nav" aria-label="Secciones de la cotización">
       <button class="drawer-nav-item active" data-cot-target="cot-sec-empresa" type="button"><span class="nav-dot"></span>Datos de empresa</button>
       <button class="drawer-nav-item" data-cot-target="cot-sec-oportunidad" type="button"><span class="nav-dot"></span>Oportunidad</button>
-      <button class="drawer-nav-item" data-cot-target="cot-sec-condiciones" type="button"><span class="nav-dot"></span>Condiciones comerciales</button>
       <button class="drawer-nav-item" data-cot-target="cot-sec-distribucion" type="button"><span class="nav-dot"></span>Distribución</button>
       <button class="drawer-nav-item" data-cot-target="cot-sec-personalizacion" type="button"><span class="nav-dot"></span>Personalización</button>
       <button class="drawer-nav-item" data-cot-target="cot-sec-financieros" type="button"><span class="nav-dot"></span>Gastos financieros</button>
       <button class="drawer-nav-item" data-cot-target="cot-sec-mdr" type="button"><span class="nav-dot"></span>MDR adicional</button>
+      <button class="drawer-nav-item" data-cot-target="cot-sec-condiciones" type="button"><span class="nav-dot"></span>Condiciones comerciales</button>
       <button class="drawer-nav-item" data-cot-target="cot-sec-seguimiento" type="button"><span class="nav-dot"></span>Estado y seguimiento</button>
     </nav>
 
@@ -2048,6 +2061,7 @@
           <div class="field-group"><label>Días de crédito</label><div class="locked-value" id="cq_diasCredito"><span class="lv-text"></span></div></div>
           <div class="field-group"><label>Tipo de producto</label><div class="locked-value" id="cq_tipoProducto"><span class="lv-text"></span></div></div>
           <div class="field-group"><label>Valor facial</label><div class="locked-value" id="cq_valorFacial"><span class="lv-text"></span></div></div>
+          <div class="field-group"><label>Cantidad de beneficiarios</label><div class="locked-value" id="cq_cantBeneficiarios"><span class="lv-text"></span></div></div>
           <div class="field-group"><label>Cantidad de tarjetas</label><div class="locked-value" id="cq_cantTarjetas"><span class="lv-text"></span></div></div>
           <div class="field-group"><label>BV por carga</label><div class="locked-value" id="cq_bvCarga"><span class="lv-text"></span></div></div>
           <div class="field-group"><label>Cantidad de cargas total</label><div class="locked-value" id="cq_cargasAnio"><span class="lv-text"></span></div></div>
@@ -2061,25 +2075,10 @@
         </div>
       </section>
 
-      <!-- ============ 3. CONDICIONES COMERCIALES ============ -->
-      <section class="form-section" id="cot-sec-condiciones">
-        <div class="form-section-head">
-          <span class="sec-num">3</span>
-          <h4>Condiciones comerciales</h4>
-          <span>Heredado de la propuesta</span>
-        </div>
-        <div class="cond-table-wrap">
-          <table class="cond-table">
-            <thead><tr><th style="width:40%">Concepto</th><th style="width:20%">Tipo</th><th style="width:24%">Valor</th><th class="center" style="width:16%">Exonerado</th></tr></thead>
-            <tbody id="cq_condicionesBody"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- ============ 4. DISTRIBUCIÓN ============ -->
+      <!-- ============ 3. DISTRIBUCIÓN ============ -->
       <section class="form-section" id="cot-sec-distribucion">
         <div class="form-section-head">
-          <span class="sec-num">4</span>
+          <span class="sec-num">3</span>
           <h4>Distribución</h4>
           <span>Heredado de la propuesta</span>
         </div>
@@ -2094,10 +2093,10 @@
         </div>
       </section>
 
-      <!-- ============ 5. PERSONALIZACIÓN ============ -->
+      <!-- ============ 4. PERSONALIZACIÓN ============ -->
       <section class="form-section" id="cot-sec-personalizacion">
         <div class="form-section-head">
-          <span class="sec-num">5</span>
+          <span class="sec-num">4</span>
           <h4>Personalización</h4>
           <span>Heredado de la propuesta</span>
         </div>
@@ -2107,10 +2106,10 @@
         </div>
       </section>
 
-      <!-- ============ 6. GASTOS FINANCIEROS ============ -->
+      <!-- ============ 5. GASTOS FINANCIEROS ============ -->
       <section class="form-section" id="cot-sec-financieros">
         <div class="form-section-head">
-          <span class="sec-num">6</span>
+          <span class="sec-num">5</span>
           <h4>Gastos financieros</h4>
           <span>Heredado de la propuesta</span>
         </div>
@@ -2126,10 +2125,10 @@
         </div>
       </section>
 
-      <!-- ============ 7. MDR ADICIONAL ============ -->
+      <!-- ============ 6. MDR ADICIONAL ============ -->
       <section class="form-section" id="cot-sec-mdr">
         <div class="form-section-head">
-          <span class="sec-num">7</span>
+          <span class="sec-num">6</span>
           <h4>MDR adicional</h4>
           <span>Heredado de la propuesta</span>
         </div>
@@ -2142,6 +2141,21 @@
             <label>MDR negociado</label>
             <div class="locked-value" id="cq_mdrNegociado"><span class="lv-text"></span></div>
           </div>
+        </div>
+      </section>
+
+      <!-- ============ 7. CONDICIONES COMERCIALES ============ -->
+      <section class="form-section" id="cot-sec-condiciones">
+        <div class="form-section-head">
+          <span class="sec-num">7</span>
+          <h4>Condiciones comerciales</h4>
+          <span>Heredado de la propuesta</span>
+        </div>
+        <div class="cond-table-wrap">
+          <table class="cond-table">
+            <thead><tr><th style="width:40%">Concepto</th><th style="width:20%">Tipo</th><th style="width:24%">Valor</th><th class="center" style="width:16%">Exonerado</th></tr></thead>
+            <tbody id="cq_condicionesBody"></tbody>
+          </table>
         </div>
       </section>
 
@@ -2161,11 +2175,6 @@
 
         <div id="cq_resultadoWrap" style="margin-top:14px;display:none;">
           <div class="reeval-box" id="cq_resultadoBox"></div>
-        </div>
-
-        <div style="margin-top:18px;">
-          <label class="block-label">Historial de la cotización</label>
-          <ul class="timeline" id="cq_historyTimeline"></ul>
         </div>
       </section>
 
@@ -2335,6 +2344,29 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" data-close-modal="cotEmailModal" type="button">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Historial de la cotización — mismo patrón visual que #historyModal
+     (Propuestas), pero disparado desde un botón fijo en la franja
+     inferior del drawer en vez de una acción de fila del listado. -->
+<div class="modal" id="cotHistoryModal" role="dialog" aria-modal="true" aria-labelledby="cotHistoryModalTitle">
+  <div class="modal-card w-lg">
+    <div class="modal-header">
+      <div>
+        <h3 id="cotHistoryModalTitle">Historial de la cotización</h3>
+        <p><span id="cotHistoryCliente">—</span> · Código <b id="cotHistoryCodigo">—</b></p>
+      </div>
+      <button class="close-x" data-close-modal="cotHistoryModal" type="button">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <ul class="timeline" id="cotHistoryTimeline"></ul>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-close-modal="cotHistoryModal" type="button">Cerrar</button>
     </div>
   </div>
 </div>
