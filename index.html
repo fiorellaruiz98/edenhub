@@ -302,10 +302,10 @@
       </div>
       <div class="filters-grid">
         <div class="field-group">
-          <label for="fCliente">Cliente (Razón social o RUC)</label>
+          <label for="fCliente">Buscador</label>
           <div class="input-wrap">
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            <input type="text" id="fCliente" placeholder="Ej. Alicorp o 20100070970">
+            <input type="text" id="fCliente" placeholder="Ej. Alicorp, 20100070970 o COD-2026-001">
           </div>
         </div>
         <div class="field-group">
@@ -462,11 +462,34 @@
       </div>
       <div class="filters-grid">
         <div class="field-group">
-          <label for="fCotCliente">Cliente (Razón social o RUC)</label>
+          <label for="fCotCliente">Buscador</label>
           <div class="input-wrap">
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            <input type="text" id="fCotCliente" placeholder="Ej. Alicorp o 20100070970">
+            <input type="text" id="fCotCliente" placeholder="Ej. Alicorp, 20100070970 o COT-2026-001">
           </div>
+        </div>
+        <div class="field-group">
+          <label for="fCotSolucion">Solución</label>
+          <select id="fCotSolucion">
+            <option value="">Todas</option>
+            <option value="Gift">Gift</option>
+            <option value="Food">Food</option>
+            <option value="Mobility">Mobility</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label for="fCotProducto">Producto</label>
+          <select id="fCotProducto">
+            <option value="">Todos</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label for="fCotFechaIni">Fecha inicio</label>
+          <input type="date" id="fCotFechaIni">
+        </div>
+        <div class="field-group">
+          <label for="fCotFechaFin">Fecha fin</label>
+          <input type="date" id="fCotFechaFin">
         </div>
         <div class="field-group">
           <label for="fCotEstado">Estado</label>
@@ -478,14 +501,6 @@
             <option value="Rechazada">Rechazada</option>
             <option value="Oportunidad perdida">Oportunidad perdida</option>
           </select>
-        </div>
-        <div class="field-group">
-          <label for="fCotFechaIni">Fecha inicio</label>
-          <input type="date" id="fCotFechaIni">
-        </div>
-        <div class="field-group">
-          <label for="fCotFechaFin">Fecha fin</label>
-          <input type="date" id="fCotFechaFin">
         </div>
       </div>
     </section>
@@ -507,9 +522,10 @@
               <th>Propuesta origen</th>
               <th>Solución</th>
               <th class="num">Business Volume</th>
+              <th class="num">Cantidad de tarjetas</th>
               <th>Estado</th>
               <th>Email</th>
-              <th>Generada el</th>
+              <th>Última actividad</th>
               <th class="center">Acciones</th>
             </tr>
           </thead>
@@ -596,10 +612,10 @@
       </div>
       <div class="filters-grid">
         <div class="field-group">
-          <label for="fUserBusqueda">Nombre o email</label>
+          <label for="fUserBusqueda">Buscador</label>
           <div class="input-wrap">
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            <input type="text" id="fUserBusqueda" placeholder="Ej. Fiorella o fiorella.ruiz@edenred.com.pe">
+            <input type="text" id="fUserBusqueda" placeholder="Ej. Fiorella, fiorella.ruiz@edenred.com.pe o Comercial">
           </div>
         </div>
         <div class="field-group">
@@ -694,10 +710,10 @@
         </div>
         <div class="filters-grid pb-filters-grid">
           <div class="field-group field-search">
-            <label for="f-search">Servicio (ID o nombre)</label>
+            <label for="f-search">Buscador</label>
             <div class="search-wrap">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input id="f-search" class="input" type="text" placeholder="Ej. Emisión de tarjetas" oninput="handleSearchInput()">
+              <input id="f-search" class="input" type="text" placeholder="Ej. S028, Emisión de tarjetas o Food" oninput="handleSearchInput()">
             </div>
           </div>
           <div class="field-group">
@@ -1133,10 +1149,10 @@
           </div>
           <div class="filters-grid mv-filters-grid">
             <div class="field-group">
-              <label for="mv-crud-search">Concepto (nombre o código)</label>
+              <label for="mv-crud-search">Buscador</label>
               <div class="input-wrap">
                 <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input id="mv-crud-search" type="text" placeholder="Concepto, código, fórmula o palabra clave">
+                <input id="mv-crud-search" type="text" placeholder="Ej. C002, Welcome kit, Computada o Activo">
               </div>
             </div>
             <div class="field-group">
@@ -1496,6 +1512,11 @@
             <input type="number" id="f_cantBeneficiarios" min="0" placeholder="0">
           </div>
           <div class="field-group">
+            <label for="f_cantTarjetas">Cantidad de tarjetas</label>
+            <input type="number" id="f_cantTarjetas" min="0" placeholder="0">
+            <span class="field-hint">Tarjetas físicas/virtuales emitidas — independiente de Cantidad de beneficiarios, no afecta el BV</span>
+          </div>
+          <div class="field-group">
             <label for="f_bvCarga">BV por carga</label>
             <div class="input-currency"><input type="number" id="f_bvCarga" min="0" placeholder="0.00" disabled></div>
             <span class="field-hint">Calculado: Valor facial × Cantidad de beneficiarios</span>
@@ -1528,14 +1549,6 @@
               <label for="f_rebateValor">Valor de rebate</label>
               <div class="input-currency" id="rebateValorWrap"><input type="number" id="f_rebateValor" min="0" placeholder="0.00" disabled></div>
             </div>
-          </div>
-        </div>
-
-        <div class="form-grid" style="margin-top:14px;">
-          <div class="field-group">
-            <label for="f_cantTarjetas">Cantidad de tarjetas</label>
-            <input type="number" id="f_cantTarjetas" min="0" placeholder="0">
-            <span class="field-hint">Tarjetas físicas/virtuales emitidas — independiente de Cantidad de beneficiarios, no afecta el BV</span>
           </div>
         </div>
       </section>
@@ -2165,7 +2178,21 @@
           <span class="sec-num">8</span>
           <h4>Documentación</h4>
         </div>
-        <div class="doc-grid" id="cq_documentacionGrid"></div>
+        <div class="approval-table-wrap">
+          <table class="approval-table">
+            <thead>
+              <tr>
+                <th>Documento</th>
+                <th>Archivo</th>
+                <th>Generado/cargado por</th>
+                <th>Fecha</th>
+                <th>Hora</th>
+                <th>Tipo</th>
+              </tr>
+            </thead>
+            <tbody id="cq_documentacionBody"></tbody>
+          </table>
+        </div>
 
         <div id="cq_resultadoWrap" style="margin-top:14px;display:none;">
           <div class="reeval-box" id="cq_resultadoBox"></div>

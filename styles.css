@@ -1392,7 +1392,7 @@ table.cond-table{width:100%;border-collapse:collapse;}
 /* ---------- Flujos de aprobación ---------- */
 .approval-toolbar{display:flex;justify-content:flex-end;margin-bottom:10px;}
 .approval-table-wrap{
-  border:1px solid var(--border-soft);border-radius:var(--radius-s);overflow:hidden;background:var(--white);
+  border:1px solid var(--border-soft);border-radius:var(--radius-s);overflow-x:auto;background:var(--white);
 }
 table.approval-table{width:100%;border-collapse:collapse;}
 .approval-table thead th{
@@ -3185,38 +3185,10 @@ table.approval-table{width:100%;border-collapse:collapse;}
   #view-cotizaciones .data-table tbody .row-actions .icon-btn{width:44px;height:44px;}
 }
 
-/* Sección "Documentación" del drawer de Cotización — 2 tarjetas de
-   documento (propuesta generada / sustento de aprobación), cada una
-   con su estado vacío cuando el documento todavía no existe. */
-.doc-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:12px;
-}
-.doc-card{
-  display:flex;gap:12px;align-items:flex-start;
-  padding:14px;
-  border:1px solid var(--border-soft);
-  border-radius:var(--radius-m);
-  background:var(--white);
-}
-.doc-card-icon{
-  width:36px;height:36px;border-radius:50%;flex:0 0 auto;
-  display:flex;align-items:center;justify-content:center;
-  background:var(--light-pink);color:var(--red-hero-dark);
-}
-.doc-card-icon svg{width:17px;height:17px;}
-.doc-card-body{min-width:0;}
-.doc-card-body strong{display:block;font-size:12.5px;font-weight:700;color:var(--black);margin-bottom:4px;}
-.doc-card-file{font-size:12.5px;color:var(--black);font-weight:600;margin:0 0 2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.doc-card-meta{font-size:11.5px;color:var(--grey);margin:0;line-height:1.5;}
-.doc-card.doc-card-empty{background:var(--surface-muted);}
-.doc-card.doc-card-empty .doc-card-icon{background:var(--light-grey);color:var(--grey);}
-.doc-card-empty-text{font-size:12px;color:var(--grey);margin:0;line-height:1.5;}
-
-@media (max-width: 639px){
-  .doc-grid{grid-template-columns:1fr;}
-}
+/* Sección "Documentación" del drawer de Cotización — fila vacía (sin
+   documento aún) atenuada, misma tabla .approval-table reutilizada de
+   Propuestas. */
+.doc-row-empty td{color:var(--grey);}
 
 /* ============================================================
    MÓDULOS PERMISOS Y ROLES + USUARIOS

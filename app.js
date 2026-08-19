@@ -462,6 +462,9 @@ function populateProductoFilter(){
   sel.innerHTML = '<option value="">Todos</option>' + productos.map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join("");
 }
 
+/* Buscador: cubre todas las columnas visibles de esta tabla (Código,
+   RUC, Razón social, Solución, Producto, Tipo, Business Volume,
+   Tarjetas, Modalidad, Versión, Estado). */
 function applyProposalsFilters(){
   const cliente = document.getElementById("fCliente").value.trim().toLowerCase();
   const solucion = document.getElementById("fSolucion").value;
@@ -472,7 +475,20 @@ function applyProposalsFilters(){
   const modalidad = document.getElementById("fModalidad").value;
 
   filtered = proposals.filter(p=>{
-    if(cliente && !(p.razonSocial.toLowerCase().includes(cliente) || p.ruc.includes(cliente))) return false;
+    if(cliente){
+      const hay = p.razonSocial.toLowerCase().includes(cliente) ||
+        p.ruc.includes(cliente) ||
+        p.codigo.toLowerCase().includes(cliente) ||
+        p.solucion.toLowerCase().includes(cliente) ||
+        p.producto.toLowerCase().includes(cliente) ||
+        p.tipoProducto.toLowerCase().includes(cliente) ||
+        String(bvTotalFor(p)).includes(cliente) ||
+        String(p.cantTarjetas).includes(cliente) ||
+        p.modalidadPago.toLowerCase().includes(cliente) ||
+        ("v"+p.version).includes(cliente) ||
+        p.estado.toLowerCase().includes(cliente);
+      if(!hay) return false;
+    }
     if(solucion && p.solucion!==solucion) return false;
     if(producto && p.producto!==producto) return false;
     if(estado==="__ACTIVAS__"){ if(p.estado==="Rechazada") return false; }
@@ -1671,11 +1687,16 @@ document.addEventListener("DOMContentLoaded", function(){
     closeAllModals();
   });
 
-  // Drawer nav scroll-spy (click)
-  document.querySelectorAll(".drawer-nav-item").forEach(btn=>{
+  // Drawer nav scroll-spy (click) — acotado a #drawer (Propuestas). Sin
+  // acotar, este selector también enganchaba los botones de navegación
+  // de Cotizaciones (misma clase .drawer-nav-item), que usan
+  // data-cot-target en vez de data-target — btn.dataset.target salía
+  // undefined ahí y rompía con "Cannot read properties of null
+  // (reading 'scrollIntoView')" en cada click dentro de ese drawer.
+  drawer.querySelectorAll(".drawer-nav-item").forEach(btn=>{
     btn.addEventListener("click", ()=>{
       document.getElementById(btn.dataset.target).scrollIntoView({behavior:"smooth", block:"start"});
-      document.querySelectorAll(".drawer-nav-item").forEach(b=>b.classList.remove("active"));
+      drawer.querySelectorAll(".drawer-nav-item").forEach(b=>b.classList.remove("active"));
       btn.classList.add("active");
       scrollNavItemIntoView(btn);
     });
@@ -1838,9 +1859,9 @@ function cotBadgeClass(estado){
 const quotations = [
   {
     id: nextCotId(), codigo:"COT-2026-001", propuestaCodigo:"COD-2026-001",
-    fechaGeneracion:"2026-07-10", validaHasta:"2026-07-25", responsable:"F. Ruiz",
+    fechaGeneracion:"2026-07-10", horaGeneracion:"09:14", validaHasta:"2026-07-25", responsable:"F. Ruiz",
     estado:"Aprobada", motivoRechazo:null, comentarioPerdida:null,
-    documentoSustento:{nombreArchivo:"sustento_aprobacion_alicorp.pdf", fecha:"2026-07-16", cargadoPor:"F. Ruiz"},
+    documentoSustento:{nombreArchivo:"sustento_aprobacion_alicorp.pdf", fecha:"2026-07-16", hora:"11:24", cargadoPor:"F. Ruiz"},
     email:{estado:"Leído", destinatario:"tesoreria@alicorp.com.pe", asunto:"Cotización COT-2026-001 · Edenred Perú",
       intentos:[{fecha:"2026-07-10", resultado:"Enviado"}]},
     historial:[
@@ -1852,7 +1873,7 @@ const quotations = [
   },
   {
     id: nextCotId(), codigo:"COT-2026-002", propuestaCodigo:"COD-2026-005",
-    fechaGeneracion:"2026-07-18", validaHasta:"2026-08-02", responsable:"F. Ruiz",
+    fechaGeneracion:"2026-07-18", horaGeneracion:"11:32", validaHasta:"2026-08-02", responsable:"F. Ruiz",
     estado:"Enviada", motivoRechazo:null, comentarioPerdida:null, documentoSustento:null,
     email:{estado:"Leído", destinatario:"compras@falabella.com.pe", asunto:"Cotización COT-2026-002 · Edenred Perú",
       intentos:[{fecha:"2026-07-18", resultado:"Enviado"}]},
@@ -1864,7 +1885,7 @@ const quotations = [
   },
   {
     id: nextCotId(), codigo:"COT-2026-003", propuestaCodigo:"COD-2026-009",
-    fechaGeneracion:"2026-07-05", validaHasta:"2026-07-20", responsable:"F. Ruiz",
+    fechaGeneracion:"2026-07-05", horaGeneracion:"15:47", validaHasta:"2026-07-20", responsable:"F. Ruiz",
     estado:"Rechazada", motivoRechazo:"El cliente indicó que el rebate ofrecido no alcanza el mínimo esperado para este periodo.", comentarioPerdida:null, documentoSustento:null,
     email:{estado:"Leído", destinatario:"administracion@nufoods.com.pe", asunto:"Cotización COT-2026-003 · Edenred Perú",
       intentos:[{fecha:"2026-07-05", resultado:"Enviado"}]},
@@ -1877,7 +1898,7 @@ const quotations = [
   },
   {
     id: nextCotId(), codigo:"COT-2026-004", propuestaCodigo:"COD-2026-012",
-    fechaGeneracion:"2026-07-22", validaHasta:"2026-08-06", responsable:"F. Ruiz",
+    fechaGeneracion:"2026-07-22", horaGeneracion:"10:05", validaHasta:"2026-08-06", responsable:"F. Ruiz",
     estado:"Generada", motivoRechazo:null, comentarioPerdida:null, documentoSustento:null,
     email:{estado:"Sin enviar", destinatario:"contacto@tottus.com.pe", asunto:"Cotización COT-2026-004 · Edenred Perú", intentos:[]},
     historial:[
@@ -1886,7 +1907,7 @@ const quotations = [
   },
   {
     id: nextCotId(), codigo:"COT-2026-005", propuestaCodigo:"COD-2026-002",
-    fechaGeneracion:"2026-07-19", validaHasta:"2026-08-03", responsable:"F. Ruiz",
+    fechaGeneracion:"2026-07-19", horaGeneracion:"14:20", validaHasta:"2026-08-03", responsable:"F. Ruiz",
     estado:"Enviada", motivoRechazo:null, comentarioPerdida:null, documentoSustento:null,
     email:{estado:"Entregado", destinatario:"finanzas@interbank.pe", asunto:"Cotización COT-2026-005 · Edenred Perú",
       intentos:[{fecha:"2026-07-19", resultado:"Enviado"}]},
@@ -1897,7 +1918,7 @@ const quotations = [
   },
   {
     id: nextCotId(), codigo:"COT-2026-006", propuestaCodigo:"COD-2026-006",
-    fechaGeneracion:"2026-07-14", validaHasta:"2026-07-29", responsable:"F. Ruiz",
+    fechaGeneracion:"2026-07-14", horaGeneracion:"16:38", validaHasta:"2026-07-29", responsable:"F. Ruiz",
     estado:"Oportunidad perdida", motivoRechazo:null, comentarioPerdida:"El cliente decidió postergar el proyecto de Gift Card para el siguiente semestre.", documentoSustento:null,
     email:{estado:"Entregado", destinatario:"compras@sodimac.com.pe", asunto:"Cotización COT-2026-006 · Edenred Perú",
       intentos:[{fecha:"2026-07-14", resultado:"Enviado"}]},
@@ -1909,7 +1930,7 @@ const quotations = [
   },
   {
     id: nextCotId(), codigo:"COT-2026-007", propuestaCodigo:"COD-2026-010",
-    fechaGeneracion:"2026-07-21", validaHasta:"2026-08-05", responsable:"F. Ruiz",
+    fechaGeneracion:"2026-07-21", horaGeneracion:"08:52", validaHasta:"2026-08-05", responsable:"F. Ruiz",
     estado:"Enviada", motivoRechazo:null, comentarioPerdida:null, documentoSustento:null,
     email:{estado:"Fallido", destinatario:"contacto@compartamos.pe", asunto:"Cotización COT-2026-007 · Edenred Perú",
       intentos:[{fecha:"2026-07-21", resultado:"Fallido"}]},
@@ -1920,7 +1941,7 @@ const quotations = [
   },
   {
     id: nextCotId(), codigo:"COT-2026-008", propuestaCodigo:"COD-2026-004",
-    fechaGeneracion:"2026-07-23", validaHasta:"2026-08-07", responsable:"F. Ruiz",
+    fechaGeneracion:"2026-07-23", horaGeneracion:"13:10", validaHasta:"2026-08-07", responsable:"F. Ruiz",
     estado:"Generada", motivoRechazo:null, comentarioPerdida:null, documentoSustento:null,
     email:{estado:"Sin enviar", destinatario:"legal@rappi.com.pe", asunto:"Cotización COT-2026-008 · Edenred Perú", intentos:[]},
     historial:[
@@ -1929,7 +1950,7 @@ const quotations = [
   },
   {
     id: nextCotId(), codigo:"COT-2026-009", propuestaCodigo:"COD-2026-007",
-    fechaGeneracion:"2026-07-24", validaHasta:"2026-08-08", responsable:"F. Ruiz",
+    fechaGeneracion:"2026-07-24", horaGeneracion:"17:05", validaHasta:"2026-08-08", responsable:"F. Ruiz",
     estado:"Enviada", motivoRechazo:null, comentarioPerdida:null, documentoSustento:null,
     email:{estado:"Enviado", destinatario:"gerencia@cineplanet.com.pe", asunto:"Cotización COT-2026-009 · Edenred Perú",
       intentos:[{fecha:"2026-07-24", resultado:"Enviado"}]},
@@ -1940,9 +1961,9 @@ const quotations = [
   },
   {
     id: nextCotId(), codigo:"COT-2026-010", propuestaCodigo:"COD-2026-011",
-    fechaGeneracion:"2026-07-08", validaHasta:"2026-07-23", responsable:"F. Ruiz",
+    fechaGeneracion:"2026-07-08", horaGeneracion:"09:47", validaHasta:"2026-07-23", responsable:"F. Ruiz",
     estado:"Aprobada", motivoRechazo:null, comentarioPerdida:null,
-    documentoSustento:{nombreArchivo:"sustento_aprobacion_sanfernando.pdf", fecha:"2026-07-15", cargadoPor:"F. Ruiz"},
+    documentoSustento:{nombreArchivo:"sustento_aprobacion_sanfernando.pdf", fecha:"2026-07-15", hora:"16:03", cargadoPor:"F. Ruiz"},
     email:{estado:"Leído", destinatario:"tesoreria@sanfernando.com.pe", asunto:"Cotización COT-2026-010 · Edenred Perú",
       intentos:[{fecha:"2026-07-08", resultado:"Enviado"}]},
     historial:[
@@ -1961,8 +1982,20 @@ let filteredCot = quotations.slice();
 let cotCurrentPage = 1;
 const COT_PAGE_SIZE = 8;
 
+function populateCotProductoFilter(){
+  const sel = document.getElementById("fCotProducto");
+  const productos = [...new Set(proposals.map(p=>p.producto))].sort();
+  sel.innerHTML = '<option value="">Todos</option>' + productos.map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join("");
+}
+
+/* Buscador: cubre TODAS las columnas visibles de esta tabla (Código,
+   Razón social, Propuesta origen, Solución, Business Volume, Cantidad
+   de tarjetas, Estado, Email) más el RUC de la propuesta origen —
+   explícitamente incluido porque no se muestra como columna propia. */
 function applyCotFilters(){
   const cliente = document.getElementById("fCotCliente").value.trim().toLowerCase();
+  const solucion = document.getElementById("fCotSolucion").value;
+  const producto = document.getElementById("fCotProducto").value;
   const estado = document.getElementById("fCotEstado").value;
   const fechaIni = document.getElementById("fCotFechaIni").value;
   const fechaFin = document.getElementById("fCotFechaFin").value;
@@ -1970,9 +2003,19 @@ function applyCotFilters(){
   filteredCot = quotations.filter(q=>{
     const p = findProposalByCodigo(q.propuestaCodigo);
     if(cliente){
-      const hay = (p.razonSocial.toLowerCase().includes(cliente)) || p.ruc.includes(cliente);
+      const hay = p.razonSocial.toLowerCase().includes(cliente) ||
+        p.ruc.includes(cliente) ||
+        q.codigo.toLowerCase().includes(cliente) ||
+        q.propuestaCodigo.toLowerCase().includes(cliente) ||
+        p.solucion.toLowerCase().includes(cliente) ||
+        String(bvTotalFor(p)).includes(cliente) ||
+        String(p.cantTarjetas).includes(cliente) ||
+        q.estado.toLowerCase().includes(cliente) ||
+        q.email.estado.toLowerCase().includes(cliente);
       if(!hay) return false;
     }
+    if(solucion && p.solucion !== solucion) return false;
+    if(producto && p.producto !== producto) return false;
     if(estado && q.estado !== estado) return false;
     if(fechaIni && q.fechaGeneracion < fechaIni) return false;
     if(fechaFin && q.fechaGeneracion > fechaFin) return false;
@@ -1984,6 +2027,8 @@ function applyCotFilters(){
 
 function clearCotFilters(){
   document.getElementById("fCotCliente").value = "";
+  document.getElementById("fCotSolucion").value = "";
+  document.getElementById("fCotProducto").value = "";
   document.getElementById("fCotEstado").value = "";
   document.getElementById("fCotFechaIni").value = "";
   document.getElementById("fCotFechaFin").value = "";
@@ -2012,6 +2057,15 @@ function emailIconSvg(estado){
   return '<svg viewBox="0 0 24 24" fill="none"><rect x="4" y="6" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M4 7l8 6 8-6" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>';
 }
 
+/* "Última actividad" del listado: fecha del evento más reciente del
+   historial (envío, reenvío, respuesta, cambio de estado, etc.), no
+   la fecha estática de generación — se recalcula por cotización, no
+   queda hardcodeada. Es un caso de uso de tabla, distinto a la
+   sección Documentación del drawer (que no debe cruzar con historial). */
+function lastCotActivity(q){
+  return q.historial.reduce((max,h)=> h.fecha > max ? h.fecha : max, q.historial[0].fecha);
+}
+
 function renderCotTable(){
   const tbody = document.getElementById("cotTableBody");
   document.getElementById("cotResultCount").textContent = filteredCot.length;
@@ -2022,7 +2076,7 @@ function renderCotTable(){
   const pageItems = filteredCot.slice(start, start+COT_PAGE_SIZE);
 
   if(pageItems.length===0){
-    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">
+    tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state">
       <svg viewBox="0 0 24 24" width="40" height="40" fill="none"><rect x="3" y="6" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
       <strong>No se encontraron cotizaciones</strong>
       <p>Ajusta los filtros de búsqueda para ver más resultados.</p>
@@ -2030,6 +2084,11 @@ function renderCotTable(){
   } else {
     tbody.innerHTML = pageItems.map(q=>{
       const p = findProposalByCodigo(q.propuestaCodigo);
+      const resendBtn = q.estado==="Enviada"
+        ? `<button type="button" class="icon-btn" data-cotaction="resend" data-cotid="${q.id}" title="Reenviar">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M4 4v6h6M20 20v-6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 15a7 7 0 0 0 12.3 2.5M18.5 9a7 7 0 0 0-12.3-2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>`
+        : "";
       return `
       <tr data-cotid="${q.id}" role="button" tabindex="0" aria-label="Ver detalle de ${esc(q.codigo)}">
         <td class="cell-codigo">${esc(q.codigo)}</td>
@@ -2037,11 +2096,13 @@ function renderCotTable(){
         <td class="cell-hide-mobile">${esc(q.propuestaCodigo)}</td>
         <td class="cell-hide-mobile"><span class="tag-neutral">${esc(p.solucion)}</span></td>
         <td class="num cell-bv">${money(bvTotalFor(p))}</td>
+        <td class="num cell-hide-mobile">${intFmt(p.cantTarjetas)}</td>
         <td class="cell-estado"><span class="badge ${cotBadgeClass(q.estado)}">${esc(q.estado)}</span></td>
         <td class="cell-hide-mobile">${esc(q.email.estado)}</td>
-        <td class="cell-hide-mobile">${fmtDate(q.fechaGeneracion)}</td>
+        <td class="cell-hide-mobile">${fmtDate(lastCotActivity(q))}</td>
         <td class="center cell-acciones">
           <div class="row-actions">
+            ${resendBtn}
             <button type="button" class="icon-btn history" data-cotaction="view" data-cotid="${q.id}" title="Ver detalle">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M4 12s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.4" stroke="currentColor" stroke-width="1.7"/></svg>
             </button>
@@ -2127,9 +2188,6 @@ function openCotHistoryModal(q){
   trapFocus(document.getElementById("cotHistoryModal"));
 }
 
-const DOC_ICON_PDF = '<svg viewBox="0 0 24 24" fill="none"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3v6h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-const DOC_ICON_FILE = '<svg viewBox="0 0 24 24" fill="none"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3v6h6M9 13h6M9 17h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-
 /* Reutiliza datos que ya existen en el modelo — no inventa campos
    paralelos. "Documento propuesta" es el mismo PDF que se adjunta al
    enviar el email (mismo nombre "Cotizacion_<codigo>.pdf" que arma
@@ -2138,41 +2196,46 @@ const DOC_ICON_FILE = '<svg viewBox="0 0 24 24" fill="none"><path d="M14 3H6a2 2
    sustento" es el archivo cargado obligatoriamente al aprobar
    (q.documentoSustento) — solo existe si la cotización ya fue
    aprobada. */
+/* Tipo de archivo derivado de la extensión — no asume PDF, el
+   documento de sustento puede ser correo (.eml), imagen u otro
+   archivo (explícitamente no Excel en el flujo de aprobación actual,
+   pero el helper queda genérico para cualquier extensión futura). */
+function fileTypeLabel(nombreArchivo){
+  const ext = (nombreArchivo.split(".").pop() || "").toLowerCase();
+  const map = {pdf:"PDF", jpg:"IMG", jpeg:"IMG", png:"IMG", gif:"IMG", eml:"EML", msg:"EML"};
+  return map[ext] || (ext ? ext.toUpperCase() : "ARCHIVO");
+}
+
 function renderCotDocumentacion(q){
-  const grid = document.getElementById("cq_documentacionGrid");
-  const propuestaCard = q.estado !== "Generada"
-    ? `<div class="doc-card">
-        <span class="doc-card-icon">${DOC_ICON_PDF}</span>
-        <div class="doc-card-body">
-          <strong>Documento propuesta</strong>
-          <p class="doc-card-file">Cotizacion_${esc(q.codigo)}.pdf</p>
-          <p class="doc-card-meta">Generado el ${fmtDate(q.fechaGeneracion)}<br>${esc(q.responsable)}</p>
-        </div>
-      </div>`
-    : `<div class="doc-card doc-card-empty">
-        <span class="doc-card-icon">${DOC_ICON_PDF}</span>
-        <div class="doc-card-body">
-          <strong>Documento propuesta</strong>
-          <p class="doc-card-empty-text">Se generará al enviar la cotización al cliente.</p>
-        </div>
-      </div>`;
-  const sustentoCard = q.documentoSustento
-    ? `<div class="doc-card">
-        <span class="doc-card-icon">${DOC_ICON_FILE}</span>
-        <div class="doc-card-body">
-          <strong>Documento de sustento</strong>
-          <p class="doc-card-file">${esc(q.documentoSustento.nombreArchivo)}</p>
-          <p class="doc-card-meta">Cargado el ${fmtDate(q.documentoSustento.fecha)}<br>${esc(q.documentoSustento.cargadoPor || "F. Ruiz")}</p>
-        </div>
-      </div>`
-    : `<div class="doc-card doc-card-empty">
-        <span class="doc-card-icon">${DOC_ICON_FILE}</span>
-        <div class="doc-card-body">
-          <strong>Documento de sustento</strong>
-          <p class="doc-card-empty-text">Se cargará al aprobar la cotización.</p>
-        </div>
-      </div>`;
-  grid.innerHTML = propuestaCard + sustentoCard;
+  const body = document.getElementById("cq_documentacionBody");
+  const propuestaArchivo = `Cotizacion_${q.codigo}.pdf`;
+  const filaPropuesta = q.estado !== "Generada"
+    ? `<tr>
+        <td>Documento propuesta</td>
+        <td>${esc(propuestaArchivo)}</td>
+        <td>${esc(q.responsable)}</td>
+        <td>${fmtDate(q.fechaGeneracion)}</td>
+        <td>${esc(q.horaGeneracion || "—")}</td>
+        <td><span class="tag-neutral">${fileTypeLabel(propuestaArchivo)}</span></td>
+      </tr>`
+    : `<tr class="doc-row-empty">
+        <td>Documento propuesta</td>
+        <td colspan="5" class="hint">Se generará al enviar la cotización al cliente.</td>
+      </tr>`;
+  const filaSustento = q.documentoSustento
+    ? `<tr>
+        <td>Documento de sustento</td>
+        <td>${esc(q.documentoSustento.nombreArchivo)}</td>
+        <td>${esc(q.documentoSustento.cargadoPor || "F. Ruiz")}</td>
+        <td>${fmtDate(q.documentoSustento.fecha)}</td>
+        <td>${esc(q.documentoSustento.hora || "—")}</td>
+        <td><span class="tag-neutral">${fileTypeLabel(q.documentoSustento.nombreArchivo)}</span></td>
+      </tr>`
+    : `<tr class="doc-row-empty">
+        <td>Documento de sustento</td>
+        <td colspan="5" class="hint">Se cargará al aprobar la cotización.</td>
+      </tr>`;
+  body.innerHTML = filaPropuesta + filaSustento;
 }
 
 function renderCotResultBox(q){
@@ -2372,8 +2435,9 @@ function simulateEmailFetch(){
 
 function sendCotEmail(q, opts){
   const isResend = !!(opts && opts.isResend);
-  const btn = isResend ? document.getElementById("btnResendEmail") : document.getElementById("btnCotSend");
-  cotSetButtonLoading(btn, isResend ? "Reenviando…" : "Enviando…");
+  const btn = (opts && opts.triggerBtn) || (isResend ? document.getElementById("btnResendEmail") : document.getElementById("btnCotSend"));
+  const label = (opts && opts.triggerBtn) ? "" : (isResend ? "Reenviando…" : "Enviando…");
+  cotSetButtonLoading(btn, label);
   q.email.estado = "Enviando";
   refreshCotDrawerIfOpen(q);
 
@@ -2526,7 +2590,9 @@ function confirmCotApprove(){
   const q = findQuotation(cotDrawerTargetId);
   if(!cotApproveFiles.length) return;
   q.estado = "Aprobada";
-  q.documentoSustento = {nombreArchivo:cotApproveFiles[0], fecha:"2026-07-25", cargadoPor:"F. Ruiz"};
+  const ahora = new Date();
+  const horaActual = String(ahora.getHours()).padStart(2,"0") + ":" + String(ahora.getMinutes()).padStart(2,"0");
+  q.documentoSustento = {nombreArchivo:cotApproveFiles[0], fecha:"2026-07-25", hora:horaActual, cargadoPor:"F. Ruiz"};
   q.historial.push({fecha:"2026-07-25", usuario:"F. Ruiz", accion:"Cotización aprobada", detalle:"Aprobada con documento de sustento adjunto."});
   closeModalById("cotApproveModal");
   refreshCotDrawerIfOpen(q);
@@ -2536,10 +2602,11 @@ function confirmCotApprove(){
 
 /* ---------- Init ---------- */
 function initCotizacionesModule(){
+  populateCotProductoFilter();
   renderCotTable();
 
   document.getElementById("fCotCliente").addEventListener("input", applyCotFilters);
-  ["fCotEstado","fCotFechaIni","fCotFechaFin"].forEach(id=>{
+  ["fCotSolucion","fCotProducto","fCotEstado","fCotFechaIni","fCotFechaFin"].forEach(id=>{
     document.getElementById(id).addEventListener("change", applyCotFilters);
   });
   document.getElementById("btnClearCotFilters").addEventListener("click", clearCotFilters);
@@ -2563,6 +2630,10 @@ function initCotizacionesModule(){
 
   document.getElementById("cotTableBody").addEventListener("click", function(e){
     const btn = e.target.closest("button[data-cotaction]");
+    if(btn && btn.dataset.cotaction==="resend"){
+      sendCotEmail(findQuotation(btn.dataset.cotid), {isResend:true, triggerBtn:btn});
+      return;
+    }
     const row = e.target.closest("tr[data-cotid]");
     const id = btn ? btn.dataset.cotid : (row ? row.dataset.cotid : null);
     if(id) openCotDrawer(id);
@@ -2918,7 +2989,16 @@ function applyUserFilters(){
   const rol = document.getElementById("fUserRol").value;
   const estado = document.getElementById("fUserEstado").value;
   filteredUsers = USERS.filter(u=>{
-    if(q && !(u.nombre.toLowerCase().includes(q) || u.email.toLowerCase().includes(q))) return false;
+    if(q){
+      const role = findRole(u.rolId);
+      const hay = u.nombre.toLowerCase().includes(q) ||
+        u.email.toLowerCase().includes(q) ||
+        (role ? role.nombre.toLowerCase().includes(q) : false) ||
+        u.area.toLowerCase().includes(q) ||
+        u.estado.toLowerCase().includes(q) ||
+        u.fechaUltimoAcceso.toLowerCase().includes(q);
+      if(!hay) return false;
+    }
     if(rol && u.rolId!==rol) return false;
     if(estado && u.estado!==estado) return false;
     return true;
@@ -3686,7 +3766,9 @@ function initSidebarNav(){
 
     const ids = Object.keys(SERVICIOS).filter(id => {
       const s = SERVICIOS[id];
-      const matchesQ = !q || id.toLowerCase().includes(q) || s.nombre.toLowerCase().includes(q) || s.descripcion.toLowerCase().includes(q);
+      const matchesQ = !q || id.toLowerCase().includes(q) || s.nombre.toLowerCase().includes(q) || s.descripcion.toLowerCase().includes(q) ||
+        (s.solucion||'').toLowerCase().includes(q) || productoLabelOf(s).toLowerCase().includes(q) ||
+        (s.estado ? 'activo' : 'inactivo').includes(q);
       const matchesProd = !prod || productoLabelOf(s) === prod;
       const matchesMarca = !marca || s.marca === marca;
       const matchesTecnologia = !tecnologia || s.tecnologia === tecnologia;
@@ -4752,7 +4834,8 @@ function getFilteredData(){
   const driver = $('#mv-filter-driver').value;
   const moneda = $('#mv-filter-moneda').value;
   return DATA.filter(d=>{
-    if(q && !(d.id.toLowerCase().includes(q) || d.idc.toLowerCase().includes(q) || d.nombre.toLowerCase().includes(q) || (d.label||'').toLowerCase().includes(q) || (d.resumen||'').toLowerCase().includes(q) || (d.formula||'').toLowerCase().includes(q))) return false;
+    if(q && !(d.id.toLowerCase().includes(q) || d.idc.toLowerCase().includes(q) || d.nombre.toLowerCase().includes(q) || (d.label||'').toLowerCase().includes(q) || (d.resumen||'').toLowerCase().includes(q) || (d.formula||'').toLowerCase().includes(q) ||
+      (d.rent||'').toLowerCase().includes(q) || (d.driver||'').toLowerCase().includes(q) || (d.moneda||'').toLowerCase().includes(q) || (d.estado||'').toLowerCase().includes(q) || (d.nominal!==null && String(d.nominal).includes(q)))) return false;
     if(categoria && d.categoria!==categoria) return false;
     if(rent && d.rent!==rent) return false;
     if(estado && d.estado!==estado) return false;
