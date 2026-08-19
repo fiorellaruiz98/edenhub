@@ -535,7 +535,7 @@ function renderProposalsTable(){
   } else {
     tbody.innerHTML = pageItems.map(p=>{
       const canReject = p.estado!=="Rechazada" && p.estado!=="Aprobada";
-      const isRejected = p.estado==="Rechazada";
+      const isRejected = p.estado==="Rechazada" && !proposalHasApprovedCotizacion(p);
       return `
       <tr data-id="${p.id}">
         <td class="cell-codigo">${esc(p.codigo)}</td>
@@ -858,6 +858,16 @@ function fillForm(p){
   updateConditionalFields();
 }
 
+/* Bug encontrado en diagnóstico: nada impedía rechazar directamente una
+   propuesta (y por lo tanto generar una nueva versión desde ella) ni
+   disparar la renegociación automática al editar campos, aunque su
+   cotización ya estuviera Aprobada por el cliente — ej. COD-2026-011
+   (Borrador) con COT-2026-010 (Aprobada). quotations vive en el mismo
+   IIFE, se lee directamente. */
+function proposalHasApprovedCotizacion(p){
+  return quotations.some(q => q.propuestaCodigo === p.codigo && q.estado === "Aprobada");
+}
+
 /* BV por carga / BV total: campos calculados y no editables (ver
    sección "Oportunidad" del drawer y el modal de Nueva oportunidad).
    Se recalculan en vivo a partir de Valor facial, Cantidad de
@@ -986,8 +996,9 @@ function openDrawer(mode, id){
   refreshVersionBanner();
 
   // Reject button only visible when editing an existing, non-terminal proposal
+  // sin una cotización ya aprobada por el cliente (ver proposalHasApprovedCotizacion).
   document.getElementById("btnRejectFromDrawer").style.display =
-    (mode==="edit" && source.estado!=="Rechazada" && source.estado!=="Aprobada") ? "inline-flex" : "none";
+    (mode==="edit" && source.estado!=="Rechazada" && source.estado!=="Aprobada" && !proposalHasApprovedCotizacion(source)) ? "inline-flex" : "none";
 
   document.querySelectorAll(".drawer-nav-item").forEach((b,i)=>b.classList.toggle("active", i===0));
   document.getElementById("drawerForm").scrollTop = 0;
@@ -1025,6 +1036,13 @@ function refreshVersionBanner(){
     banner.style.display = "none";
     return;
   }
+  const p = findProposal(drawerTargetId);
+  if(proposalHasApprovedCotizacion(p)){
+    banner.style.display = "flex";
+    banner.querySelector(".vb-text").innerHTML =
+      `Esta propuesta tiene una cotización <b>aprobada</b> por el cliente — no se pueden generar nuevas versiones ni renegociar condiciones automáticamente. Genera una nueva cotización si necesitas cambiarlas.`;
+    return;
+  }
   const data = collectFormData();
   const changed = diffFields(JSON.parse(originalSnapshot), data);
   if(changed.length){
@@ -1043,6 +1061,10 @@ function saveProposal(estadoDestino){
     const p = findProposal(drawerTargetId);
     const original = originalSnapshot ? JSON.parse(originalSnapshot) : data;
     const changedFields = diffFields(original, data);
+    if(changedFields.length && proposalHasApprovedCotizacion(p)){
+      showToast(`No se puede guardar: ${p.codigo} tiene una cotización aprobada por el cliente. Genera una nueva cotización para renegociar condiciones.`, "danger");
+      return;
+    }
     const bumpsVersion = estadoDestino !== "Borrador" && changedFields.length > 0;
     Object.assign(p, data);
     p.estado = estadoDestino;
@@ -1980,7 +2002,7 @@ function findQuotation(id){ return quotations.find(q=>q.id===id); }
 /* ---------- Filtros + tabla ---------- */
 let filteredCot = quotations.slice();
 let cotCurrentPage = 1;
-const COT_PAGE_SIZE = 8;
+const COT_PAGE_SIZE = 5;
 
 function populateCotProductoFilter(){
   const sel = document.getElementById("fCotProducto");
@@ -1997,6 +2019,7 @@ function applyCotFilters(){
   const solucion = document.getElementById("fCotSolucion").value;
   const producto = document.getElementById("fCotProducto").value;
   const estado = document.getElementById("fCotEstado").value;
+  const emailEstado = document.getElementById("fCotEmailEstado").value;
   const fechaIni = document.getElementById("fCotFechaIni").value;
   const fechaFin = document.getElementById("fCotFechaFin").value;
 
@@ -2017,6 +2040,7 @@ function applyCotFilters(){
     if(solucion && p.solucion !== solucion) return false;
     if(producto && p.producto !== producto) return false;
     if(estado && q.estado !== estado) return false;
+    if(emailEstado && q.email.estado !== emailEstado) return false;
     if(fechaIni && q.fechaGeneracion < fechaIni) return false;
     if(fechaFin && q.fechaGeneracion > fechaFin) return false;
     return true;
@@ -2030,6 +2054,7 @@ function clearCotFilters(){
   document.getElementById("fCotSolucion").value = "";
   document.getElementById("fCotProducto").value = "";
   document.getElementById("fCotEstado").value = "";
+  document.getElementById("fCotEmailEstado").value = "";
   document.getElementById("fCotFechaIni").value = "";
   document.getElementById("fCotFechaFin").value = "";
   const panel = document.getElementById("fCotCliente").closest(".filters-panel");
@@ -2102,10 +2127,10 @@ function renderCotTable(){
         <td class="cell-hide-mobile">${fmtDate(lastCotActivity(q))}</td>
         <td class="center cell-acciones">
           <div class="row-actions">
-            ${resendBtn}
             <button type="button" class="icon-btn history" data-cotaction="view" data-cotid="${q.id}" title="Ver detalle">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M4 12s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.4" stroke="currentColor" stroke-width="1.7"/></svg>
             </button>
+            ${resendBtn}
           </div>
         </td>
       </tr>`;
@@ -2200,10 +2225,27 @@ function openCotHistoryModal(q){
    documento de sustento puede ser correo (.eml), imagen u otro
    archivo (explícitamente no Excel en el flujo de aprobación actual,
    pero el helper queda genérico para cualquier extensión futura). */
-function fileTypeLabel(nombreArchivo){
-  const ext = (nombreArchivo.split(".").pop() || "").toLowerCase();
-  const map = {pdf:"PDF", jpg:"IMG", jpeg:"IMG", png:"IMG", gif:"IMG", eml:"EML", msg:"EML"};
-  return map[ext] || (ext ? ext.toUpperCase() : "ARCHIVO");
+/* Descarga simulada real: no hay almacenamiento de archivos en este
+   entorno, así que se genera un Blob de texto plano en el momento con
+   el nombre correcto — el navegador sí descarga un archivo real con
+   ese nombre, aunque el contenido sea un placeholder. */
+function simulateDownload(nombreArchivo){
+  const contenido = `Documento simulado — EdenHub\nArchivo: ${nombreArchivo}\n\nEste es un archivo de demostración; no hay almacenamiento real de documentos en este entorno.`;
+  const blob = new Blob([contenido], {type:"text/plain"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = nombreArchivo;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+}
+
+function docDownloadBtnHtml(nombreArchivo){
+  return `<button type="button" class="icon-btn" data-cotdoc-download="${esc(nombreArchivo)}" title="Descargar">
+    <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>`;
 }
 
 function renderCotDocumentacion(q){
@@ -2211,28 +2253,28 @@ function renderCotDocumentacion(q){
   const propuestaArchivo = `Cotizacion_${q.codigo}.pdf`;
   const filaPropuesta = q.estado !== "Generada"
     ? `<tr>
-        <td>Documento propuesta</td>
+        <td><strong>Documento propuesta</strong></td>
         <td>${esc(propuestaArchivo)}</td>
         <td>${esc(q.responsable)}</td>
         <td>${fmtDate(q.fechaGeneracion)}</td>
         <td>${esc(q.horaGeneracion || "—")}</td>
-        <td><span class="tag-neutral">${fileTypeLabel(propuestaArchivo)}</span></td>
+        <td class="center">${docDownloadBtnHtml(propuestaArchivo)}</td>
       </tr>`
     : `<tr class="doc-row-empty">
-        <td>Documento propuesta</td>
+        <td><strong>Documento propuesta</strong></td>
         <td colspan="5" class="hint">Se generará al enviar la cotización al cliente.</td>
       </tr>`;
   const filaSustento = q.documentoSustento
     ? `<tr>
-        <td>Documento de sustento</td>
+        <td><strong>Documento de sustento</strong></td>
         <td>${esc(q.documentoSustento.nombreArchivo)}</td>
         <td>${esc(q.documentoSustento.cargadoPor || "F. Ruiz")}</td>
         <td>${fmtDate(q.documentoSustento.fecha)}</td>
         <td>${esc(q.documentoSustento.hora || "—")}</td>
-        <td><span class="tag-neutral">${fileTypeLabel(q.documentoSustento.nombreArchivo)}</span></td>
+        <td class="center">${docDownloadBtnHtml(q.documentoSustento.nombreArchivo)}</td>
       </tr>`
     : `<tr class="doc-row-empty">
-        <td>Documento de sustento</td>
+        <td><strong>Documento de sustento</strong></td>
         <td colspan="5" class="hint">Se cargará al aprobar la cotización.</td>
       </tr>`;
   body.innerHTML = filaPropuesta + filaSustento;
@@ -2606,10 +2648,15 @@ function initCotizacionesModule(){
   renderCotTable();
 
   document.getElementById("fCotCliente").addEventListener("input", applyCotFilters);
-  ["fCotSolucion","fCotProducto","fCotEstado","fCotFechaIni","fCotFechaFin"].forEach(id=>{
+  ["fCotSolucion","fCotProducto","fCotEstado","fCotEmailEstado","fCotFechaIni","fCotFechaFin"].forEach(id=>{
     document.getElementById(id).addEventListener("change", applyCotFilters);
   });
   document.getElementById("btnClearCotFilters").addEventListener("click", clearCotFilters);
+
+  document.getElementById("cq_documentacionBody").addEventListener("click", function(e){
+    const btn = e.target.closest("button[data-cotdoc-download]");
+    if(btn) simulateDownload(btn.dataset.cotdocDownload);
+  });
 
   function applyCotKpiFilter(estadoValue){
     clearCotFilters();
@@ -2855,19 +2902,19 @@ const ROLES = [
 function findRole(id){ return ROLES.find(r=>r.id===id); }
 
 const USERS = [
-  {id:"u1", nombre:"Fiorella Ruiz", email:"fiorella.ruiz@edenred.com.pe", rolId:"administrador", area:"Tecnología", estado:"Activo", fechaUltimoAcceso:"2026-08-08 09:12"},
-  {id:"u2", nombre:"Marco Salazar", email:"marco.salazar@edenred.com.pe", rolId:"head-comercial", area:"Comercial", estado:"Activo", fechaUltimoAcceso:"2026-08-07 18:40"},
-  {id:"u3", nombre:"Daniela Vega", email:"daniela.vega@edenred.com.pe", rolId:"ejecutivos-comerciales", area:"Comercial", estado:"Activo", fechaUltimoAcceso:"2026-08-08 08:05"},
-  {id:"u4", nombre:"Renzo Huamán", email:"renzo.huaman@edenred.com.pe", rolId:"ejecutivos-comerciales", area:"Comercial", estado:"Activo", fechaUltimoAcceso:"2026-08-06 14:22"},
-  {id:"u5", nombre:"Claudia Espinoza", email:"claudia.espinoza@edenred.com.pe", rolId:"head-customer", area:"Customer Success", estado:"Activo", fechaUltimoAcceso:"2026-08-07 11:15"},
-  {id:"u6", nombre:"Jorge Paredes", email:"jorge.paredes@edenred.com.pe", rolId:"ejecutivos-customer", area:"Customer Success", estado:"Activo", fechaUltimoAcceso:"2026-08-08 07:50"},
-  {id:"u7", nombre:"Valeria Castro", email:"valeria.castro@edenred.com.pe", rolId:"finanzas", area:"Finanzas", estado:"Activo", fechaUltimoAcceso:"2026-08-05 16:30"},
-  {id:"u8", nombre:"Álvaro Torres", email:"alvaro.torres@edenred.com.pe", rolId:"producto", area:"Producto", estado:"Activo", fechaUltimoAcceso:"2026-08-08 10:02"},
-  {id:"u9", nombre:"Milagros Quispe", email:"milagros.quispe@edenred.com.pe", rolId:"operaciones", area:"Operaciones", estado:"Activo", fechaUltimoAcceso:"2026-08-04 09:47"},
-  {id:"u10", nombre:"Sebastián Ríos", email:"sebastian.rios@edenred.com.pe", rolId:"cobranzas", area:"Cobranzas", estado:"Inactivo", fechaUltimoAcceso:"2026-06-30 12:00"},
-  {id:"u11", nombre:"Patricia Núñez", email:"patricia.nunez@edenred.com.pe", rolId:"tecnologia", area:"Tecnología", estado:"Activo", fechaUltimoAcceso:"2026-08-08 08:58"},
-  {id:"u12", nombre:"Diego Flores", email:"diego.flores@edenred.com.pe", rolId:"contabilidad", area:"Contabilidad", estado:"Activo", fechaUltimoAcceso:"2026-08-07 15:10"},
-  {id:"u13", nombre:"Carla Medina", email:"carla.medina@edenred.com.pe", rolId:"ejecutivos-comerciales", area:"Comercial", estado:"Invitado", fechaUltimoAcceso:"—"}
+  {id:"u1", nombre:"Fiorella Ruiz", email:"fiorella.ruiz@edenred.com.pe", rolId:"administrador", area:"Tecnología", estado:"Activo", fechaUltimoAcceso:"2026-08-08 09:12", historial:[{"fecha":"2026-01-12","usuario":"Sistema","accion":"Usuario creado","detalle":"Creado con rol \"Administrador\", estado \"Activo\"."}]},
+  {id:"u2", nombre:"Marco Salazar", email:"marco.salazar@edenred.com.pe", rolId:"head-comercial", area:"Comercial", estado:"Activo", fechaUltimoAcceso:"2026-08-07 18:40", historial:[{"fecha":"2026-02-03","usuario":"F. Ruiz","accion":"Usuario creado","detalle":"Creado con rol \"Head Comercial\", estado \"Activo\"."}]},
+  {id:"u3", nombre:"Daniela Vega", email:"daniela.vega@edenred.com.pe", rolId:"ejecutivos-comerciales", area:"Comercial", estado:"Activo", fechaUltimoAcceso:"2026-08-08 08:05", historial:[{"fecha":"2026-02-10","usuario":"F. Ruiz","accion":"Usuario creado","detalle":"Creado con rol \"Ejecutivos Comerciales\", estado \"Activo\"."}]},
+  {id:"u4", nombre:"Renzo Huamán", email:"renzo.huaman@edenred.com.pe", rolId:"ejecutivos-comerciales", area:"Comercial", estado:"Activo", fechaUltimoAcceso:"2026-08-06 14:22", historial:[{"fecha":"2026-03-01","usuario":"F. Ruiz","accion":"Usuario creado","detalle":"Creado con rol \"Ejecutivos Comerciales\", estado \"Activo\"."}]},
+  {id:"u5", nombre:"Claudia Espinoza", email:"claudia.espinoza@edenred.com.pe", rolId:"head-customer", area:"Customer Success", estado:"Activo", fechaUltimoAcceso:"2026-08-07 11:15", historial:[{"fecha":"2026-02-18","usuario":"F. Ruiz","accion":"Usuario creado","detalle":"Creado con rol \"Head Customer\", estado \"Activo\"."}]},
+  {id:"u6", nombre:"Jorge Paredes", email:"jorge.paredes@edenred.com.pe", rolId:"ejecutivos-customer", area:"Customer Success", estado:"Activo", fechaUltimoAcceso:"2026-08-08 07:50", historial:[{"fecha":"2026-03-14","usuario":"F. Ruiz","accion":"Usuario creado","detalle":"Creado con rol \"Ejecutivos Customer\", estado \"Activo\"."}]},
+  {id:"u7", nombre:"Valeria Castro", email:"valeria.castro@edenred.com.pe", rolId:"finanzas", area:"Finanzas", estado:"Activo", fechaUltimoAcceso:"2026-08-05 16:30", historial:[{"fecha":"2026-01-20","usuario":"F. Ruiz","accion":"Usuario creado","detalle":"Creado con rol \"Finanzas\", estado \"Activo\"."}]},
+  {id:"u8", nombre:"Álvaro Torres", email:"alvaro.torres@edenred.com.pe", rolId:"producto", area:"Producto", estado:"Activo", fechaUltimoAcceso:"2026-08-08 10:02", historial:[{"fecha":"2026-01-25","usuario":"F. Ruiz","accion":"Usuario creado","detalle":"Creado con rol \"Producto\", estado \"Activo\"."}]},
+  {id:"u9", nombre:"Milagros Quispe", email:"milagros.quispe@edenred.com.pe", rolId:"operaciones", area:"Operaciones", estado:"Activo", fechaUltimoAcceso:"2026-08-04 09:47", historial:[{"fecha":"2026-02-05","usuario":"F. Ruiz","accion":"Usuario creado","detalle":"Creado con rol \"Operaciones\", estado \"Activo\"."}]},
+  {id:"u10", nombre:"Sebastián Ríos", email:"sebastian.rios@edenred.com.pe", rolId:"cobranzas", area:"Cobranzas", estado:"Inactivo", fechaUltimoAcceso:"2026-06-30 12:00", historial:[{"fecha":"2026-03-22","usuario":"F. Ruiz","accion":"Usuario creado","detalle":"Creado con rol \"Cobranzas\", estado \"Activo\"."},{"fecha":"2026-07-01","usuario":"F. Ruiz","accion":"Cambio de estado","detalle":"De \"Activo\" a \"Inactivo\"."}]},
+  {id:"u11", nombre:"Patricia Núñez", email:"patricia.nunez@edenred.com.pe", rolId:"tecnologia", area:"Tecnología", estado:"Activo", fechaUltimoAcceso:"2026-08-08 08:58", historial:[{"fecha":"2026-01-15","usuario":"Sistema","accion":"Usuario creado","detalle":"Creado con rol \"Tecnología\", estado \"Activo\"."}]},
+  {id:"u12", nombre:"Diego Flores", email:"diego.flores@edenred.com.pe", rolId:"contabilidad", area:"Contabilidad", estado:"Activo", fechaUltimoAcceso:"2026-08-07 15:10", historial:[{"fecha":"2026-02-27","usuario":"F. Ruiz","accion":"Usuario creado","detalle":"Creado con rol \"Contabilidad\", estado \"Activo\"."}]},
+  {id:"u13", nombre:"Carla Medina", email:"carla.medina@edenred.com.pe", rolId:"ejecutivos-comerciales", area:"Comercial", estado:"Invitado", fechaUltimoAcceso:"—", historial:[{"fecha":"2026-08-05","usuario":"F. Ruiz","accion":"Usuario creado","detalle":"Creado con rol \"Ejecutivos Comerciales\", estado \"Invitado\". Invitación enviada, pendiente de primer acceso."}]}
 ];
 function findUser(id){ return USERS.find(u=>u.id===id); }
 function roleUserCount(roleId){ return USERS.filter(u=>u.rolId===roleId).length; }
@@ -2935,36 +2982,69 @@ function renderPermMatrixBody(role){
     });
   });
 }
+let roleDrawerIsNew = false;
+
+function blankRolePermisos(){
+  const m = {};
+  PERM_MODULOS.forEach(mod=>{ m[mod.key] = {ver:false,crear:false,editar:false,eliminar:false,aprobar:false,alcance:null}; });
+  return m;
+}
+
+function slugifyRoleId(nombre){
+  const diacritics = new RegExp("[" + String.fromCharCode(0x0300) + "-" + String.fromCharCode(0x036f) + "]", "g");
+  const stripped = nombre.toLowerCase().normalize("NFD").replace(diacritics, "");
+  const base = stripped.replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"") || ("rol-" + Date.now());
+  let id = base, n = 2;
+  while(findRole(id)){ id = base + "-" + n; n++; }
+  return id;
+}
+
 function openRoleDrawer(roleId){
-  const role = findRole(roleId);
-  if(!role) return;
-  roleDrawerTargetId = roleId;
-  document.getElementById("roleDrawerTitle").textContent = role.nombre;
-  const n = roleUserCount(roleId);
-  document.getElementById("roleDrawerCount").textContent = n + (n===1?" usuario":" usuarios");
-  renderPermMatrixBody(role);
+  const role = roleId ? findRole(roleId) : null;
+  if(roleId && !role) return;
+  roleDrawerIsNew = !roleId;
+  roleDrawerTargetId = roleId || null;
+  document.getElementById("roleDrawerTitle").textContent = role ? role.nombre : "Nuevo rol";
+  const n = role ? roleUserCount(roleId) : 0;
+  document.getElementById("roleDrawerCount").textContent = role ? (n + (n===1?" usuario":" usuarios")) : "Sin usuarios asignados todavía";
+  document.getElementById("roleNombre").value = role ? role.nombre : "";
+  document.getElementById("roleDescripcion").value = role ? role.descripcion : "";
+  renderPermMatrixBody(role || {permisos: blankRolePermisos()});
   document.getElementById("roleDrawer").classList.add("open");
   roleOverlay.classList.add("visible");
   trapFocus(document.getElementById("roleDrawer"));
 }
 function closeRoleDrawer(){
   document.getElementById("roleDrawer").classList.remove("open");
+  document.getElementById("roleDrawer").classList.remove("expanded");
   roleOverlay.classList.remove("visible");
   roleDrawerTargetId = null;
 }
 function saveRoleDrawer(){
-  const role = findRole(roleDrawerTargetId);
-  if(!role) return;
+  const nombre = document.getElementById("roleNombre").value.trim();
+  if(!nombre){ showToast("El nombre del rol es obligatorio.", "danger"); return; }
+  const descripcion = document.getElementById("roleDescripcion").value.trim();
+  const permisos = {};
   document.querySelectorAll('#permMatrixBody tr').forEach(row=>{
     const modKey = row.querySelector('select[data-permalcance]').dataset.permalcance;
     const p = {ver:false,crear:false,editar:false,eliminar:false,aprobar:false,alcance:null};
     row.querySelectorAll('input[data-permaction]').forEach(chk=>{ p[chk.dataset.permaction] = chk.checked; });
     const sel = row.querySelector('select[data-permalcance]');
     p.alcance = sel.disabled ? null : sel.value;
-    role.permisos[modKey] = p;
+    permisos[modKey] = p;
   });
+  if(roleDrawerIsNew){
+    ROLES.push({id: slugifyRoleId(nombre), nombre, descripcion, icon:"user", permisos});
+    showToast("Rol \"" + nombre + "\" creado.", "success");
+  } else {
+    const role = findRole(roleDrawerTargetId);
+    if(!role) return;
+    Object.assign(role, {nombre, descripcion, permisos});
+    showToast("Matriz de permisos de \"" + role.nombre + "\" actualizada.", "success");
+  }
   closeRoleDrawer();
-  showToast("Matriz de permisos de \"" + role.nombre + "\" actualizada.", "success");
+  renderRoleGrid();
+  populateUserRoleFilter();
 }
 
 /* ---------- Usuarios ---------- */
@@ -3044,8 +3124,11 @@ function renderUserTable(){
         <td>${esc(u.fechaUltimoAcceso)}</td>
         <td class="center">
           <div class="row-actions">
-            <button class="icon-btn" data-useraction="edit" data-userid="${u.id}" title="Ver / editar" type="button">
+            <button class="icon-btn" data-useraction="edit" data-userid="${u.id}" title="Editar" type="button">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M4 20l3.6-1 10-10-2.6-2.6-10 10L4 20z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="icon-btn" data-useraction="delete" data-userid="${u.id}" title="Eliminar" type="button">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6h16Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
             </button>
           </div>
         </td>
@@ -3078,6 +3161,7 @@ function openUserDrawer(id){
   document.getElementById("u_estado").value = u ? u.estado : "Invitado";
   document.getElementById("u_ultimoAcceso").querySelector(".lv-text").textContent = u ? u.fechaUltimoAcceso : "—";
   document.getElementById("btnDeleteUser").style.display = u ? "" : "none";
+  document.getElementById("btnUserHistory").style.display = u ? "" : "none";
   document.getElementById("userDrawer").classList.add("open");
   userOverlay.classList.add("visible");
   trapFocus(document.getElementById("userDrawer"));
@@ -3097,29 +3181,62 @@ function saveUserDrawer(){
   const rolId = document.getElementById("u_rol").value;
   const area = document.getElementById("u_area").value.trim();
   const estado = document.getElementById("u_estado").value;
+  const fecha = new Date().toISOString().slice(0,10);
   if(userDrawerTargetId){
     const u = findUser(userDrawerTargetId);
+    if(rolId !== u.rolId){
+      const rolAnterior = findRole(u.rolId), rolNuevo = findRole(rolId);
+      u.historial.push({fecha, usuario:"F. Ruiz", accion:"Cambio de rol", detalle:`De "${rolAnterior?rolAnterior.nombre:"—"}" a "${rolNuevo?rolNuevo.nombre:"—"}".`});
+    }
+    if(estado !== u.estado){
+      u.historial.push({fecha, usuario:"F. Ruiz", accion:"Cambio de estado", detalle:`De "${u.estado}" a "${estado}".`});
+    }
     Object.assign(u, {nombre, email, rolId, area, estado});
     showToast("Usuario \"" + nombre + "\" actualizado.", "success");
   } else {
-    USERS.push({id:"u"+(USERS.length+1)+"_"+Date.now(), nombre, email, rolId, area, estado, fechaUltimoAcceso:"—"});
+    const rol = findRole(rolId);
+    USERS.push({id:"u"+(USERS.length+1)+"_"+Date.now(), nombre, email, rolId, area, estado, fechaUltimoAcceso:"—",
+      historial:[{fecha, usuario:"F. Ruiz", accion:"Usuario creado", detalle:`Creado con rol "${rol?rol.nombre:"—"}", estado "${estado}".`}]});
     showToast("Usuario \"" + nombre + "\" creado.", "success");
   }
   closeUserDrawer();
   renderRoleGrid();
   applyUserFilters();
 }
-function deleteUser(){
-  const u = findUser(userDrawerTargetId);
+function renderUserHistory(u){
+  const tl = document.getElementById("userHistoryTimeline");
+  const rev = (u.historial||[]).slice().reverse();
+  tl.innerHTML = rev.map((h,idx)=>`
+    <li class="timeline-item ${idx===0?"is-current":""}">
+      <span class="timeline-dot">${rev.length-idx}</span>
+      <div class="timeline-card">
+        <div class="timeline-card-head"><strong>${esc(h.accion)}</strong></div>
+        <p class="timeline-meta">${fmtDate(h.fecha)} · ${esc(h.usuario)}</p>
+        <p class="timeline-summary">${esc(h.detalle)}</p>
+      </div>
+    </li>`).join("");
+}
+function openUserHistoryModal(u){
+  document.getElementById("userHistoryNombre").textContent = u.nombre;
+  document.getElementById("userHistoryEmail").textContent = u.email;
+  renderUserHistory(u);
+  document.getElementById("userHistoryModal").classList.add("open");
+  userOverlay.classList.add("visible");
+  trapFocus(document.getElementById("userHistoryModal"));
+}
+
+function deleteUserById(id){
+  const u = findUser(id);
   if(!u) return;
   if(!confirm("¿Confirmas eliminar al usuario \"" + u.nombre + "\"? Esta acción no se puede deshacer.")) return;
   const idx = USERS.findIndex(x=>x.id===u.id);
   if(idx>-1) USERS.splice(idx,1);
-  closeUserDrawer();
+  if(document.getElementById("userDrawer").classList.contains("open")) closeUserDrawer();
   renderRoleGrid();
   applyUserFilters();
   showToast("Usuario eliminado.", "success");
 }
+function deleteUser(){ deleteUserById(userDrawerTargetId); }
 
 function initPermisosUsuariosModule(){
   renderRoleGrid();
@@ -3132,6 +3249,8 @@ function initPermisosUsuariosModule(){
     const card = e.target.closest(".role-card");
     if(card){ e.preventDefault(); openRoleDrawer(card.dataset.roleid); }
   });
+  document.getElementById("btnNewRole").addEventListener("click", ()=>openRoleDrawer(null));
+  document.getElementById("btnExpandRoleDrawer").addEventListener("click", ()=>document.getElementById("roleDrawer").classList.toggle("expanded"));
   document.getElementById("btnCloseRoleDrawer").addEventListener("click", closeRoleDrawer);
   document.getElementById("btnCancelRoleDrawer").addEventListener("click", closeRoleDrawer);
   document.getElementById("btnSaveRoleDrawer").addEventListener("click", saveRoleDrawer);
@@ -3158,6 +3277,10 @@ function initPermisosUsuariosModule(){
 
   document.getElementById("userTableBody").addEventListener("click", e=>{
     const btn = e.target.closest("button[data-useraction]");
+    if(btn && btn.dataset.useraction==="delete"){
+      deleteUserById(btn.dataset.userid);
+      return;
+    }
     const row = e.target.closest("tr[data-userid]");
     const id = btn ? btn.dataset.userid : (row ? row.dataset.userid : null);
     if(id) openUserDrawer(id);
@@ -3183,6 +3306,7 @@ function initPermisosUsuariosModule(){
   document.getElementById("btnCancelUserDrawer").addEventListener("click", closeUserDrawer);
   document.getElementById("btnSaveUserDrawer").addEventListener("click", saveUserDrawer);
   document.getElementById("btnDeleteUser").addEventListener("click", deleteUser);
+  document.getElementById("btnUserHistory").addEventListener("click", ()=>openUserHistoryModal(findUser(userDrawerTargetId)));
   userOverlay.addEventListener("click", closeUserDrawer);
 }
 
@@ -4807,7 +4931,6 @@ function estadoBadge(estado){
   const label = estado==='Pendiente' ? 'Pendiente' : estado;
   return '<span class="badge '+(map[estado]||'mv-estado-inactivo')+'">'+esc(label)+'</span>';
 }
-function claseLabel(clase){ return clase==='INPUT' ? 'Valor manual' : 'Resultado calculado'; }
 
 /* -------------------------------------------------------------------------
    3) GESTIÓN DE VARIABLES — filtros y tabla
@@ -4908,8 +5031,6 @@ function renderConceptosTable(){
         nominalCell = '<span>'+fmtNum(d.nominal, Number.isInteger(d.nominal)?0:2)+'</span>';
       } else if(d.esSupuesto){
         nominalCell = '<span>—</span><span class="mv-assumed"><span class="mv-assumed-warn" data-tooltip="Este valor es un supuesto, no está confirmado">'+ICONS.warning+'</span>Valor supuesto</span>';
-      } else if(d.clase==='OUTPUT'){
-        nominalCell = '<span class="mv-nominal-calc">calculado</span>';
       } else {
         nominalCell = '<span class="mv-nominal-calc">sin definir</span>';
       }
@@ -5071,7 +5192,6 @@ function openFormulaModal(id){
     '<div class="mv-tech-line"><span class="mv-mono-chip">'+esc(d.id)+' · '+esc(d.idc)+'</span><span class="mv-tech-name">'+esc(d.nombre)+'</span></div>'+
     '<div class="mv-meta-grid">'+
       '<div class="mv-meta-item"><div class="mv-m-label">Clase</div><div class="mv-m-value">'+esc(RENT_LABELS[d.rent]||d.rent)+'</div></div>'+
-      '<div class="mv-meta-item"><div class="mv-m-label">Origen del valor</div><div class="mv-m-value">'+claseLabel(d.clase)+'</div></div>'+
       '<div class="mv-meta-item"><div class="mv-m-label">Valor nominal</div><div class="mv-m-value">'+nominalLine+'</div></div>'+
       '<div class="mv-meta-item"><div class="mv-m-label">Moneda</div><div class="mv-m-value">'+(d.moneda==='EURO'?'Euro (€)':d.moneda==='DOLARES'?'Dólares ($)':'Soles (S/)')+'</div></div>'+
       '<div class="mv-meta-item"><div class="mv-m-label">Unidad de medida</div><div class="mv-m-value">'+(d.driver&&d.driver!=='—'?esc(d.driver):'—')+'</div></div>'+
@@ -5206,20 +5326,6 @@ function editFormTemplate(d){
   '</div>'+
   '<div class="form-grid">'+
     '<div class="field-group field-full">'+
-      '<label>¿Cómo se obtiene el valor? <span class="req">*</span></label>'+
-      '<div class="mv-class-toggle" id="mv-class-toggle">'+
-        '<button type="button" class="sel-input '+((!d||d.clase==='INPUT')?'active':'')+'" data-clase="INPUT">'+
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>'+
-          'Se ingresa manualmente'+
-        '</button>'+
-        '<button type="button" class="sel-output '+(d&&d.clase==='OUTPUT'?'active':'')+'" data-clase="OUTPUT">'+
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17 10 11 14 15 20 7"/></svg>'+
-          'Se calcula con una fórmula'+
-        '</button>'+
-      '</div>'+
-      '<input type="hidden" name="clase" value="'+(d?d.clase:'INPUT')+'">'+
-    '</div>'+
-    '<div class="field-group field-full">'+
       '<label>Fórmula técnica</label>'+
       '<textarea name="formula" placeholder="Ej. PROPUESTA.DESTINO_DE_ENTREGA = LIMA">'+(d?esc(d.formula||''):'')+'</textarea>'+
       '<span class="field-hint">Puedes referenciar otros nombres técnicos de concepto o variables PROPUESTA.*</span>'+
@@ -5336,7 +5442,6 @@ function handleEditSubmit(e){
     formula: (vals.formula||'').trim(),
     estado: vals.estado,
     driver: vals.driver,
-    clase: vals.clase,
     rent: vals.rent,
     moneda: vals.moneda,
   };
@@ -6664,14 +6769,6 @@ function wireStatic(){
   /* Modal de edición */
   $('#mv-edit-form').addEventListener('submit', handleEditSubmit);
   $('#mv-edit-form').addEventListener('input', ()=>{ editDirty = true; $('#mv-discard-bar').classList.remove('visible'); });
-  $('#mv-edit-form').addEventListener('click', (e)=>{
-    const btn = e.target.closest('#mv-class-toggle button[data-clase]');
-    if(!btn) return;
-    $$('#mv-class-toggle button').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    $('#mv-edit-form [name="clase"]').value = btn.dataset.clase;
-    editDirty = true;
-  });
   $('#mv-edit-form').addEventListener('change', (e)=>{
     if(e.target.id!=='mv-f-activo') return;
     syncToggleState('mv-f-activo','Activo','Inactivo');
