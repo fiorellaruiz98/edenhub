@@ -1889,9 +1889,6 @@ table.approval-table{width:100%;border-collapse:collapse;}
     background-repeat: no-repeat; background-position: right 10px center; background-size: 14px; padding-right: 30px;
   }
 
-    #view-pricebook .table-toolbar h2{ font-family: var(--font-title); font-size: 16px; font-weight: 700; }
-    #view-pricebook .table-toolbar .count{ font-size: 12.5px; color: var(--text-secondary); font-weight: 400; margin-left: 8px; font-family: var(--font-body); }
-
     #view-pricebook .export-dropdown{ position: relative; }
     #view-pricebook .export-dropdown .btn-ribbon-outline .chev{ width: 12px; height: 12px; margin-left: -2px; }
     #view-pricebook .export-menu{

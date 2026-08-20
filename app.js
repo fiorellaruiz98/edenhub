@@ -3967,7 +3967,7 @@ function initSidebarNav(){
     const total = Object.keys(SERVICIOS).length;
     ids = ids || Object.keys(SERVICIOS);
 
-    document.getElementById('row-count').textContent = ids.length + ' resultados';
+    document.getElementById('row-count').textContent = ids.length;
     document.getElementById('pagination-text').textContent = `Mostrando ${ids.length} de ${total} servicios`;
 
     if(ids.length === 0){
