@@ -3911,7 +3911,7 @@ function initSidebarNav(){
      sola vez; el bloque HTML de paginación era estático y nunca se
      actualizaba desde JS.
      ------------------------------------------------------------ */
-  const PRICEBOOK_PAGE_SIZE = 5;
+  const PRICEBOOK_PAGE_SIZE = 7;
   let pbFilteredIds = [];
   let pbCurrentPage = 1;
 
@@ -4044,7 +4044,15 @@ function initSidebarNav(){
     let html = `<button class="page-btn" data-pbpage="prev" ${pbCurrentPage===1?"disabled":""}>
         <svg viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>`;
-    for(let i=1;i<=totalPages;i++){
+    /* Ventana de 3 números centrada en la página actual (a diferencia
+       de Cotizaciones/Propuestas, que listan todas las páginas — con
+       222 servicios y 32 páginas eso generaba una fila de 32 botones y
+       scroll horizontal). Se ajusta en los bordes para seguir
+       mostrando 3 siempre que existan al menos 3 páginas en total. */
+    let windowStart = Math.max(1, pbCurrentPage - 1);
+    windowStart = Math.min(windowStart, Math.max(1, totalPages - 2));
+    const windowEnd = Math.min(totalPages, windowStart + 2);
+    for(let i=windowStart;i<=windowEnd;i++){
       html += `<button class="page-btn ${i===pbCurrentPage?"active":""}" data-pbpage="${i}">${i}</button>`;
     }
     html += `<button class="page-btn" data-pbpage="next" ${pbCurrentPage===totalPages?"disabled":""}>
