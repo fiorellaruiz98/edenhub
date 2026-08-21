@@ -3899,8 +3899,21 @@ function initSidebarNav(){
       const matchesStatus = !status || (status === 'Activo' && s.estado) || (status === 'Inactivo' && !s.estado);
       return matchesQ && matchesProd && matchesMarca && matchesTecnologia && matchesStatus;
     });
-    renderMainTable(sortIds(ids));
+    pbFilteredIds = sortIds(ids);
+    pbCurrentPage = 1;
+    renderMainTable();
   }
+
+  /* ------------------------------------------------------------
+     Paginación — mismo patrón que Propuestas/Cotizaciones/Usuarios
+     (pagFrom/pagTo/pagTotal + pagControls con botones prev/números/next).
+     No existía antes: la tabla renderizaba los 222 servicios de una
+     sola vez; el bloque HTML de paginación era estático y nunca se
+     actualizaba desde JS.
+     ------------------------------------------------------------ */
+  const PRICEBOOK_PAGE_SIZE = 5;
+  let pbFilteredIds = [];
+  let pbCurrentPage = 1;
 
   /* ------------------------------------------------------------
      Ordenamiento por columna en la tabla principal
@@ -3961,14 +3974,12 @@ function initSidebarNav(){
   /* ------------------------------------------------------------
      Render de la tabla principal
      ------------------------------------------------------------ */
-  function renderMainTable(ids){
+  function renderMainTable(){
     const tbody = document.getElementById('table-body');
     tbody.innerHTML = '';
-    const total = Object.keys(SERVICIOS).length;
-    ids = ids || Object.keys(SERVICIOS);
+    const ids = pbFilteredIds;
 
     document.getElementById('row-count').textContent = ids.length;
-    document.getElementById('pagination-text').textContent = `Mostrando ${ids.length} de ${total} servicios`;
 
     if(ids.length === 0){
       tbody.innerHTML = `<tr><td colspan="7">
@@ -3978,10 +3989,17 @@ function initSidebarNav(){
           <button type="button" class="btn-ribbon-neutral btn-sm" onclick="clearPricebookFilters()">Limpiar filtros</button>
         </div>
       </td></tr>`;
+      renderPricebookPagination(0, 0, 0);
       return;
     }
 
-    ids.forEach(id => {
+    const totalPages = Math.max(1, Math.ceil(ids.length / PRICEBOOK_PAGE_SIZE));
+    if(pbCurrentPage > totalPages) pbCurrentPage = totalPages;
+    const start = (pbCurrentPage - 1) * PRICEBOOK_PAGE_SIZE;
+    const pageIds = ids.slice(start, start + PRICEBOOK_PAGE_SIZE);
+    renderPricebookPagination(start + 1, Math.min(start + PRICEBOOK_PAGE_SIZE, ids.length), ids.length);
+
+    pageIds.forEach(id => {
       const s = SERVICIOS[id];
       const tr = document.createElement('tr');
       tr.dataset.id = id;
@@ -4005,6 +4023,41 @@ function initSidebarNav(){
         </td>`;
       tbody.appendChild(tr);
     });
+  }
+
+  /* La barra desaparece con <=PRICEBOOK_PAGE_SIZE resultados (a
+     diferencia de Propuestas/Cotizaciones, que siempre la muestran) —
+     comportamiento pedido explícitamente para este módulo. */
+  function renderPricebookPagination(from, to, total){
+    const bar = document.getElementById('pricebookPagBar');
+    if(total <= PRICEBOOK_PAGE_SIZE){
+      bar.style.display = 'none';
+      return;
+    }
+    bar.style.display = '';
+    document.getElementById('pricebookPagFrom').textContent = from;
+    document.getElementById('pricebookPagTo').textContent = to;
+    document.getElementById('pricebookPagTotal').textContent = total;
+
+    const totalPages = Math.max(1, Math.ceil(total / PRICEBOOK_PAGE_SIZE));
+    const wrap = document.getElementById('pricebookPagControls');
+    let html = `<button class="page-btn" data-pbpage="prev" ${pbCurrentPage===1?"disabled":""}>
+        <svg viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>`;
+    for(let i=1;i<=totalPages;i++){
+      html += `<button class="page-btn ${i===pbCurrentPage?"active":""}" data-pbpage="${i}">${i}</button>`;
+    }
+    html += `<button class="page-btn" data-pbpage="next" ${pbCurrentPage===totalPages?"disabled":""}>
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>`;
+    wrap.innerHTML = html;
+  }
+  function goToPricebookPage(page){
+    const totalPages = Math.max(1, Math.ceil(pbFilteredIds.length / PRICEBOOK_PAGE_SIZE));
+    if(page==="prev") pbCurrentPage = Math.max(1, pbCurrentPage-1);
+    else if(page==="next") pbCurrentPage = Math.min(totalPages, pbCurrentPage+1);
+    else pbCurrentPage = +page;
+    renderMainTable();
   }
 
   /* ------------------------------------------------------------
@@ -4566,6 +4619,12 @@ function initSidebarNav(){
   }
 
   document.getElementById('pbBtnClearFilters').addEventListener('click', clearPricebookFilters);
+
+  document.getElementById('pricebookPagControls').addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-pbpage]');
+    if(!btn || btn.disabled) return;
+    goToPricebookPage(btn.dataset.pbpage);
+  });
 
   document.querySelector('#main-table thead').addEventListener('click', (e) => {
     const th = e.target.closest('th.sortable');

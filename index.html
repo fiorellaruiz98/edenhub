@@ -837,17 +837,9 @@
           </table>
         </div>
 
-        <div class="pagination-bar">
-          <p class="pagination-info" id="pagination-text">Mostrando 1–7 de 7 servicios</p>
-          <div class="pagination-controls">
-            <button class="page-btn" data-page="prev" disabled aria-label="Anterior">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
-            <button class="page-btn active" data-page="1">1</button>
-            <button class="page-btn" data-page="next" disabled aria-label="Siguiente">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
-          </div>
+        <div class="pagination-bar" id="pricebookPagBar">
+          <p class="pagination-info">Mostrando <b id="pricebookPagFrom">0</b>–<b id="pricebookPagTo">0</b> de <b id="pricebookPagTotal">0</b> servicios</p>
+          <div class="pagination-controls" id="pricebookPagControls"></div>
         </div>
       </section>
     
