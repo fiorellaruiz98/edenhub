@@ -456,12 +456,6 @@ function renderKPIs(){
 /* ============================================================
    FILTERS
    ============================================================ */
-function populateProductoFilter(){
-  const sel = document.getElementById("fProducto");
-  const productos = [...new Set(proposals.map(p=>p.producto))].sort();
-  sel.innerHTML = '<option value="">Todos</option>' + productos.map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join("");
-}
-
 /* Buscador: cubre todas las columnas visibles de esta tabla (Código,
    RUC, Razón social, Solución, Producto, Tipo, Business Volume,
    Tarjetas, Modalidad, Versión, Estado). */
@@ -1102,7 +1096,6 @@ function saveProposal(estadoDestino){
   }
 
   closeDrawer();
-  populateProductoFilter();
   applyProposalsFilters();
 }
 
@@ -1613,7 +1606,6 @@ function saveOportunidad(){
 
   oportunidadDirty = false;
   closeModalById("oportunidadModal");
-  populateProductoFilter();
   applyProposalsFilters();
   flashRow(newP.id);
 
@@ -1648,7 +1640,6 @@ function showToast(message, type){
    EVENT WIRING
    ============================================================ */
 document.addEventListener("DOMContentLoaded", function(){
-  populateProductoFilter();
   renderKPIs();
   renderProposalsTable();
   initSidebarNav();
@@ -1828,8 +1819,7 @@ document.addEventListener("DOMContentLoaded", function(){
   // Validador de rentabilidad — Generar Cotización (visible solo si semáforo verde)
   document.getElementById("btnGenerarCotizacion").addEventListener("click", function(){
     const codigoLabel = this.dataset.codigo;
-    closeModalById("rentabModal");
-    showToast(`Cotización generada a partir de ${codigoLabel}. Revísala en el módulo de Cotizaciones.`, "success");
+    generateCotizacionFromProposal(codigoLabel);
   });
 
   // Save / reject actions
@@ -1894,6 +1884,59 @@ function findProposalByCodigo(codigo){ return proposals.find(p=>p.codigo===codig
 
 let cotSeq = 1;
 function nextCotId(){ return "cot" + (cotSeq++); }
+
+/* Genera una cotización real a partir de una propuesta ya validada como
+   rentable (semáforo verde en "Validar Rentabilidad"). No pide ningún
+   campo nuevo: Solución/Marca/Tecnología/Categoría/Tipo de producto/
+   Producto ya se resuelven en vivo en el drawer de detalle vía
+   findProposalByCodigo() — la cotización solo guarda la referencia. */
+function generateCotizacionFromProposal(propuestaCodigo){
+  const propuesta = findProposalByCodigo(propuestaCodigo);
+  if(!propuesta){
+    showToast("Propuesta no encontrada", "danger");
+    return false;
+  }
+
+  const year = new Date().getFullYear();
+  const nextNum = quotations.filter(q => q.codigo.startsWith(`COT-${year}`)).length + 1;
+  const cotizacionCodigo = `COT-${year}-${String(nextNum).padStart(3, '0')}`;
+
+  const ahora = new Date();
+  const fechaGeneracion = ahora.toISOString().slice(0,10);
+  const horaGeneracion = String(ahora.getHours()).padStart(2,"0") + ":" + String(ahora.getMinutes()).padStart(2,"0");
+  const validaHasta = new Date(ahora.getTime() + 15 * 24 * 60 * 60 * 1000).toISOString().slice(0,10);
+
+  const newCotizacion = {
+    id: nextCotId(),
+    codigo: cotizacionCodigo,
+    propuestaCodigo: propuestaCodigo,
+    fechaGeneracion, horaGeneracion, validaHasta,
+    responsable: "F. Ruiz",
+    estado: "Generada",
+    motivoRechazo: null,
+    comentarioPerdida: null,
+    documentoSustento: null,
+    email: {estado:"Sin enviar", destinatario:"", asunto:"", intentos:[]},
+    historial: [{fecha: fechaGeneracion, usuario:"F. Ruiz", accion:"Cotización generada",
+      detalle:`Generada a partir de la propuesta ${propuestaCodigo}, validada como rentable.`}]
+  };
+
+  /* unshift (no push): misma convención que saveOportunidad()/saveProposal()
+     usan para propuestas nuevas — el registro recién creado aparece primero,
+     visible de inmediato sin paginar. */
+  quotations.unshift(newCotizacion);
+
+  closeModalById("rentabModal");
+  showToast(`Cotización ${cotizacionCodigo} generada. Revísala en el módulo de Cotizaciones.`, "success");
+
+  /* applyCotFilters(), no renderCotTable(): renderCotTable() lee de
+     filteredCot, una copia de quotations tomada al cargar la página —
+     sin recalcularla, la cotización recién creada no aparecería en la
+     tabla hasta el próximo cambio de filtro. */
+  applyCotFilters();
+
+  return true;
+}
 
 const COT_ESTADOS = ["Generada","Enviada","Aprobada","Rechazada","Oportunidad perdida"];
 const EMAIL_ESTADOS = ["Sin enviar","Enviando","Enviado","Entregado","Leído","Fallido"];
@@ -2032,12 +2075,6 @@ function findQuotation(id){ return quotations.find(q=>q.id===id); }
 let filteredCot = quotations.slice();
 let cotCurrentPage = 1;
 const COT_PAGE_SIZE = 5;
-
-function populateCotProductoFilter(){
-  const sel = document.getElementById("fCotProducto");
-  const productos = [...new Set(proposals.map(p=>p.producto))].sort();
-  sel.innerHTML = '<option value="">Todos</option>' + productos.map(p=>`<option value="${esc(p)}">${esc(p)}</option>`).join("");
-}
 
 /* Buscador: cubre TODAS las columnas visibles de esta tabla (Código,
    Razón social, Propuesta origen, Solución, Business Volume, Cantidad
@@ -2408,11 +2445,13 @@ function openCotDrawer(id){
 
   setLockedValue("cq_solucion", p.solucion);
   setLockedValue("cq_marca", p.marca);
-  setLockedValue("cq_sector", p.sector);
+  setLockedValue("cq_tecnologia", p.tecnologia);
   setLockedValue("cq_categoria", p.categoria);
+  setLockedValue("cq_tipoProducto", p.tipoProducto);
+  setLockedValue("cq_producto", p.producto);
+  setLockedValue("cq_sector", p.sector);
   setLockedValue("cq_modalidadPago", p.modalidadPago);
   setLockedValue("cq_diasCredito", p.modalidadPago==="Crédito" ? intFmt(p.diasCredito)+" días" : "No aplica");
-  setLockedValue("cq_tipoProducto", p.tipoProducto);
   setLockedValue("cq_valorFacial", moneyDec(p.valorFacial));
   setLockedValue("cq_cantBeneficiarios", intFmt(p.cantBeneficiarios));
   setLockedValue("cq_cantTarjetas", intFmt(p.cantTarjetas));
@@ -2673,7 +2712,6 @@ function confirmCotApprove(){
 
 /* ---------- Init ---------- */
 function initCotizacionesModule(){
-  populateCotProductoFilter();
   renderCotTable();
 
   document.getElementById("fCotCliente").addEventListener("input", applyCotFilters);
