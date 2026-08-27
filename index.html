@@ -1495,12 +1495,24 @@
             <div class="locked-value" id="f_marca"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.8"/></svg><span class="lv-text"></span></div>
           </div>
           <div class="field-group">
-            <label for="f_sector"><svg class="icon-sm lock-ico" viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.8"/></svg> Sector</label>
-            <div class="locked-value" id="f_sector"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.8"/></svg><span class="lv-text"></span></div>
+            <label for="f_tecnologia"><svg class="icon-sm lock-ico" viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.8"/></svg> Tecnología</label>
+            <div class="locked-value" id="f_tecnologia"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.8"/></svg><span class="lv-text"></span></div>
           </div>
           <div class="field-group">
             <label for="f_categoria"><svg class="icon-sm lock-ico" viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.8"/></svg> Categoría de producto</label>
             <div class="locked-value" id="f_categoria"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.8"/></svg><span class="lv-text"></span></div>
+          </div>
+          <div class="field-group">
+            <label for="f_tipoProducto"><svg class="icon-sm lock-ico" viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.8"/></svg> Tipo de producto</label>
+            <div class="locked-value" id="f_tipoProducto"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.8"/></svg><span class="lv-text"></span></div>
+          </div>
+          <div class="field-group">
+            <label for="f_producto"><svg class="icon-sm lock-ico" viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.8"/></svg> Producto</label>
+            <div class="locked-value" id="f_producto"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.8"/></svg><span class="lv-text"></span></div>
+          </div>
+          <div class="field-group">
+            <label for="f_sector"><svg class="icon-sm lock-ico" viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.8"/></svg> Sector</label>
+            <div class="locked-value" id="f_sector"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.8"/></svg><span class="lv-text"></span></div>
           </div>
           <div class="field-group">
             <label for="f_modalidadPago">Modalidad de pago</label>
@@ -1511,10 +1523,6 @@
             <label for="f_diasCredito">Días de crédito</label>
             <input type="number" id="f_diasCredito" min="0" placeholder="0">
             <span class="field-hint">Solo aplica si la modalidad es Crédito</span>
-          </div>
-          <div class="field-group">
-            <label for="f_tipoProducto">Tipo de producto</label>
-            <select id="f_tipoProducto"><option>Físico</option><option>Virtual</option></select>
           </div>
           <div class="field-group">
             <label for="f_valorFacial">Valor facial</label>
@@ -1900,20 +1908,66 @@
           </div>
           <div class="form-grid cols-3">
             <div class="field-group">
-              <label for="op_solucion">Solución</label>
-              <select id="op_solucion"><option>Gift</option><option>Food</option><option>Mobility</option></select>
+              <label for="op_solucion">Solución <span class="req">*</span></label>
+              <select id="op_solucion">
+                <option value="">-</option>
+                <option>Gift</option>
+                <option>Food</option>
+                <option>Mobility</option>
+                <option>No aplica</option>
+              </select>
             </div>
             <div class="field-group">
-              <label for="op_marca">Marca</label>
-              <select id="op_marca"><option>Mastercard</option><option>Visa</option></select>
+              <label for="op_marca">Marca <span class="req">*</span></label>
+              <select id="op_marca">
+                <option value="">-</option>
+                <option>Visa</option>
+                <option>Mastercard</option>
+                <option>No aplica</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label for="op_tecnologia">Tecnología <span class="req">*</span></label>
+              <select id="op_tecnologia">
+                <option value="">-</option>
+                <option>Chip contactless</option>
+                <option>Banda</option>
+                <option>No aplica</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label for="op_categoria">Categoría de producto <span class="req">*</span></label>
+              <select id="op_categoria">
+                <option value="">-</option>
+                <option>Esencial</option>
+                <option>Estándar</option>
+                <option>No aplica</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label for="op_tipoProducto">Tipo de producto <span class="req">*</span></label>
+              <select id="op_tipoProducto">
+                <option value="">-</option>
+                <option>Virtual</option>
+                <option>Físico</option>
+                <option>No aplica</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label for="op_producto">Producto <span class="req">*</span></label>
+              <select id="op_producto">
+                <option value="">-</option>
+                <option>Alimentación</option>
+                <option>Regalo</option>
+                <option>Incentivo</option>
+                <option>Movilidad</option>
+                <option>Comedores</option>
+                <option>Navidad</option>
+              </select>
             </div>
             <div class="field-group">
               <label for="op_sector">Sector</label>
               <select id="op_sector"><option>Privado</option><option>Público</option></select>
-            </div>
-            <div class="field-group">
-              <label for="op_categoria">Categoría de producto</label>
-              <select id="op_categoria"><option>Esencial</option><option>Estándar</option><option>No aplica</option></select>
             </div>
             <div class="field-group">
               <label for="op_modalidadPago">Modalidad de pago</label>
@@ -1922,10 +1976,6 @@
             <div class="field-group" id="op_diasCreditoGroup">
               <label for="op_diasCredito">Días de crédito <span class="req">*</span></label>
               <input type="number" id="op_diasCredito" min="0" step="1" placeholder="0">
-            </div>
-            <div class="field-group">
-              <label for="op_tipoProducto">Tipo de producto</label>
-              <select id="op_tipoProducto"><option>Físico</option><option>Virtual</option></select>
             </div>
             <div class="field-group">
               <label for="op_valorFacial">Valor facial <span class="req">*</span></label>

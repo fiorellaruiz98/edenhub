@@ -34,7 +34,7 @@ const proposals = [
     id: nextId(), codigo:"COD-2026-001", ruc:"20100070970", razonSocial:"Alicorp S.A.A.",
     giro:"Consumo masivo", esCliente:true, direccion:"Av. Argentina 4793, Carmen de la Legua, Callao",
     representantes:[{tipoDoc:"DNI",numDoc:"09541278",nombres:"Rosa",apellidos:"Vidal Torres",cargo:"General Manager"}],
-    solucion:"Food", marca:"Mastercard", sector:"Privado", categoria:"Esencial",
+    solucion:"Food", marca:"Mastercard", tecnologia:"Chip contactless", sector:"Privado", categoria:"Esencial",
     bvMes:185000, cantBeneficiarios:1200, cantTarjetas:1200, cargasAnio:12, tipoProducto:"Físico", valorFacial:154,
     modalidadPago:"Crédito", diasCredito:30,
     rebate:{activo:true,tipo:"porcentaje",valor:1.5},
@@ -42,7 +42,7 @@ const proposals = [
     expenses: makeExpenses([12,8,15,5,10,3,20,0], ["otros"]),
     distribucion:[{destino:"Lima",cantidadPuntos:3},{destino:"Provincia",cantidadPuntos:1}],
     logoEmpresa:true, cartaFianza:true, productoCustom:false, mdrNegociado:0,
-    producto:"Tarjeta Alimentación Esencial", estado:"Aprobada", version:2, fecha:"2026-07-08",
+    producto:"Alimentación", estado:"Aprobada", version:2, fecha:"2026-07-08",
     historial:[
       {version:1, fecha:"2026-05-04", estado:"Creada", usuario:"F. Ruiz", resumen:"Propuesta inicial creada para negociación de portafolio Food."},
       {version:1, fecha:"2026-06-02", estado:"Rechazada", usuario:"J. Salinas (Comercial)", resumen:"El comité comercial solicitó reducir el BV proyectado por estacionalidad.", motivo:"El comité comercial solicitó reducir el BV proyectado por estacionalidad."},
@@ -58,7 +58,7 @@ const proposals = [
     id: nextId(), codigo:"COD-2026-002", ruc:"20511358907", razonSocial:"Interbank",
     giro:"Financiero", esCliente:true, direccion:"Av. Carlos Villarán 140, La Victoria, Lima",
     representantes:[{tipoDoc:"DNI",numDoc:"41235690",nombres:"Diego",apellidos:"Cárdenas Luna",cargo:"Apoderado legal"}],
-    solucion:"Gift", marca:"Visa", sector:"Privado", categoria:"No aplica",
+    solucion:"Gift", marca:"Visa", tecnologia:"No aplica", sector:"Privado", categoria:"No aplica",
     bvMes:92000, cantBeneficiarios:450, cantTarjetas:450, cargasAnio:4, tipoProducto:"Virtual", valorFacial:204,
     modalidadPago:"Al contado", diasCredito:0,
     rebate:{activo:false,tipo:"monto",valor:0},
@@ -66,14 +66,14 @@ const proposals = [
     expenses: makeExpenses([9,0,6,0,14,0,0,0], ["entrega","mantenimiento","carga","renovacion","otros"]),
     distribucion:[{destino:"Lima",cantidadPuntos:2}],
     logoEmpresa:false, cartaFianza:false, productoCustom:true, mdrNegociado:2.1,
-    producto:"Gift Card Digital", estado:"Creada", version:1, fecha:"2026-07-12",
+    producto:"Regalo", estado:"Creada", version:1, fecha:"2026-07-12",
     historial:[{version:1, fecha:"2026-07-12", estado:"Creada", usuario:"F. Ruiz", resumen:"Propuesta inicial de Gift Card Digital para campaña Q3."}]
   },
   {
     id: nextId(), codigo:"COD-2026-003", ruc:"20100128218", razonSocial:"Backus",
     giro:"Alimentos y bebidas", esCliente:true, direccion:"Av. Nicolás Ayllón 3986, Ate, Lima",
     representantes:[{tipoDoc:"DNI",numDoc:"08774521",nombres:"Manuel",apellidos:"Sotelo Braga",cargo:"General Manager"},{tipoDoc:"CE",numDoc:"00123456",nombres:"Laura",apellidos:"Ibáñez Ruiz",cargo:"Apoderado legal"}],
-    solucion:"Food", marca:"Mastercard", sector:"Privado", categoria:"Estándar",
+    solucion:"Food", marca:"Mastercard", tecnologia:"Banda", sector:"Privado", categoria:"Estándar",
     bvMes:310000, cantBeneficiarios:2100, cantTarjetas:2100, cargasAnio:12, tipoProducto:"Físico", valorFacial:147,
     modalidadPago:"Crédito", diasCredito:45,
     rebate:{activo:true,tipo:"monto",valor:5200},
@@ -81,7 +81,7 @@ const proposals = [
     expenses: makeExpenses([14,10,18,6,12,4,22,3], []),
     distribucion:[{destino:"Lima",cantidadPuntos:2},{destino:"Provincia",cantidadPuntos:1}],
     logoEmpresa:true, cartaFianza:true, productoCustom:false, mdrNegociado:0,
-    producto:"Tarjeta Alimentación Estándar", estado:"Rechazada", version:1, fecha:"2026-06-28",
+    producto:"Alimentación", estado:"Rechazada", version:1, fecha:"2026-06-28",
     historial:[
       {version:1, fecha:"2026-05-20", estado:"Creada", usuario:"F. Ruiz", resumen:"Propuesta inicial de migración de portafolio Estándar."},
       {version:1, fecha:"2026-06-28", estado:"Rechazada", usuario:"M. Quiroz (Operaciones)", resumen:"Se revisaron condiciones de factura mínima y comisión cliente.", motivo:"Cliente solicitó comisión cliente menor al 2.0% ofertado; pendiente de reevaluación comercial."}
@@ -94,7 +94,7 @@ const proposals = [
     id: nextId(), codigo:"COD-2026-004", ruc:"20601234561", razonSocial:"Rappi Perú S.A.C.",
     giro:"Tecnología", esCliente:false, direccion:"Av. Santa Cruz 830, Miraflores, Lima",
     representantes:[{tipoDoc:"CE",numDoc:"00456789",nombres:"Andrés",apellidos:"Gómez Peña",cargo:"General Manager"}],
-    solucion:"Mobility", marca:"Visa", sector:"Privado", categoria:"No aplica",
+    solucion:"Mobility", marca:"Visa", tecnologia:"Chip contactless", sector:"Privado", categoria:"No aplica",
     bvMes:45000, cantBeneficiarios:300, cantTarjetas:300, cargasAnio:6, tipoProducto:"Físico", valorFacial:150,
     modalidadPago:"Al contado", diasCredito:0,
     rebate:{activo:false,tipo:"monto",valor:0},
@@ -102,7 +102,7 @@ const proposals = [
     expenses: makeExpenses([10,7,12,4,9,2,15,0], ["personalizacion","otros"]),
     distribucion:[{destino:"Lima",cantidadPuntos:1}],
     logoEmpresa:false, cartaFianza:false, productoCustom:false, mdrNegociado:0,
-    producto:"Tarjeta Movilidad", estado:"Borrador", version:1, fecha:"2026-07-14",
+    producto:"Movilidad", estado:"Borrador", version:1, fecha:"2026-07-14",
     historial:[{version:1, fecha:"2026-07-14", estado:"Borrador", usuario:"F. Ruiz", resumen:"Borrador guardado, pendiente de validar cantidad de cargas al año."}],
     solicitudes:[
       {id:"SOL-0004", tipo:"Excepción", fechaCreacion:"2026-07-14", estado:"En Atención", motivo:null}
@@ -112,7 +112,7 @@ const proposals = [
     id: nextId(), codigo:"COD-2026-005", ruc:"20345678912", razonSocial:"Falabella Perú S.A.",
     giro:"Retail", esCliente:true, direccion:"Av. Angamos Este 1805, Surquillo, Lima",
     representantes:[{tipoDoc:"DNI",numDoc:"07896541",nombres:"Patricia",apellidos:"León Salazar",cargo:"General Manager"}],
-    solucion:"Food", marca:"Mastercard", sector:"Privado", categoria:"Esencial",
+    solucion:"Food", marca:"Mastercard", tecnologia:"Chip contactless", sector:"Privado", categoria:"Esencial",
     bvMes:210000, cantBeneficiarios:1500, cantTarjetas:1500, cargasAnio:12, tipoProducto:"Físico", valorFacial:140,
     modalidadPago:"Crédito", diasCredito:30,
     rebate:{activo:true,tipo:"porcentaje",valor:1.0},
@@ -120,7 +120,7 @@ const proposals = [
     expenses: makeExpenses([12,8,15,5,10,3,20,0], []),
     distribucion:[{destino:"Lima",cantidadPuntos:2},{destino:"Provincia",cantidadPuntos:1}],
     logoEmpresa:true, cartaFianza:false, productoCustom:false, mdrNegociado:0,
-    producto:"Tarjeta Alimentación Esencial", estado:"Aprobada", version:1, fecha:"2026-07-02",
+    producto:"Alimentación", estado:"Aprobada", version:1, fecha:"2026-07-02",
     historial:[{version:1, fecha:"2026-07-02", estado:"Aprobada", usuario:"F. Ruiz", resumen:"Propuesta aprobada directamente en primera versión."}],
     solicitudes:[
       {id:"SOL-0005", tipo:"Línea de Crédito", fechaCreacion:"2026-06-28", estado:"Aprobado", motivo:null}
@@ -130,7 +130,7 @@ const proposals = [
     id: nextId(), codigo:"COD-2026-006", ruc:"20512345678", razonSocial:"Sodimac Perú S.A.",
     giro:"Retail", esCliente:true, direccion:"Av. Angamos Este 1805, Surquillo, Lima",
     representantes:[{tipoDoc:"DNI",numDoc:"06541237",nombres:"Jorge",apellidos:"Paredes Ito",cargo:"Apoderado legal"}],
-    solucion:"Gift", marca:"Visa", sector:"Privado", categoria:"No aplica",
+    solucion:"Gift", marca:"Visa", tecnologia:"Banda", sector:"Privado", categoria:"No aplica",
     bvMes:67000, cantBeneficiarios:380, cantTarjetas:380, cargasAnio:2, tipoProducto:"Físico", valorFacial:176,
     modalidadPago:"Al contado", diasCredito:0,
     rebate:{activo:false,tipo:"monto",valor:0},
@@ -138,14 +138,14 @@ const proposals = [
     expenses: makeExpenses([9,6,11,3,8,2,13,0], ["carga","otros"]),
     distribucion:[{destino:"Lima",cantidadPuntos:1}],
     logoEmpresa:false, cartaFianza:false, productoCustom:false, mdrNegociado:0,
-    producto:"Gift Card Física", estado:"Creada", version:1, fecha:"2026-07-11",
+    producto:"Regalo", estado:"Creada", version:1, fecha:"2026-07-11",
     historial:[{version:1, fecha:"2026-07-11", estado:"Creada", usuario:"F. Ruiz", resumen:"Propuesta inicial para campaña Gift de temporada."}]
   },
   {
     id: nextId(), codigo:"COD-2026-007", ruc:"20601987654", razonSocial:"Cineplanet S.A.",
     giro:"Entretenimiento", esCliente:true, direccion:"Av. Óscar R. Benavides 3866, Callao",
     representantes:[{tipoDoc:"DNI",numDoc:"05412369",nombres:"Valeria",apellidos:"Nuñez Campos",cargo:"General Manager"}],
-    solucion:"Mobility", marca:"Mastercard", sector:"Privado", categoria:"No aplica",
+    solucion:"Mobility", marca:"Mastercard", tecnologia:"No aplica", sector:"Privado", categoria:"No aplica",
     bvMes:28000, cantBeneficiarios:210, cantTarjetas:210, cargasAnio:4, tipoProducto:"Virtual", valorFacial:133,
     modalidadPago:"Crédito", diasCredito:15,
     rebate:{activo:false,tipo:"monto",valor:0},
@@ -153,7 +153,7 @@ const proposals = [
     expenses: makeExpenses([8,5,9,3,7,2,11,0], ["mantenimiento"]),
     distribucion:[{destino:"Lima",cantidadPuntos:1}],
     logoEmpresa:false, cartaFianza:false, productoCustom:false, mdrNegociado:0,
-    producto:"Tarjeta Movilidad", estado:"Borrador", version:1, fecha:"2026-07-10",
+    producto:"Movilidad", estado:"Borrador", version:1, fecha:"2026-07-10",
     historial:[
       {version:1, fecha:"2026-06-18", estado:"Borrador", usuario:"F. Ruiz", resumen:"Borrador inicial con datos preliminares de la oportunidad."},
       {version:1, fecha:"2026-07-10", estado:"Borrador", usuario:"F. Ruiz", resumen:"Actualización de días de crédito y valor facial."}
@@ -166,7 +166,7 @@ const proposals = [
     id: nextId(), codigo:"COD-2026-008", ruc:"20100456789", razonSocial:"Ransa Comercial S.A.",
     giro:"Servicios", esCliente:true, direccion:"Av. Elmer Faucett 3348, Callao",
     representantes:[{tipoDoc:"DNI",numDoc:"04123698",nombres:"Ricardo",apellidos:"Cabrera Solís",cargo:"Apoderado legal"}],
-    solucion:"Food", marca:"Visa", sector:"Privado", categoria:"Estándar",
+    solucion:"Food", marca:"Visa", tecnologia:"Banda", sector:"Privado", categoria:"Estándar",
     bvMes:156000, cantBeneficiarios:980, cantTarjetas:980, cargasAnio:12, tipoProducto:"Físico", valorFacial:159,
     modalidadPago:"Crédito", diasCredito:30,
     rebate:{activo:false,tipo:"monto",valor:0},
@@ -174,14 +174,14 @@ const proposals = [
     expenses: makeExpenses([11,7,14,5,9,3,18,0], ["personalizacion"]),
     distribucion:[{destino:"Lima",cantidadPuntos:2},{destino:"Provincia",cantidadPuntos:1}],
     logoEmpresa:true, cartaFianza:true, productoCustom:false, mdrNegociado:0,
-    producto:"Tarjeta Alimentación Estándar", estado:"Rechazada", version:1, fecha:"2026-06-20",
+    producto:"Alimentación", estado:"Rechazada", version:1, fecha:"2026-06-20",
     historial:[{version:1, fecha:"2026-06-20", estado:"Rechazada", usuario:"J. Salinas (Comercial)", resumen:"Rechazada en primera versión por condiciones de factura mínima.", motivo:"El BV proyectado no sustenta la factura mínima solicitada por el cliente."}]
   },
   {
     id: nextId(), codigo:"COD-2026-009", ruc:"20601122334", razonSocial:"Nufoods S.A.C.",
     giro:"Alimentos y bebidas", esCliente:true, direccion:"Av. República de Panamá 3055, San Isidro, Lima",
     representantes:[{tipoDoc:"DNI",numDoc:"03698521",nombres:"Camila",apellidos:"Herrera Díaz",cargo:"General Manager"}],
-    solucion:"Food", marca:"Mastercard", sector:"Privado", categoria:"Esencial",
+    solucion:"Food", marca:"Mastercard", tecnologia:"Chip contactless", sector:"Privado", categoria:"Esencial",
     bvMes:74000, cantBeneficiarios:520, cantTarjetas:520, cargasAnio:12, tipoProducto:"Físico", valorFacial:142,
     modalidadPago:"Al contado", diasCredito:0,
     rebate:{activo:true,tipo:"porcentaje",valor:0.8},
@@ -189,7 +189,7 @@ const proposals = [
     expenses: makeExpenses([10,6,12,4,8,2,16,0], ["otros"]),
     distribucion:[{destino:"Lima",cantidadPuntos:3}],
     logoEmpresa:true, cartaFianza:false, productoCustom:false, mdrNegociado:0,
-    producto:"Tarjeta Alimentación Esencial", estado:"Aprobada", version:1, fecha:"2026-07-15",
+    producto:"Alimentación", estado:"Aprobada", version:1, fecha:"2026-07-15",
     historial:[
       {version:1, fecha:"2026-06-25", estado:"Creada", usuario:"F. Ruiz", resumen:"Propuesta inicial para plan de e-commerce y beneficios internos."},
       {version:1, fecha:"2026-07-15", estado:"Aprobada", usuario:"F. Ruiz", resumen:"Aprobada tras ajuste de rebate al 0.8% de BV."}
@@ -199,7 +199,7 @@ const proposals = [
     id: nextId(), codigo:"COD-2026-010", ruc:"20512000111", razonSocial:"Compartamos Financiera",
     giro:"Financiero", esCliente:false, direccion:"Av. República de Panamá 3591, San Isidro, Lima",
     representantes:[{tipoDoc:"DNI",numDoc:"02147896",nombres:"Hugo",apellidos:"Ferrer Vega",cargo:"Apoderado legal"}],
-    solucion:"Gift", marca:"Visa", sector:"Privado", categoria:"No aplica",
+    solucion:"Gift", marca:"Visa", tecnologia:"No aplica", sector:"Privado", categoria:"No aplica",
     bvMes:39000, cantBeneficiarios:260, cantTarjetas:260, cargasAnio:2, tipoProducto:"Virtual", valorFacial:150,
     modalidadPago:"Crédito", diasCredito:20,
     rebate:{activo:false,tipo:"monto",valor:0},
@@ -207,14 +207,14 @@ const proposals = [
     expenses: makeExpenses([9,0,10,0,13,0,0,0], ["entrega","mantenimiento","carga","renovacion","otros"]),
     distribucion:[{destino:"Lima",cantidadPuntos:2}],
     logoEmpresa:false, cartaFianza:false, productoCustom:true, mdrNegociado:1.8,
-    producto:"Gift Card Digital", estado:"Creada", version:1, fecha:"2026-07-13",
+    producto:"Regalo", estado:"Creada", version:1, fecha:"2026-07-13",
     historial:[{version:1, fecha:"2026-07-13", estado:"Creada", usuario:"F. Ruiz", resumen:"Propuesta inicial para beneficios de colaboradores."}]
   },
   {
     id: nextId(), codigo:"COD-2026-011", ruc:"20100998877", razonSocial:"San Fernando S.A.",
     giro:"Alimentos y bebidas", esCliente:true, direccion:"Calle Amador Merino Reyna 267, San Isidro, Lima",
     representantes:[{tipoDoc:"DNI",numDoc:"01236547",nombres:"Elena",apellidos:"Osorio Vargas",cargo:"General Manager"}],
-    solucion:"Food", marca:"Mastercard", sector:"Privado", categoria:"Estándar",
+    solucion:"Food", marca:"Mastercard", tecnologia:"Chip contactless", sector:"Privado", categoria:"Estándar",
     bvMes:198000, cantBeneficiarios:1340, cantTarjetas:1340, cargasAnio:12, tipoProducto:"Físico", valorFacial:148,
     modalidadPago:"Crédito", diasCredito:30,
     rebate:{activo:false,tipo:"monto",valor:0},
@@ -222,14 +222,14 @@ const proposals = [
     expenses: makeExpenses([13,9,16,5,11,3,19,0], []),
     distribucion:[{destino:"Lima",cantidadPuntos:2},{destino:"Provincia",cantidadPuntos:1}],
     logoEmpresa:true, cartaFianza:true, productoCustom:false, mdrNegociado:0,
-    producto:"Tarjeta Alimentación Estándar", estado:"Borrador", version:1, fecha:"2026-07-15",
+    producto:"Alimentación", estado:"Borrador", version:1, fecha:"2026-07-15",
     historial:[{version:1, fecha:"2026-07-15", estado:"Borrador", usuario:"F. Ruiz", resumen:"Borrador en preparación, a la espera de validación de RRLL."}]
   },
   {
     id: nextId(), codigo:"COD-2026-012", ruc:"20601554433", razonSocial:"Tottus Perú S.A.",
     giro:"Retail", esCliente:true, direccion:"Av. Angamos Este 1803, Surquillo, Lima",
     representantes:[{tipoDoc:"DNI",numDoc:"09638527",nombres:"Sergio",apellidos:"Malpartida Ruiz",cargo:"Apoderado legal"}],
-    solucion:"Mobility", marca:"Visa", sector:"Privado", categoria:"No aplica",
+    solucion:"Mobility", marca:"Visa", tecnologia:"Banda", sector:"Privado", categoria:"No aplica",
     bvMes:52000, cantBeneficiarios:340, cantTarjetas:340, cargasAnio:6, tipoProducto:"Físico", valorFacial:153,
     modalidadPago:"Al contado", diasCredito:0,
     rebate:{activo:false,tipo:"monto",valor:0},
@@ -237,7 +237,7 @@ const proposals = [
     expenses: makeExpenses([10,7,12,4,9,2,15,0], ["otros"]),
     distribucion:[{destino:"Lima",cantidadPuntos:1}],
     logoEmpresa:false, cartaFianza:false, productoCustom:false, mdrNegociado:0,
-    producto:"Tarjeta Movilidad", estado:"Aprobada", version:1, fecha:"2026-07-05",
+    producto:"Movilidad", estado:"Aprobada", version:1, fecha:"2026-07-05",
     historial:[{version:1, fecha:"2026-07-05", estado:"Aprobada", usuario:"F. Ruiz", resumen:"Aprobada en primera versión sin observaciones."}]
   }
 ];
@@ -826,12 +826,14 @@ function fillForm(p){
 
   setLockedValue("f_solucion", p.solucion);
   setLockedValue("f_marca", p.marca);
-  setLockedValue("f_sector", p.sector);
+  setLockedValue("f_tecnologia", p.tecnologia);
   setLockedValue("f_categoria", p.categoria);
+  setLockedValue("f_tipoProducto", p.tipoProducto);
+  setLockedValue("f_producto", p.producto);
+  setLockedValue("f_sector", p.sector);
   document.getElementById("f_cantBeneficiarios").value = p.cantBeneficiarios;
   document.getElementById("f_cantTarjetas").value = p.cantTarjetas;
   document.getElementById("f_cargasAnio").value = p.cargasAnio;
-  document.getElementById("f_tipoProducto").value = p.tipoProducto;
   document.getElementById("f_valorFacial").value = p.valorFacial;
   document.getElementById("f_bvCarga").value = calcBvCarga(p.valorFacial, p.cantBeneficiarios).toFixed(2);
   document.getElementById("f_bvTotal").value = calcBvTotal(p.valorFacial, p.cantBeneficiarios, p.cargasAnio).toFixed(2);
@@ -887,11 +889,6 @@ window.calcBvTotal = calcBvTotal;
    por carga, un cálculo distinto). */
 function bvTotalFor(p){ return calcBvTotal(p.valorFacial, p.cantBeneficiarios, p.cargasAnio); }
 
-function deriveProducto(data){
-  return data.solucion==="Food" ? "Tarjeta Alimentación " + (data.categoria!=="No aplica"?data.categoria:"Estándar")
-    : data.solucion==="Gift" ? "Gift Card " + (data.tipoProducto==="Virtual"?"Digital":"Física")
-    : "Tarjeta Movilidad";
-}
 function nextCodigo(){
   const n = proposals.length + 1;
   return "COD-2026-" + String(n).padStart(3,"0");
@@ -909,7 +906,7 @@ function blankTemplate(){
   return {
     ruc:"", razonSocial:"Cliente por definir", giro:GIRO_OPTIONS[0], esCliente:false,
     direccion:"", representantes:[],
-    solucion:"Food", marca:"Mastercard", sector:"Privado", categoria:"Esencial",
+    solucion:"Food", marca:"Mastercard", tecnologia:"", sector:"Privado", categoria:"Esencial",
     bvMes:0, cantBeneficiarios:0, cantTarjetas:0, cargasAnio:0, tipoProducto:"Físico", valorFacial:0,
     modalidadPago:"Crédito", diasCredito:0,
     rebate:{activo:false,tipo:"monto",valor:0},
@@ -918,7 +915,7 @@ function blankTemplate(){
     condicionesExtra: [],
     distribucion:[{destino:"Lima",cantidadPuntos:0}],
     logoEmpresa:false, cartaFianza:false, montoCartaFianza:0, productoCustom:false, mdrNegociado:0,
-    producto:"Producto por definir", estado:"Borrador", version:1, fecha: new Date().toISOString().slice(0,10),
+    producto:"", estado:"Borrador", version:1, fecha: new Date().toISOString().slice(0,10),
     solicitudes:[]
   };
 }
@@ -934,12 +931,14 @@ function collectFormData(){
     representantes: workingRepresentantes,
     solucion: getLockedValue("f_solucion"),
     marca: getLockedValue("f_marca"),
+    tecnologia: getLockedValue("f_tecnologia"),
     sector: getLockedValue("f_sector"),
     categoria: getLockedValue("f_categoria"),
+    tipoProducto: getLockedValue("f_tipoProducto"),
+    producto: getLockedValue("f_producto"),
     cantBeneficiarios: +document.getElementById("f_cantBeneficiarios").value || 0,
     cantTarjetas: +document.getElementById("f_cantTarjetas").value || 0,
     cargasAnio: +document.getElementById("f_cargasAnio").value || 0,
-    tipoProducto: document.getElementById("f_tipoProducto").value,
     valorFacial: +document.getElementById("f_valorFacial").value || 0,
     /* bvMes es internamente "BV por carga" (usado solo por computeRentabilidad).
        El "Business Volume" mostrado en listado/dashboards es BV total —
@@ -1088,7 +1087,7 @@ function saveProposal(estadoDestino){
       solicitudesBase = JSON.parse(JSON.stringify(base.solicitudes||[]));
     } else {
       baseCodigo = nextCodigo();
-      producto = deriveProducto(data);
+      producto = data.producto;
     }
     const fecha = new Date().toISOString().slice(0,10);
     const newP = Object.assign({}, data, {
@@ -1436,6 +1435,12 @@ function resetOportunidadForm(){
   setStaticValue("op_direccion", "—", true);
   document.getElementById("rucLookupStatus").textContent = "";
   document.getElementById("rucLookupStatus").className = "ruc-lookup-status";
+  /* form.reset() no revierte `disabled` seteado por JS — si el modal se
+     cerró con Producto="Comedores" (campos deshabilitados), quedarían
+     bloqueados al reabrir con datos limpios. */
+  ["op_solucion","op_marca","op_tecnologia","op_categoria","op_tipoProducto"].forEach(id=>{
+    document.getElementById(id).disabled = false;
+  });
   updateDiasCreditoVisibility();
   recalcOportunidadBv();
   document.querySelectorAll("#oportunidadForm .field-group.field-error").forEach(g=>g.classList.remove("field-error"));
@@ -1491,6 +1496,21 @@ function updateDiasCreditoVisibility(){
   document.getElementById("op_diasCreditoGroup").style.display = modalidad==="Crédito" ? "" : "none";
 }
 
+/* "Comedores" es una línea de producto sin Solución/Marca/Tecnología/
+   Categoría/Tipo de producto reales asociadas — se fuerza "No aplica"
+   y se bloquean para que no quede una combinación inconsistente.
+   Mismo patrón que syncConditionalField() (Rebate, Carta fianza, MDR
+   negociado): forzar valor + disabled mientras dure la condición, y
+   simplemente reactivar (sin resetear) al dejar de cumplirse. */
+function applyProductoComedoresLogic(){
+  const isComedores = document.getElementById("op_producto").value === "Comedores";
+  ["op_solucion","op_marca","op_tecnologia","op_categoria","op_tipoProducto"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(isComedores) el.value = "No aplica";
+    el.disabled = isComedores;
+  });
+}
+
 function openOportunidadModal(){
   resetOportunidadForm();
   document.getElementById("oportunidadModal").classList.add("open");
@@ -1512,6 +1532,13 @@ function validateOportunidadForm(){
 
   const ruc = document.getElementById("op_ruc").value.trim();
   if(!/^\d{11}$/.test(ruc)){ errors.push("El RUC debe tener 11 dígitos numéricos."); markError("op_ruc"); }
+
+  if(!document.getElementById("op_solucion").value){ errors.push("Selecciona la Solución."); markError("op_solucion"); }
+  if(!document.getElementById("op_marca").value){ errors.push("Selecciona la Marca."); markError("op_marca"); }
+  if(!document.getElementById("op_tecnologia").value){ errors.push("Selecciona la Tecnología."); markError("op_tecnologia"); }
+  if(!document.getElementById("op_categoria").value){ errors.push("Selecciona la Categoría de producto."); markError("op_categoria"); }
+  if(!document.getElementById("op_tipoProducto").value){ errors.push("Selecciona el Tipo de producto."); markError("op_tipoProducto"); }
+  if(!document.getElementById("op_producto").value){ errors.push("Selecciona el Producto."); markError("op_producto"); }
 
   const valorFacial = document.getElementById("op_valorFacial").value;
   if(valorFacial === "" || +valorFacial <= 0){ errors.push("Ingresa un valor facial válido."); markError("op_valorFacial"); }
@@ -1554,12 +1581,14 @@ function saveOportunidad(){
     representantes: [],
     solucion: document.getElementById("op_solucion").value,
     marca: document.getElementById("op_marca").value,
+    tecnologia: document.getElementById("op_tecnologia").value,
     sector: document.getElementById("op_sector").value,
     categoria: document.getElementById("op_categoria").value,
+    tipoProducto: document.getElementById("op_tipoProducto").value,
+    producto: document.getElementById("op_producto").value,
     cantBeneficiarios: +document.getElementById("op_cantBeneficiarios").value || 0,
     cantTarjetas: +document.getElementById("op_cantTarjetas").value || 0,
     cargasAnio: +document.getElementById("op_cargasAnio").value || 0,
-    tipoProducto: document.getElementById("op_tipoProducto").value,
     valorFacial: +document.getElementById("op_valorFacial").value || 0,
     bvMes: calcBvCarga(+document.getElementById("op_valorFacial").value || 0, +document.getElementById("op_cantBeneficiarios").value || 0),
     modalidadPago: document.getElementById("op_modalidadPago").value,
@@ -1573,10 +1602,9 @@ function saveOportunidad(){
   };
 
   const codigo = nextCodigo();
-  const producto = deriveProducto(data);
   const fecha = new Date().toISOString().slice(0,10);
   const newP = Object.assign({}, data, {
-    id: nextId(), codigo, producto, estado:"Creada", version:1, fecha,
+    id: nextId(), codigo, estado:"Creada", version:1, fecha,
     solicitudes: [],
     historial:[{version:1, fecha, estado:"Creada", usuario:"F. Ruiz", resumen:"Propuesta generada automáticamente desde el registro de una nueva oportunidad."}]
   });
@@ -1690,6 +1718,7 @@ document.addEventListener("DOMContentLoaded", function(){
   document.getElementById("btnSaveOportunidad").addEventListener("click", saveOportunidad);
   document.getElementById("op_ruc").addEventListener("input", ()=>{ oportunidadDirty = true; handleRucLookup(); });
   document.getElementById("op_modalidadPago").addEventListener("change", ()=>{ oportunidadDirty = true; updateDiasCreditoVisibility(); });
+  document.getElementById("op_producto").addEventListener("change", applyProductoComedoresLogic);
   document.getElementById("op_valorFacial").addEventListener("input", recalcOportunidadBv);
   document.getElementById("op_cantBeneficiarios").addEventListener("input", recalcOportunidadBv);
   document.getElementById("op_cargasAnio").addEventListener("input", recalcOportunidadBv);
