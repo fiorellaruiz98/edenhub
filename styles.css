@@ -3115,8 +3115,22 @@ table.approval-table{width:100%;border-collapse:collapse;}
 .cot-email-meta{padding:12px 14px;border-bottom:1px solid var(--border-soft);background:var(--surface-muted);}
 .cot-email-meta p{display:flex;gap:8px;margin:0;font-size:12px;}
 .cot-email-meta p + p{margin-top:4px;}
-.cot-email-meta p span{color:var(--grey);min-width:48px;}
+.cot-email-meta p span{color:var(--grey);min-width:48px;flex:0 0 auto;}
 .cot-email-meta p b{color:var(--black);font-weight:700;}
+/* Para/CC editables — misma fila compacta que Asunto (que sigue siendo
+   texto de solo lectura), pero con aspecto de input real cuando está
+   habilitado; al deshabilitarse (email ya enviado) se funde visualmente
+   con el resto del bloque, igual que antes de que fueran editables. */
+.cot-email-meta p input.cot-email-input{
+  flex:1;min-width:0;
+  border:1px solid var(--border-soft);border-radius:4px;
+  padding:2px 6px;font-size:12px;font-weight:700;color:var(--black);
+  background:var(--white);
+}
+.cot-email-meta p input.cot-email-input:disabled{
+  border-color:transparent;background:transparent;padding:2px 0;
+  color:var(--black);opacity:1;
+}
 .cot-email-body{padding:14px;font-size:12.5px;color:var(--black);line-height:1.55;}
 .cot-email-body p{margin:0 0 8px;}
 .cot-email-attachment{

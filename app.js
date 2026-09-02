@@ -35,7 +35,7 @@ const proposals = [
     giro:"Consumo masivo", esCliente:true, direccion:"Av. Argentina 4793, Carmen de la Legua, Callao",
     representantes:[{tipoDoc:"DNI",numDoc:"09541278",nombres:"Rosa",apellidos:"Vidal Torres",cargo:"General Manager"}],
     solucion:"Food", marca:"Mastercard", tecnologia:"Chip contactless", sector:"Privado", categoria:"Esencial",
-    bvMes:185000, cantBeneficiarios:1200, cantTarjetas:1200, cargasAnio:12, tipoProducto:"Físico", valorFacial:154,
+    bvMes:185000, cantBeneficiarios:1200, cargasAnio:12, tipoProducto:"Físico", valorFacial:154, esEmisionNueva:false,
     modalidadPago:"Crédito", diasCredito:30,
     rebate:{activo:true,tipo:"porcentaje",valor:1.5},
     comisionCliente:2.5, facturaMinima:1500,
@@ -59,7 +59,7 @@ const proposals = [
     giro:"Financiero", esCliente:true, direccion:"Av. Carlos Villarán 140, La Victoria, Lima",
     representantes:[{tipoDoc:"DNI",numDoc:"41235690",nombres:"Diego",apellidos:"Cárdenas Luna",cargo:"Apoderado legal"}],
     solucion:"Gift", marca:"Visa", tecnologia:"No aplica", sector:"Privado", categoria:"No aplica",
-    bvMes:92000, cantBeneficiarios:450, cantTarjetas:450, cargasAnio:4, tipoProducto:"Virtual", valorFacial:204,
+    bvMes:92000, cantBeneficiarios:450, cargasAnio:4, tipoProducto:"Virtual", valorFacial:204, esEmisionNueva:false,
     modalidadPago:"Al contado", diasCredito:0,
     rebate:{activo:false,tipo:"monto",valor:0},
     comisionCliente:3.2, facturaMinima:900,
@@ -74,7 +74,7 @@ const proposals = [
     giro:"Alimentos y bebidas", esCliente:true, direccion:"Av. Nicolás Ayllón 3986, Ate, Lima",
     representantes:[{tipoDoc:"DNI",numDoc:"08774521",nombres:"Manuel",apellidos:"Sotelo Braga",cargo:"General Manager"},{tipoDoc:"CE",numDoc:"00123456",nombres:"Laura",apellidos:"Ibáñez Ruiz",cargo:"Apoderado legal"}],
     solucion:"Food", marca:"Mastercard", tecnologia:"Banda", sector:"Privado", categoria:"Estándar",
-    bvMes:310000, cantBeneficiarios:2100, cantTarjetas:2100, cargasAnio:12, tipoProducto:"Físico", valorFacial:147,
+    bvMes:310000, cantBeneficiarios:2100, cargasAnio:12, tipoProducto:"Físico", valorFacial:147, esEmisionNueva:false,
     modalidadPago:"Crédito", diasCredito:45,
     rebate:{activo:true,tipo:"monto",valor:5200},
     comisionCliente:2.0, facturaMinima:2200,
@@ -95,7 +95,7 @@ const proposals = [
     giro:"Tecnología", esCliente:false, direccion:"Av. Santa Cruz 830, Miraflores, Lima",
     representantes:[{tipoDoc:"CE",numDoc:"00456789",nombres:"Andrés",apellidos:"Gómez Peña",cargo:"General Manager"}],
     solucion:"Mobility", marca:"Visa", tecnologia:"Chip contactless", sector:"Privado", categoria:"No aplica",
-    bvMes:45000, cantBeneficiarios:300, cantTarjetas:300, cargasAnio:6, tipoProducto:"Físico", valorFacial:150,
+    bvMes:45000, cantBeneficiarios:300, cargasAnio:6, tipoProducto:"Físico", valorFacial:150, esEmisionNueva:false,
     modalidadPago:"Al contado", diasCredito:0,
     rebate:{activo:false,tipo:"monto",valor:0},
     comisionCliente:2.8, facturaMinima:600,
@@ -113,7 +113,7 @@ const proposals = [
     giro:"Retail", esCliente:true, direccion:"Av. Angamos Este 1805, Surquillo, Lima",
     representantes:[{tipoDoc:"DNI",numDoc:"07896541",nombres:"Patricia",apellidos:"León Salazar",cargo:"General Manager"}],
     solucion:"Food", marca:"Mastercard", tecnologia:"Chip contactless", sector:"Privado", categoria:"Esencial",
-    bvMes:210000, cantBeneficiarios:1500, cantTarjetas:1500, cargasAnio:12, tipoProducto:"Físico", valorFacial:140,
+    bvMes:210000, cantBeneficiarios:1500, cargasAnio:12, tipoProducto:"Físico", valorFacial:140, esEmisionNueva:false,
     modalidadPago:"Crédito", diasCredito:30,
     rebate:{activo:true,tipo:"porcentaje",valor:1.0},
     comisionCliente:2.4, facturaMinima:1800,
@@ -131,7 +131,7 @@ const proposals = [
     giro:"Retail", esCliente:true, direccion:"Av. Angamos Este 1805, Surquillo, Lima",
     representantes:[{tipoDoc:"DNI",numDoc:"06541237",nombres:"Jorge",apellidos:"Paredes Ito",cargo:"Apoderado legal"}],
     solucion:"Gift", marca:"Visa", tecnologia:"Banda", sector:"Privado", categoria:"No aplica",
-    bvMes:67000, cantBeneficiarios:380, cantTarjetas:380, cargasAnio:2, tipoProducto:"Físico", valorFacial:176,
+    bvMes:67000, cantBeneficiarios:380, cargasAnio:2, tipoProducto:"Físico", valorFacial:176, esEmisionNueva:false,
     modalidadPago:"Al contado", diasCredito:0,
     rebate:{activo:false,tipo:"monto",valor:0},
     comisionCliente:3.0, facturaMinima:700,
@@ -146,7 +146,7 @@ const proposals = [
     giro:"Entretenimiento", esCliente:true, direccion:"Av. Óscar R. Benavides 3866, Callao",
     representantes:[{tipoDoc:"DNI",numDoc:"05412369",nombres:"Valeria",apellidos:"Nuñez Campos",cargo:"General Manager"}],
     solucion:"Mobility", marca:"Mastercard", tecnologia:"No aplica", sector:"Privado", categoria:"No aplica",
-    bvMes:28000, cantBeneficiarios:210, cantTarjetas:210, cargasAnio:4, tipoProducto:"Virtual", valorFacial:133,
+    bvMes:28000, cantBeneficiarios:210, cargasAnio:4, tipoProducto:"Virtual", valorFacial:133, esEmisionNueva:false,
     modalidadPago:"Crédito", diasCredito:15,
     rebate:{activo:false,tipo:"monto",valor:0},
     comisionCliente:2.6, facturaMinima:400,
@@ -167,7 +167,7 @@ const proposals = [
     giro:"Servicios", esCliente:true, direccion:"Av. Elmer Faucett 3348, Callao",
     representantes:[{tipoDoc:"DNI",numDoc:"04123698",nombres:"Ricardo",apellidos:"Cabrera Solís",cargo:"Apoderado legal"}],
     solucion:"Food", marca:"Visa", tecnologia:"Banda", sector:"Privado", categoria:"Estándar",
-    bvMes:156000, cantBeneficiarios:980, cantTarjetas:980, cargasAnio:12, tipoProducto:"Físico", valorFacial:159,
+    bvMes:156000, cantBeneficiarios:980, cargasAnio:12, tipoProducto:"Físico", valorFacial:159, esEmisionNueva:false,
     modalidadPago:"Crédito", diasCredito:30,
     rebate:{activo:false,tipo:"monto",valor:0},
     comisionCliente:2.3, facturaMinima:1200,
@@ -182,7 +182,7 @@ const proposals = [
     giro:"Alimentos y bebidas", esCliente:true, direccion:"Av. República de Panamá 3055, San Isidro, Lima",
     representantes:[{tipoDoc:"DNI",numDoc:"03698521",nombres:"Camila",apellidos:"Herrera Díaz",cargo:"General Manager"}],
     solucion:"Food", marca:"Mastercard", tecnologia:"Chip contactless", sector:"Privado", categoria:"Esencial",
-    bvMes:74000, cantBeneficiarios:520, cantTarjetas:520, cargasAnio:12, tipoProducto:"Físico", valorFacial:142,
+    bvMes:74000, cantBeneficiarios:520, cargasAnio:12, tipoProducto:"Físico", valorFacial:142, esEmisionNueva:false,
     modalidadPago:"Al contado", diasCredito:0,
     rebate:{activo:true,tipo:"porcentaje",valor:0.8},
     comisionCliente:2.7, facturaMinima:800,
@@ -200,7 +200,7 @@ const proposals = [
     giro:"Financiero", esCliente:false, direccion:"Av. República de Panamá 3591, San Isidro, Lima",
     representantes:[{tipoDoc:"DNI",numDoc:"02147896",nombres:"Hugo",apellidos:"Ferrer Vega",cargo:"Apoderado legal"}],
     solucion:"Gift", marca:"Visa", tecnologia:"No aplica", sector:"Privado", categoria:"No aplica",
-    bvMes:39000, cantBeneficiarios:260, cantTarjetas:260, cargasAnio:2, tipoProducto:"Virtual", valorFacial:150,
+    bvMes:39000, cantBeneficiarios:260, cargasAnio:2, tipoProducto:"Virtual", valorFacial:150, esEmisionNueva:false,
     modalidadPago:"Crédito", diasCredito:20,
     rebate:{activo:false,tipo:"monto",valor:0},
     comisionCliente:3.1, facturaMinima:500,
@@ -215,7 +215,7 @@ const proposals = [
     giro:"Alimentos y bebidas", esCliente:true, direccion:"Calle Amador Merino Reyna 267, San Isidro, Lima",
     representantes:[{tipoDoc:"DNI",numDoc:"01236547",nombres:"Elena",apellidos:"Osorio Vargas",cargo:"General Manager"}],
     solucion:"Food", marca:"Mastercard", tecnologia:"Chip contactless", sector:"Privado", categoria:"Estándar",
-    bvMes:198000, cantBeneficiarios:1340, cantTarjetas:1340, cargasAnio:12, tipoProducto:"Físico", valorFacial:148,
+    bvMes:198000, cantBeneficiarios:1340, cargasAnio:12, tipoProducto:"Físico", valorFacial:148, esEmisionNueva:false,
     modalidadPago:"Crédito", diasCredito:30,
     rebate:{activo:false,tipo:"monto",valor:0},
     comisionCliente:2.2, facturaMinima:1600,
@@ -230,7 +230,7 @@ const proposals = [
     giro:"Retail", esCliente:true, direccion:"Av. Angamos Este 1803, Surquillo, Lima",
     representantes:[{tipoDoc:"DNI",numDoc:"09638527",nombres:"Sergio",apellidos:"Malpartida Ruiz",cargo:"Apoderado legal"}],
     solucion:"Mobility", marca:"Visa", tecnologia:"Banda", sector:"Privado", categoria:"No aplica",
-    bvMes:52000, cantBeneficiarios:340, cantTarjetas:340, cargasAnio:6, tipoProducto:"Físico", valorFacial:153,
+    bvMes:52000, cantBeneficiarios:340, cargasAnio:6, tipoProducto:"Físico", valorFacial:153, esEmisionNueva:false,
     modalidadPago:"Al contado", diasCredito:0,
     rebate:{activo:false,tipo:"monto",valor:0},
     comisionCliente:2.9, facturaMinima:650,
@@ -328,7 +328,12 @@ function renderInicioKpis(){
   const tasaConversion = rucsTotales.size ? (rucsAprobados.size/rucsTotales.size*100) : 0;
   document.getElementById('inicioKpiClientesSub').textContent = tasaConversion.toFixed(1) + '% tasa de conversión';
 
-  document.getElementById('inicioKpiTarjetas').textContent = intFmt(aprobadasActual.reduce((s,p)=>s+p.cantTarjetas, 0));
+  /* "Cantidad de tarjetas" se reemplazó por el checkbox esEmisionNueva
+     (booleano) — la tarjeta de KPI ahora cuenta propuestas aprobadas
+     con emisión de tarjetas nuevas en vez de sumar un total numérico
+     que ya no existe. */
+  const conEmisionNueva = aprobadasActual.filter(p=>p.esEmisionNueva).length;
+  document.getElementById('inicioKpiTarjetas').textContent = intFmt(conEmisionNueva);
   document.getElementById('inicioKpiTarjetasSub').textContent = aprobadasActual.length + (aprobadasActual.length===1 ? ' propuesta aprobada' : ' propuestas aprobadas');
 }
 
@@ -477,7 +482,6 @@ function applyProposalsFilters(){
         p.producto.toLowerCase().includes(cliente) ||
         p.tipoProducto.toLowerCase().includes(cliente) ||
         String(bvTotalFor(p)).includes(cliente) ||
-        String(p.cantTarjetas).includes(cliente) ||
         p.modalidadPago.toLowerCase().includes(cliente) ||
         ("v"+p.version).includes(cliente) ||
         p.estado.toLowerCase().includes(cliente);
@@ -539,7 +543,6 @@ function renderProposalsTable(){
         <td class="cell-hide-mobile">${esc(p.producto)}</td>
         <td class="cell-hide-mobile">${esc(p.tipoProducto)}</td>
         <td class="num cell-bv">${money(bvTotalFor(p))}</td>
-        <td class="num cell-hide-mobile">${intFmt(p.cantTarjetas)}</td>
         <td class="cell-hide-mobile">${esc(p.modalidadPago)}</td>
         <td class="center cell-hide-mobile"><span class="version-chip">v${p.version}</span></td>
         <td class="cell-estado"><span class="badge ${badgeClass(p.estado)}">${esc(p.estado)}</span></td>
@@ -826,7 +829,7 @@ function fillForm(p){
   setLockedValue("f_producto", p.producto);
   setLockedValue("f_sector", p.sector);
   document.getElementById("f_cantBeneficiarios").value = p.cantBeneficiarios;
-  document.getElementById("f_cantTarjetas").value = p.cantTarjetas;
+  document.getElementById("f_esEmisionNueva").checked = !!p.esEmisionNueva;
   document.getElementById("f_cargasAnio").value = p.cargasAnio;
   document.getElementById("f_valorFacial").value = p.valorFacial;
   document.getElementById("f_bvCarga").value = calcBvCarga(p.valorFacial, p.cantBeneficiarios).toFixed(2);
@@ -901,7 +904,7 @@ function blankTemplate(){
     ruc:"", razonSocial:"Cliente por definir", giro:GIRO_OPTIONS[0], esCliente:false,
     direccion:"", representantes:[],
     solucion:"Food", marca:"Mastercard", tecnologia:"", sector:"Privado", categoria:"Esencial",
-    bvMes:0, cantBeneficiarios:0, cantTarjetas:0, cargasAnio:0, tipoProducto:"Físico", valorFacial:0,
+    bvMes:0, cantBeneficiarios:0, cargasAnio:0, tipoProducto:"Físico", valorFacial:0, esEmisionNueva:false,
     modalidadPago:"Crédito", diasCredito:0,
     rebate:{activo:false,tipo:"monto",valor:0},
     comisionCliente:0, facturaMinima:0,
@@ -931,7 +934,7 @@ function collectFormData(){
     tipoProducto: getLockedValue("f_tipoProducto"),
     producto: getLockedValue("f_producto"),
     cantBeneficiarios: +document.getElementById("f_cantBeneficiarios").value || 0,
-    cantTarjetas: +document.getElementById("f_cantTarjetas").value || 0,
+    esEmisionNueva: document.getElementById("f_esEmisionNueva").checked,
     cargasAnio: +document.getElementById("f_cargasAnio").value || 0,
     valorFacial: +document.getElementById("f_valorFacial").value || 0,
     /* bvMes es internamente "BV por carga" (usado solo por computeRentabilidad).
@@ -1539,9 +1542,6 @@ function validateOportunidadForm(){
   const cantBeneficiarios = document.getElementById("op_cantBeneficiarios").value;
   if(cantBeneficiarios === "" || +cantBeneficiarios <= 0 || !Number.isInteger(+cantBeneficiarios)){ errors.push("Ingresa una cantidad de beneficiarios válida."); markError("op_cantBeneficiarios"); }
 
-  const cantTarjetas = document.getElementById("op_cantTarjetas").value;
-  if(cantTarjetas === "" || +cantTarjetas <= 0 || !Number.isInteger(+cantTarjetas)){ errors.push("Ingresa una cantidad de tarjetas válida."); markError("op_cantTarjetas"); }
-
   const cargasAnio = document.getElementById("op_cargasAnio").value;
   if(cargasAnio === "" || +cargasAnio <= 0 || !Number.isInteger(+cargasAnio)){ errors.push("Ingresa una cantidad de cargas total válida."); markError("op_cargasAnio"); }
 
@@ -1580,7 +1580,7 @@ function saveOportunidad(){
     tipoProducto: document.getElementById("op_tipoProducto").value,
     producto: document.getElementById("op_producto").value,
     cantBeneficiarios: +document.getElementById("op_cantBeneficiarios").value || 0,
-    cantTarjetas: +document.getElementById("op_cantTarjetas").value || 0,
+    esEmisionNueva: document.getElementById("op_esEmisionNueva").checked,
     cargasAnio: +document.getElementById("op_cargasAnio").value || 0,
     valorFacial: +document.getElementById("op_valorFacial").value || 0,
     bvMes: calcBvCarga(+document.getElementById("op_valorFacial").value || 0, +document.getElementById("op_cantBeneficiarios").value || 0),
@@ -2098,7 +2098,6 @@ function applyCotFilters(){
         q.propuestaCodigo.toLowerCase().includes(cliente) ||
         p.solucion.toLowerCase().includes(cliente) ||
         String(bvTotalFor(p)).includes(cliente) ||
-        String(p.cantTarjetas).includes(cliente) ||
         q.estado.toLowerCase().includes(cliente) ||
         q.email.estado.toLowerCase().includes(cliente);
       if(!hay) return false;
@@ -2187,7 +2186,6 @@ function renderCotTable(){
         <td class="cell-hide-mobile">${esc(q.propuestaCodigo)}</td>
         <td class="cell-hide-mobile"><span class="tag-neutral">${esc(p.solucion)}</span></td>
         <td class="num cell-bv">${money(bvTotalFor(p))}</td>
-        <td class="num cell-hide-mobile">${intFmt(p.cantTarjetas)}</td>
         <td class="cell-estado"><span class="badge ${cotBadgeClass(q.estado)}">${esc(q.estado)}</span></td>
         <td class="cell-hide-mobile">${esc(q.email.estado)}</td>
         <td class="cell-hide-mobile">${fmtDate(lastCotActivity(q))}</td>
@@ -2416,7 +2414,7 @@ function renderCotFooterButtons(q){
   document.getElementById("btnCloseCotDrawerFooter").addEventListener("click", closeCotDrawer);
   document.getElementById("btnCotHistory").addEventListener("click", ()=>openCotHistoryModal(q));
   const sendBtn = document.getElementById("btnCotSend");
-  if(sendBtn) sendBtn.addEventListener("click", ()=>sendCotEmail(q, {isResend:false}));
+  if(sendBtn) sendBtn.addEventListener("click", ()=>openCotComposeModal(q));
   const rejectBtn = document.getElementById("btnCotReject");
   if(rejectBtn) rejectBtn.addEventListener("click", ()=>openCotRejectModal(q));
   const approveBtn = document.getElementById("btnCotApprove");
@@ -2454,7 +2452,7 @@ function openCotDrawer(id){
   setLockedValue("cq_diasCredito", p.modalidadPago==="Crédito" ? intFmt(p.diasCredito)+" días" : "No aplica");
   setLockedValue("cq_valorFacial", moneyDec(p.valorFacial));
   setLockedValue("cq_cantBeneficiarios", intFmt(p.cantBeneficiarios));
-  setLockedValue("cq_cantTarjetas", intFmt(p.cantTarjetas));
+  setLockedValue("cq_esEmisionNueva", p.esEmisionNueva ? "Sí" : "No");
   setLockedValue("cq_bvCarga", money(calcBvCarga(p.valorFacial, p.cantBeneficiarios)));
   setLockedValue("cq_cargasAnio", intFmt(p.cargasAnio));
   setLockedValue("cq_bvTotal", money(bvTotalFor(p)));
@@ -2584,9 +2582,16 @@ function sendCotEmail(q, opts){
   });
 }
 
+/* Vista previa de un email ya enviado (o en curso) — Para/CC quedan
+   deshabilitados (solo lectura), footer "Cerrar" únicamente. */
 function openCotEmailPreview(q){
   document.getElementById("cotEmailModalCodigo").textContent = q.codigo;
-  document.getElementById("cotEmailTo").textContent = q.email.destinatario;
+  const toInput = document.getElementById("cotEmailToInput");
+  const ccInput = document.getElementById("cotEmailCcInput");
+  toInput.value = q.email.destinatario;
+  toInput.disabled = true;
+  ccInput.value = (q.email.cc||[]).join(", ");
+  ccInput.disabled = true;
   document.getElementById("cotEmailSubject").textContent = q.email.asunto;
   document.getElementById("cotEmailAttachmentName").textContent = `Cotizacion_${q.codigo}.pdf`;
 
@@ -2607,9 +2612,69 @@ function openCotEmailPreview(q){
     renderCotTable();
   }
 
+  document.getElementById("cotEmailFooterSent").style.display = "";
+  document.getElementById("cotEmailFooterCompose").style.display = "none";
   document.getElementById("cotEmailModal").classList.add("open");
   cotOverlay.classList.add("visible");
   trapFocus(document.getElementById("cotEmailModal"));
+}
+
+/* Paso previo al primer envío — Para/CC editables (Para precargado con
+   el destinatario semilla, CC vacío/opcional), con "Cancelar"/"Enviar"
+   en vez de "Cerrar". Reutiliza el mismo modal que la vista previa de
+   solo lectura en vez de crear uno paralelo. */
+function openCotComposeModal(q){
+  document.getElementById("cotEmailModalCodigo").textContent = q.codigo;
+  const toInput = document.getElementById("cotEmailToInput");
+  const ccInput = document.getElementById("cotEmailCcInput");
+  toInput.value = q.email.destinatario || "";
+  toInput.disabled = false;
+  ccInput.value = (q.email.cc||[]).join(", ");
+  ccInput.disabled = false;
+  document.getElementById("cotEmailSubject").textContent = q.email.asunto;
+  document.getElementById("cotEmailAttachmentName").textContent = `Cotizacion_${q.codigo}.pdf`;
+
+  document.getElementById("cotEmailLinkApprove").disabled = true;
+  document.getElementById("cotEmailLinkReject").disabled = true;
+  document.getElementById("cotEmailLinksHint").textContent = "Los enlaces se activan una vez que el email se haya enviado correctamente.";
+
+  document.getElementById("cotEmailFooterSent").style.display = "none";
+  document.getElementById("cotEmailFooterCompose").style.display = "";
+  document.getElementById("cotEmailModal").classList.add("open");
+  cotOverlay.classList.add("visible");
+  trapFocus(document.getElementById("cotEmailModal"));
+}
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/* Valida Para (obligatorio) + CC (opcional, múltiple separado por
+   coma), guarda ambos en q.email y recién ahí dispara el envío
+   simulado real — antes de esto no se ha "enviado" nada. */
+function confirmCotSendFromCompose(){
+  const q = findQuotation(cotDrawerTargetId);
+  if(!q) return;
+
+  const destinatario = document.getElementById("cotEmailToInput").value.trim();
+  if(!destinatario || !EMAIL_RE.test(destinatario)){
+    showToast("Ingresa un email válido en Para.", "danger");
+    return;
+  }
+
+  const ccRaw = document.getElementById("cotEmailCcInput").value.trim();
+  let cc = [];
+  if(ccRaw){
+    const parts = ccRaw.split(",").map(s=>s.trim()).filter(Boolean);
+    cc = parts.filter(e=>EMAIL_RE.test(e));
+    if(cc.length !== parts.length){
+      showToast("Algunos correos en CC no son válidos.", "danger");
+      return;
+    }
+  }
+
+  q.email.destinatario = destinatario;
+  q.email.cc = cc;
+  closeModalById("cotEmailModal");
+  sendCotEmail(q, {isResend:false});
 }
 
 /* ---------- Modales de acción (Rechazar / Perdida / Aprobar) ---------- */
@@ -2708,6 +2773,39 @@ function confirmCotApprove(){
   refreshCotDrawerIfOpen(q);
   renderCotTable();
   showToast(`Cotización ${q.codigo} marcada como Aprobada.`, "success");
+  openCotCongratsModal(q);
+}
+
+/* ---------- "Felicidades" — paso final tras aprobar (con sustento ya
+   cargado), ofrece completar la Ficha de Incorporación ---------- */
+let cotCongratsTargetId = null;
+function openCotCongratsModal(q){
+  cotCongratsTargetId = q.id;
+  const p = findProposalByCodigo(q.propuestaCodigo);
+  document.getElementById("cotCongratsCliente").textContent = p ? p.razonSocial : "el cliente";
+  document.getElementById("cotCongratsModal").classList.add("open");
+  cotOverlay.classList.add("visible");
+  trapFocus(document.getElementById("cotCongratsModal"));
+}
+function handleFichaAhora(){
+  closeModalById("cotCongratsModal");
+  window.open("assets/ficha_cliente_edenred_v16.html", "_blank");
+}
+function handleFichaLuego(){
+  const q = findQuotation(cotCongratsTargetId);
+  if(!q) return;
+  q.historial.push({fecha:"2026-07-25", usuario:"Cliente", accion:"Recordatorio de ficha enviado", detalle:"El cliente eligió completar la Ficha de Incorporación más tarde; se envió un recordatorio por email."});
+  refreshCotDrawerIfOpen(q);
+  closeModalById("cotCongratsModal");
+
+  document.getElementById("cotReminderCodigo").textContent = q.codigo;
+  document.getElementById("cotReminderTo").textContent = q.email.destinatario;
+  document.getElementById("cotReminderSubject").textContent = `Ficha de incorporación cliente · ${q.codigo}`;
+  document.getElementById("cotReminderEmailModal").classList.add("open");
+  cotOverlay.classList.add("visible");
+  trapFocus(document.getElementById("cotReminderEmailModal"));
+
+  showToast("Recordatorio de Ficha de Incorporación enviado.", "success");
 }
 
 /* ---------- Init ---------- */
@@ -2826,6 +2924,9 @@ function initCotizacionesModule(){
   });
 
   // Modales de acción
+  document.getElementById("btnConfirmCotSendCompose").addEventListener("click", confirmCotSendFromCompose);
+  document.getElementById("btnFichaAhora").addEventListener("click", handleFichaAhora);
+  document.getElementById("btnFichaLuego").addEventListener("click", handleFichaLuego);
   document.getElementById("btnConfirmCotReject").addEventListener("click", confirmCotReject);
   document.getElementById("btnConfirmCotLost").addEventListener("click", confirmCotLost);
   document.getElementById("btnConfirmCotApprove").addEventListener("click", confirmCotApprove);

@@ -209,7 +209,7 @@
             <svg viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2.5" stroke="currentColor" stroke-width="2.2"/><path d="M2 10h20" stroke="currentColor" stroke-width="2.2"/></svg>
           </div>
           <div class="kpi-body">
-            <p class="kpi-label">Tarjetas comprometidas</p>
+            <p class="kpi-label">Con emisión de tarjetas nuevas</p>
             <p class="kpi-value" id="inicioKpiTarjetas">—</p>
             <p class="kpi-sub" id="inicioKpiTarjetasSub">—</p>
           </div>
@@ -393,7 +393,6 @@
               <th>Producto</th>
               <th>Tipo</th>
               <th class="num">Business Volume</th>
-              <th class="num">Tarjetas</th>
               <th>Modalidad</th>
               <th class="center">Versión</th>
               <th>Estado</th>
@@ -548,7 +547,6 @@
               <th>Propuesta origen</th>
               <th>Solución</th>
               <th class="num">Business Volume</th>
-              <th class="num">Tarjetas</th>
               <th>Estado</th>
               <th>Email</th>
               <th>Última actividad</th>
@@ -1547,11 +1545,6 @@
             <input type="number" id="f_cantBeneficiarios" min="0" placeholder="0">
           </div>
           <div class="field-group">
-            <label for="f_cantTarjetas">Cantidad de tarjetas</label>
-            <input type="number" id="f_cantTarjetas" min="0" placeholder="0">
-            <span class="field-hint">Tarjetas físicas/virtuales emitidas — independiente de Cantidad de beneficiarios, no afecta el BV</span>
-          </div>
-          <div class="field-group">
             <label for="f_bvCarga">BV por carga</label>
             <div class="input-currency"><input type="number" id="f_bvCarga" min="0" placeholder="0.00" disabled></div>
             <span class="field-hint">Calculado: Valor facial × Cantidad de beneficiarios</span>
@@ -1568,6 +1561,14 @@
         </div>
 
         <div class="toggle-row" style="margin-top:14px;">
+          <div class="toggle-row-text">
+            <strong>¿Emisión de nuevas tarjetas?</strong>
+            <span>Indica si esta propuesta implica emitir tarjetas físicas/virtuales nuevas</span>
+          </div>
+          <label class="switch"><input type="checkbox" id="f_esEmisionNueva"><span class="track"></span><span class="thumb"></span></label>
+        </div>
+
+        <div class="toggle-row" style="margin-top:10px;">
           <div class="toggle-row-text">
             <strong>Rebate</strong>
             <span>Se habilita únicamente si aplica una regla de negocio vigente</span>
@@ -2000,11 +2001,6 @@
               <input type="number" id="op_cantBeneficiarios" min="0" step="1" placeholder="0">
             </div>
             <div class="field-group">
-              <label for="op_cantTarjetas">Cantidad de tarjetas <span class="req">*</span></label>
-              <input type="number" id="op_cantTarjetas" min="0" step="1" placeholder="0">
-              <span class="field-hint">Tarjetas físicas/virtuales emitidas — independiente de Cantidad de beneficiarios</span>
-            </div>
-            <div class="field-group">
               <label for="op_bvCarga">BV por carga</label>
               <div class="input-currency"><input type="number" id="op_bvCarga" min="0" step="0.01" placeholder="0.00" disabled></div>
               <span class="field-hint">Calculado: Valor facial × Cantidad de beneficiarios</span>
@@ -2018,6 +2014,13 @@
               <div class="input-currency"><input type="number" id="op_bvTotal" min="0" step="0.01" placeholder="0.00" disabled></div>
               <span class="field-hint">Calculado: BV por carga × Cantidad de cargas total</span>
             </div>
+          </div>
+          <div class="toggle-row" style="margin-top:14px;">
+            <div class="toggle-row-text">
+              <strong>¿Emisión de nuevas tarjetas?</strong>
+              <span>Indica si esta oportunidad implica emitir tarjetas físicas/virtuales nuevas</span>
+            </div>
+            <label class="switch"><input type="checkbox" id="op_esEmisionNueva"><span class="track"></span><span class="thumb"></span></label>
           </div>
         </section>
       </form>
@@ -2154,7 +2157,7 @@
           <div class="field-group"><label>Días de crédito</label><div class="locked-value" id="cq_diasCredito"><span class="lv-text"></span></div></div>
           <div class="field-group"><label>Valor facial</label><div class="locked-value" id="cq_valorFacial"><span class="lv-text"></span></div></div>
           <div class="field-group"><label>Cantidad de beneficiarios</label><div class="locked-value" id="cq_cantBeneficiarios"><span class="lv-text"></span></div></div>
-          <div class="field-group"><label>Cantidad de tarjetas</label><div class="locked-value" id="cq_cantTarjetas"><span class="lv-text"></span></div></div>
+          <div class="field-group"><label>¿Emisión de nuevas tarjetas?</label><div class="locked-value" id="cq_esEmisionNueva"><span class="lv-text"></span></div></div>
           <div class="field-group"><label>BV por carga</label><div class="locked-value" id="cq_bvCarga"><span class="lv-text"></span></div></div>
           <div class="field-group"><label>Cantidad de cargas total</label><div class="locked-value" id="cq_cargasAnio"><span class="lv-text"></span></div></div>
           <div class="field-group"><label>BV total</label><div class="locked-value" id="cq_bvTotal"><span class="lv-text"></span></div></div>
@@ -2423,7 +2426,8 @@
       </div>
       <div class="cot-email-preview">
         <div class="cot-email-meta">
-          <p><span>Para</span><b id="cotEmailTo">—</b></p>
+          <p><span>Para</span><input type="email" id="cotEmailToInput" class="cot-email-input" placeholder="correo@empresa.com"></p>
+          <p><span>CC</span><input type="text" id="cotEmailCcInput" class="cot-email-input" placeholder="Opcional — separa varios con comas"></p>
           <p><span>Asunto</span><b id="cotEmailSubject">—</b></p>
         </div>
         <div class="cot-email-body">
@@ -2442,8 +2446,77 @@
         </div>
       </div>
     </div>
-    <div class="modal-footer">
+    <div class="modal-footer" id="cotEmailFooterSent">
       <button class="btn btn-secondary" data-close-modal="cotEmailModal" type="button">Cerrar</button>
+    </div>
+    <div class="modal-footer" id="cotEmailFooterCompose" style="display:none;">
+      <button class="btn-text" data-close-modal="cotEmailModal" type="button">Cancelar</button>
+      <button class="btn btn-primary" id="btnConfirmCotSendCompose" type="button">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M4 4l16 8-16 8V4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        Enviar cotización al cliente
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- "Felicidades" — aparece como paso final tras confirmCotApprove(),
+     una vez que el documento de sustento ya fue cargado (no reemplaza
+     esa exigencia, se muestra después). -->
+<div class="modal" id="cotCongratsModal" role="dialog" aria-modal="true" aria-labelledby="cotCongratsTitle">
+  <div class="modal-card w-sm">
+    <div class="modal-header">
+      <div>
+        <h3 id="cotCongratsTitle">¡Felicidades! 🎉</h3>
+      </div>
+      <button class="close-x" data-close-modal="cotCongratsModal" type="button">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--black);margin:0 0 10px;">La cotización de <b id="cotCongratsCliente">—</b> ha sido aprobada con éxito.</p>
+      <p style="font-size:13px;color:var(--black);margin:0 0 10px;">Ahora necesitamos que completes tu Ficha de Incorporación para finalizar el onboarding.</p>
+      <p class="hint" style="margin:0;">⏱️ Es importante hacerlo pronto para agilizar la firma de tu contrato.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="btnFichaLuego" type="button">Completarla luego</button>
+      <button class="btn btn-primary" id="btnFichaAhora" type="button">Completarla ahora</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmación de recordatorio simulado — mismo lenguaje visual que
+     la vista previa de correo (.cot-email-preview), para no introducir
+     un componente nuevo (ej. <pre> de texto plano). -->
+<div class="modal" id="cotReminderEmailModal" role="dialog" aria-modal="true" aria-labelledby="cotReminderTitle">
+  <div class="modal-card w-sm">
+    <div class="modal-header">
+      <div>
+        <h3 id="cotReminderTitle">Recordatorio enviado</h3>
+        <p>Código <b id="cotReminderCodigo">—</b></p>
+      </div>
+      <button class="close-x" data-close-modal="cotReminderEmailModal" type="button">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="cot-demo-banner">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M12 9v4M12 17h.01" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
+        Entorno de demostración. Ninguna comunicación real se envía.
+      </div>
+      <div class="cot-email-preview">
+        <div class="cot-email-meta">
+          <p><span>Para</span><b id="cotReminderTo">—</b></p>
+          <p><span>Asunto</span><b id="cotReminderSubject">—</b></p>
+        </div>
+        <div class="cot-email-body">
+          <p>Estimado cliente,</p>
+          <p>Su cotización ha sido aprobada exitosamente. Para continuar con el onboarding, por favor complete su Ficha de Incorporación.</p>
+          <p style="margin-top:14px;">Este enlace tiene validez de 15 días.</p>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" data-close-modal="cotReminderEmailModal" type="button">Aceptar</button>
     </div>
   </div>
 </div>
