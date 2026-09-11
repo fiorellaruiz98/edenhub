@@ -497,6 +497,9 @@ main{
 .kpi-card.kpi-total .kpi-ribbon{background:var(--light-pink);color:var(--red-hero-dark);}
 .kpi-card.kpi-open .kpi-ribbon{background:var(--cold-white);color:#2554A6;}
 .kpi-card.kpi-closed .kpi-ribbon{background:var(--status-aprobada-bg);color:var(--status-aprobada-fg);}
+.kpi-card.kpi-user-active .kpi-ribbon{background:#E8F5E9;color:#4CAF50;}
+.kpi-card.kpi-user-invited .kpi-ribbon{background:#F1F1F1;color:#9E9E9E;}
+.kpi-card.kpi-user-inactive .kpi-ribbon{background:#FDEAEA;color:#F72717;}
 .kpi-body{min-width:0;}
 .kpi-label{
   font-size:11.5px;
@@ -1359,9 +1362,9 @@ table.cond-table{width:100%;border-collapse:collapse;}
   transition:all .25s ease;
   position:relative;
 }
-.semaforo-dot.rojo.active{background:#E5342B;opacity:1;box-shadow:0 0 0 6px rgba(229,52,43,.15);}
-.semaforo-dot.ambar.active{background:#F5A623;opacity:1;box-shadow:0 0 0 6px rgba(245,166,35,.15);}
-.semaforo-dot.verde.active{background:#1F8A4C;opacity:1;box-shadow:0 0 0 6px rgba(31,138,76,.15);}
+.semaforo-dot.rojo.active{background:#F72717;opacity:1;box-shadow:0 0 0 6px rgba(247,39,23,.15);}
+.semaforo-dot.ambar.active{background:#FFC107;opacity:1;box-shadow:0 0 0 6px rgba(255,193,7,.15);}
+.semaforo-dot.verde.active{background:#4CAF50;opacity:1;box-shadow:0 0 0 6px rgba(76,175,80,.15);}
 
 /* El resultado no depende solo del color: cada estado tiene un ícono
    distinto (check / alerta / equis) para que sea legible también para
@@ -1377,9 +1380,9 @@ table.cond-table{width:100%;border-collapse:collapse;}
   margin:0 auto 14px;
 }
 .sr-icon svg{width:26px;height:26px;}
-.semaforo-result.rojo .sr-icon{background:var(--status-rechazada-bg);color:var(--status-rechazada-fg);}
-.semaforo-result.ambar .sr-icon{background:#FDF0DA;color:#966017;}
-.semaforo-result.verde .sr-icon{background:var(--status-aprobada-bg);color:var(--status-aprobada-fg);}
+.semaforo-result.rojo .sr-icon{background:#FDEAEA;color:#F72717;}
+.semaforo-result.ambar .sr-icon{background:#FFF6DE;color:#B3840A;}
+.semaforo-result.verde .sr-icon{background:#E8F5E9;color:#4CAF50;}
 .semaforo-result .sr-label{
   display:block;
   font-family:var(--font-title);
@@ -3069,6 +3072,10 @@ table.approval-table{width:100%;border-collapse:collapse;}
    "Enviada" no tiene equivalente y necesita una clase nueva. */
 .badge-enviada{background:#FFF3D6;color:#8A5A00;}
 .badge-enviada::before{background:#8A5A00;}
+
+/* Excepción de rentabilidad pendiente de aprobación de créditos */
+.badge-revision{background:#FFF6DE;color:#B3840A;}
+.badge-revision::before{background:#B3840A;}
 
 /* Chip de propuesta de origen, en el header del drawer */
 .cot-origin-chip{

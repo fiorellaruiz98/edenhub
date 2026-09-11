@@ -546,6 +546,7 @@
               <th>Razón social</th>
               <th>Propuesta origen</th>
               <th>Solución</th>
+              <th>Producto</th>
               <th class="num">Business Volume</th>
               <th>Estado</th>
               <th>Email</th>
@@ -595,7 +596,7 @@
          ============================================================ -->
     <div class="app-view" id="view-usuarios">
     <section class="kpi-row" aria-label="Indicadores clave de usuarios">
-      <div class="kpi-card kpi-total" id="kpiUserCardActive" role="button" tabindex="0" aria-label="Filtrar por usuarios activos">
+      <div class="kpi-card kpi-user-active" id="kpiUserCardActive" role="button" tabindex="0" aria-label="Filtrar por usuarios activos">
         <div class="kpi-ribbon">
           <svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
@@ -605,7 +606,7 @@
           <p class="kpi-sub">Con acceso habilitado</p>
         </div>
       </div>
-      <div class="kpi-card kpi-open" id="kpiUserCardInvited" role="button" tabindex="0" aria-label="Filtrar por usuarios invitados">
+      <div class="kpi-card kpi-user-invited" id="kpiUserCardInvited" role="button" tabindex="0" aria-label="Filtrar por usuarios invitados">
         <div class="kpi-ribbon">
           <svg viewBox="0 0 24 24" fill="none"><path d="M4 4l16 8-16 8V4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
         </div>
@@ -615,7 +616,7 @@
           <p class="kpi-sub">Aún no inician sesión</p>
         </div>
       </div>
-      <div class="kpi-card kpi-closed" id="kpiUserCardInactive" role="button" tabindex="0" aria-label="Filtrar por usuarios inactivos">
+      <div class="kpi-card kpi-user-inactive" id="kpiUserCardInactive" role="button" tabindex="0" aria-label="Filtrar por usuarios inactivos">
         <div class="kpi-ribbon">
           <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 9v4M12 17h.01" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
         </div>
@@ -1724,6 +1725,10 @@
     <svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M12 9v4M12 16.5h.01" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
     <span class="vb-text"></span>
   </div>
+  <div class="version-banner" id="excepcionBanner" style="display:none;" role="status">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
+    <span class="vb-text">Esta propuesta está en revisión de créditos por una excepción de rentabilidad pendiente. No se puede editar hasta que se resuelva.</span>
+  </div>
   <div class="drawer-footer">
     <div class="drawer-footer-left">
       <button class="btn btn-secondary" id="btnValidarRentabDrawer" type="button">
@@ -1829,10 +1834,42 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" data-close-modal="rentabModal" type="button">Cerrar</button>
+      <button class="btn btn-outline-danger" id="btnGenerarExcepcion" type="button" style="display:none;">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
+        Generar excepción
+      </button>
       <button class="btn btn-primary" id="btnGenerarCotizacion" type="button" style="display:none;">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M9 12h6M9 16h6M9 8h2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7 3h8l4 4v14H7z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
         Generar Cotización
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL — Generar excepción de rentabilidad
+     ============================================================ -->
+<div class="modal" id="excepcionModal" role="dialog" aria-modal="true" aria-labelledby="excepcionModalTitle">
+  <div class="modal-card w-sm">
+    <div class="modal-header">
+      <div>
+        <h3 id="excepcionModalTitle">Generar excepción</h3>
+        <p>Código <b id="excepcionCodigo">—</b></p>
+      </div>
+      <button class="close-x" data-close-modal="excepcionModal" type="button">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p style="margin:0 0 16px;font-size:13px;color:var(--grey);">¿Confirmar generación de excepción? La propuesta quedará en revisión de créditos y no podrá editarse hasta que se resuelva.</p>
+      <div class="field-group">
+        <label for="excepcionObservaciones">Observaciones (opcional)</label>
+        <textarea id="excepcionObservaciones" rows="3" placeholder="Detalle el motivo de la excepción…"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-close-modal="excepcionModal" type="button">Cancelar</button>
+      <button class="btn btn-primary" id="btnConfirmExcepcion" type="button">Confirmar generación de excepción</button>
     </div>
   </div>
 </div>
@@ -1901,8 +1938,8 @@
               <div class="static-value is-empty" id="op_razonSocial">Se completa al ingresar el RUC</div>
             </div>
             <div class="field-group">
-              <label>Giro de negocio</label>
-              <div class="static-value is-empty" id="op_giro">—</div>
+              <label for="op_giro">Giro de negocio</label>
+              <select id="op_giro"></select>
             </div>
             <div class="field-group">
               <label>¿Es cliente?</label>
@@ -2669,10 +2706,7 @@
     </form>
   </div>
   <div class="drawer-footer">
-    <div class="drawer-footer-left">
-      <button class="btn btn-outline-danger" id="btnDeleteUser" type="button">Eliminar usuario</button>
-    </div>
-    <div class="drawer-footer-right">
+    <div class="drawer-footer-right" style="margin-left:auto;">
       <button class="btn btn-secondary" id="btnUserHistory" type="button">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
         Ver historial

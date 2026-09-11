@@ -534,6 +534,10 @@ function renderProposalsTable(){
     tbody.innerHTML = pageItems.map(p=>{
       const canReject = p.estado!=="Rechazada" && p.estado!=="Aprobada";
       const isRejected = p.estado==="Rechazada" && !proposalHasApprovedCotizacion(p);
+      const enRevision = p.excepcion && p.excepcion.estado==="pendiente";
+      const estadoCell = enRevision
+        ? `<span class="badge badge-revision" title="Excepción de rentabilidad pendiente de aprobación de créditos">En revisión de créditos</span>`
+        : `<span class="badge ${badgeClass(p.estado)}">${esc(p.estado)}</span>`;
       return `
       <tr data-id="${p.id}">
         <td class="cell-codigo">${esc(p.codigo)}</td>
@@ -545,7 +549,7 @@ function renderProposalsTable(){
         <td class="num cell-bv">${money(bvTotalFor(p))}</td>
         <td class="cell-hide-mobile">${esc(p.modalidadPago)}</td>
         <td class="center cell-hide-mobile"><span class="version-chip">v${p.version}</span></td>
-        <td class="cell-estado"><span class="badge ${badgeClass(p.estado)}">${esc(p.estado)}</span></td>
+        <td class="cell-estado">${estadoCell}</td>
         <td class="center cell-acciones">
           <div class="row-actions">
             ${isRejected
@@ -610,6 +614,9 @@ function condRowsFromProposal(p){
     const v = (p.expenses && p.expenses[e.key]) || {monto:0, exonerado:false};
     rows.push({key:e.key, concepto:e.label, tipo:"moneda", valor:v.monto, exonerado:v.exonerado, custom:false});
   });
+  if(p.logoEmpresa){
+    rows.push({key:"logoEmpresa", concepto:"Servicio logo empresa", tipo:"servicio", valor:0, exonerado:false, custom:false});
+  }
   (p.condicionesExtra||[]).forEach(c=>{
     const isKnownPreset = COND_CUSTOM_PRESETS.includes(c.concepto) && c.concepto!=="Otro personalizado";
     rows.push({
@@ -633,6 +640,7 @@ function mapCondiciones(){
   workingCondiciones.forEach(c=>{
     if(c.key==="comisionCliente"){ comisionCliente = c.exonerado?0:(+c.valor||0); return; }
     if(c.key==="facturaMinima"){ facturaMinima = c.exonerado?0:(+c.valor||0); return; }
+    if(c.key==="logoEmpresa"){ return; }
     if(c.key){ expenses[c.key] = {monto:+c.valor||0, exonerado:!!c.exonerado}; return; }
     const concepto = (c.customText && c.customText.trim()) ? c.customText.trim() : (c.presetValue || "Condición personalizada");
     extra.push({concepto, tipo:c.tipo, valor:+c.valor||0, exonerado:!!c.exonerado});
@@ -656,31 +664,34 @@ function renderCondicionesTable(){
            <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.8"/></svg>
            ${esc(c.concepto)}
          </span>`;
-    const tipoCell = c.custom
+    const isServicio = c.tipo==="servicio";
+    const tipoCell = isServicio
+      ? `<span class="tag-neutral">Servicio</span>`
+      : c.custom
       ? `<select class="cond-tipo" data-idx="${i}">
            <option value="moneda" ${c.tipo==="moneda"?"selected":""}>Moneda</option>
            <option value="porcentual" ${c.tipo==="porcentual"?"selected":""}>Porcentual</option>
          </select>`
       : `<span class="tag-neutral">${c.tipo==="moneda"?"Moneda":"Porcentual"}</span>`;
+    const valorCell = isServicio ? `<span class="tag-neutral">Incluido</span>` : `
+        <div class="${c.tipo==="moneda"?"input-currency":"input-percent"}">
+          <input type="number" class="cond-valor" data-idx="${i}" min="0" step="0.01" value="${c.valor}" ${c.exonerado?"disabled":""}>
+        </div>`;
     return `
     <tr data-idx="${i}" class="${c.exonerado ? "cond-row-exempt" : ""}">
       <td>${conceptoCell}</td>
       <td>${tipoCell}</td>
-      <td>
-        <div class="${c.tipo==="moneda"?"input-currency":"input-percent"}">
-          <input type="number" class="cond-valor" data-idx="${i}" min="0" step="0.01" value="${c.valor}" ${c.exonerado?"disabled":""}>
-        </div>
-      </td>
+      <td>${valorCell}</td>
       <td class="center">
-        <div class="exempt-cell">
+        ${isServicio ? `` : `<div class="exempt-cell">
           <label class="switch sm tone-pink"><input type="checkbox" class="cond-exonerar" data-idx="${i}" ${c.exonerado?"checked":""}><span class="track"></span><span class="thumb"></span></label>
           ${c.exonerado ? `<span class="exempt-badge">Exonerado</span>` : ``}
-        </div>
+        </div>`}
       </td>
       <td class="center">
-        <button type="button" class="mini-row-remove cond-remove" data-idx="${i}" title="Eliminar condición">
+        ${c.custom ? `<button type="button" class="mini-row-remove cond-remove" data-idx="${i}" title="Eliminar condición">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-        </button>
+        </button>` : ``}
       </td>
     </tr>`;
   }).join("");
@@ -969,19 +980,23 @@ function openDrawer(mode, id){
   drawerTargetId = id || null;
 
   let source;
+  const drawerCodigoEl = document.getElementById("drawerCodigo");
   if(mode==="new"){
     source = blankTemplate();
     document.getElementById("drawerEyebrow").textContent = "Nueva propuesta";
-    document.getElementById("drawerCodigo").textContent = "Se genera al guardar";
+    drawerCodigoEl.textContent = "Se genera al guardar";
+    drawerCodigoEl.dataset.codigo = "";
   } else if(mode==="edit"){
     source = findProposal(id);
     document.getElementById("drawerEyebrow").textContent = "Editar propuesta · v" + source.version;
-    document.getElementById("drawerCodigo").textContent = source.codigo;
+    drawerCodigoEl.textContent = source.codigo;
+    drawerCodigoEl.dataset.codigo = source.codigo;
   } else if(mode==="newversion"){
     const base = findProposal(id);
     source = JSON.parse(JSON.stringify(base));
     document.getElementById("drawerEyebrow").textContent = "Nueva versión desde propuesta rechazada";
-    document.getElementById("drawerCodigo").textContent = base.codigo + " · próxima v" + (base.version+1);
+    drawerCodigoEl.textContent = base.codigo + " · próxima v" + (base.version+1);
+    drawerCodigoEl.dataset.codigo = base.codigo;
   }
 
   document.getElementById("drawerTitle").textContent = source.razonSocial;
@@ -990,6 +1005,7 @@ function openDrawer(mode, id){
   originalSnapshot = (mode==="edit") ? JSON.stringify(collectFormData()) : null;
   nextVersionForEdit = (mode==="edit") ? source.version + 1 : null;
   refreshVersionBanner();
+  refreshDrawerLockState(source);
 
   // Reject button only visible when editing an existing, non-terminal proposal
   // sin una cotización ya aprobada por el cliente (ver proposalHasApprovedCotizacion).
@@ -1022,6 +1038,15 @@ const FIELD_LABELS = {
 };
 function diffFields(original, updated){
   return Object.keys(FIELD_LABELS).filter(k => JSON.stringify(original[k]) !== JSON.stringify(updated[k])).map(k=>FIELD_LABELS[k]);
+}
+
+/* Mientras una propuesta tenga una excepción de rentabilidad pendiente de
+   aprobación de créditos, queda bloqueada para edición (ver Cambio 8). */
+function refreshDrawerLockState(p){
+  const locked = !!(p && p.excepcion && p.excepcion.estado==="pendiente");
+  document.getElementById("excepcionBanner").style.display = locked ? "flex" : "none";
+  document.getElementById("btnSaveDraft").disabled = locked;
+  document.getElementById("btnSaveVersion").disabled = locked;
 }
 
 /* Muestra en tiempo real que el cambio actual generará una nueva versión,
@@ -1393,8 +1418,9 @@ const SEMAFORO_ICONS = {
   rojo: '<svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>'
 };
 
-function openRentabModal(data, codigoLabel){
+function openRentabModal(data, codigoLabel, realCodigo){
   const r = computeRentabilidad(data);
+  realCodigo = realCodigo || codigoLabel;
 
   document.getElementById("rentabCodigo").textContent = codigoLabel;
   ["semRojo","semAmbar","semVerde"].forEach(elId=>document.getElementById(elId).classList.remove("active"));
@@ -1409,11 +1435,48 @@ function openRentabModal(data, codigoLabel){
 
   const btnCotizar = document.getElementById("btnGenerarCotizacion");
   btnCotizar.style.display = r.nivel==="verde" ? "inline-flex" : "none";
-  btnCotizar.dataset.codigo = codigoLabel;
+  btnCotizar.dataset.codigo = realCodigo;
+
+  const btnExcepcion = document.getElementById("btnGenerarExcepcion");
+  btnExcepcion.style.display = r.nivel==="rojo" ? "inline-flex" : "none";
+  btnExcepcion.dataset.codigo = realCodigo;
 
   document.getElementById("rentabModal").classList.add("open");
   overlay.classList.add("visible");
   trapFocus(document.getElementById("rentabModal"));
+}
+
+/* ---------- Generar excepción de rentabilidad (semáforo rojo) ----------
+   No reutiliza p.estado (Borrador/Creada/Aprobada/Rechazada) porque ese
+   campo alimenta KPIs y filtros existentes en todo el módulo; la excepción
+   es un sub-estado independiente que se muestra por encima del badge normal
+   mientras esté "pendiente" y bloquea el guardado hasta resolverse. */
+let excepcionTargetCodigo = null;
+function openExcepcionModal(codigoLabel){
+  excepcionTargetCodigo = codigoLabel;
+  document.getElementById("excepcionCodigo").textContent = codigoLabel;
+  document.getElementById("excepcionObservaciones").value = "";
+  document.getElementById("excepcionModal").classList.add("open");
+  overlay.classList.add("visible");
+  trapFocus(document.getElementById("excepcionModal"));
+}
+function confirmExcepcion(){
+  const p = proposals.find(p=>p.codigo===excepcionTargetCodigo);
+  if(!p){
+    showToast("Guarda la propuesta antes de generar una excepción.", "danger");
+    closeModalById("excepcionModal");
+    return;
+  }
+  const observaciones = document.getElementById("excepcionObservaciones").value.trim();
+  const fecha = new Date().toISOString().slice(0,10);
+  p.excepcion = {estado:"pendiente", observaciones, fecha};
+  p.historial.push({version:p.version, fecha, estado:p.estado, usuario:"F. Ruiz",
+    resumen:"Excepción de rentabilidad generada" + (observaciones ? ": " + observaciones : ".") + " Pendiente de aprobación de créditos."});
+  closeModalById("excepcionModal");
+  closeModalById("rentabModal");
+  if(drawer.classList.contains("open")) refreshDrawerLockState(p);
+  applyProposalsFilters();
+  showToast("Excepción creada. Pendiente de aprobación de créditos", "info");
 }
 
 /* ============================================================
@@ -1425,8 +1488,10 @@ function resetOportunidadForm(){
   oportunidadDirty = false;
   document.getElementById("oportunidadForm").reset();
   document.getElementById("op_ruc").value = "";
+  const giroSel = document.getElementById("op_giro");
+  giroSel.innerHTML = GIRO_OPTIONS.map(g=>`<option value="${esc(g)}">${esc(g)}</option>`).join("");
+  giroSel.value = GIRO_OPTIONS[0];
   setStaticValue("op_razonSocial", "Se completa al ingresar el RUC", true);
-  setStaticValue("op_giro", "—", true);
   setStaticValue("op_esCliente", "—", true);
   setStaticValue("op_direccion", "—", true);
   document.getElementById("rucLookupStatus").textContent = "";
@@ -1462,7 +1527,7 @@ function handleRucLookup(){
   const statusEl = document.getElementById("rucLookupStatus");
   if(ruc.length !== 11 || !/^\d{11}$/.test(ruc)){
     setStaticValue("op_razonSocial", "Se completa al ingresar el RUC", true);
-    setStaticValue("op_giro", "—", true);
+    document.getElementById("op_giro").value = GIRO_OPTIONS[0];
     setStaticValue("op_esCliente", "—", true);
     setStaticValue("op_direccion", "—", true);
     statusEl.textContent = "";
@@ -1472,14 +1537,14 @@ function handleRucLookup(){
   const cliente = lookupClienteByRuc(ruc);
   if(cliente){
     setStaticValue("op_razonSocial", cliente.razonSocial, false);
-    setStaticValue("op_giro", cliente.giro, false);
+    document.getElementById("op_giro").value = GIRO_OPTIONS.includes(cliente.giro) ? cliente.giro : GIRO_OPTIONS[0];
     setStaticValue("op_esCliente", cliente.esCliente ? "Sí" : "No", false);
     setStaticValue("op_direccion", cliente.direccion, false);
     statusEl.textContent = "Cliente encontrado en el maestro de clientes";
     statusEl.className = "ruc-lookup-status found";
   } else {
     setStaticValue("op_razonSocial", "Cliente nuevo (sin datos previos)", true);
-    setStaticValue("op_giro", GIRO_OPTIONS[0], false);
+    document.getElementById("op_giro").value = GIRO_OPTIONS[0];
     setStaticValue("op_esCliente", "No", false);
     setStaticValue("op_direccion", "—", true);
     statusEl.textContent = "RUC no registrado — se creará como cliente nuevo";
@@ -1568,7 +1633,7 @@ function saveOportunidad(){
   const data = {
     ruc,
     razonSocial: cliente ? cliente.razonSocial : "Cliente nuevo (sin datos previos)",
-    giro: cliente ? cliente.giro : GIRO_OPTIONS[0],
+    giro: document.getElementById("op_giro").value,
     esCliente: cliente ? !!cliente.esCliente : false,
     direccion: cliente ? cliente.direccion : "",
     representantes: [],
@@ -1796,6 +1861,19 @@ document.addEventListener("DOMContentLoaded", function(){
     refreshVersionBanner();
   });
 
+  // "Servicio logo empresa" — al activarse/desactivarse, agrega o quita su
+  // fila informativa en Condiciones comerciales (no es un costo, solo indica el servicio).
+  document.getElementById("f_logoEmpresa").addEventListener("change", e=>{
+    const idx = workingCondiciones.findIndex(c=>c.key==="logoEmpresa");
+    if(e.target.checked){
+      if(idx===-1) workingCondiciones.push({key:"logoEmpresa", concepto:"Servicio logo empresa", tipo:"servicio", valor:0, exonerado:false, custom:false});
+    } else if(idx>-1){
+      workingCondiciones.splice(idx,1);
+    }
+    renderCondicionesTable();
+    refreshVersionBanner();
+  });
+
   // Flujos de aprobación — Ver etapa / Anular (delegado)
   document.getElementById("approvalBody").addEventListener("click", function(e){
     const btn = e.target.closest("button[data-stage-action]");
@@ -1812,8 +1890,9 @@ document.addEventListener("DOMContentLoaded", function(){
   // valores actuales del formulario (no requiere guardar primero)
   document.getElementById("btnValidarRentabDrawer").addEventListener("click", function(){
     const data = collectFormData();
-    const codigoLabel = document.getElementById("drawerCodigo").textContent || "Nueva propuesta";
-    openRentabModal(data, codigoLabel);
+    const drawerCodigoEl = document.getElementById("drawerCodigo");
+    const codigoLabel = drawerCodigoEl.textContent || "Nueva propuesta";
+    openRentabModal(data, codigoLabel, drawerCodigoEl.dataset.codigo);
   });
 
   // Validador de rentabilidad — Generar Cotización (visible solo si semáforo verde)
@@ -1821,6 +1900,12 @@ document.addEventListener("DOMContentLoaded", function(){
     const codigoLabel = this.dataset.codigo;
     generateCotizacionFromProposal(codigoLabel);
   });
+
+  // Validador de rentabilidad — Generar excepción (visible solo si semáforo rojo)
+  document.getElementById("btnGenerarExcepcion").addEventListener("click", function(){
+    openExcepcionModal(this.dataset.codigo);
+  });
+  document.getElementById("btnConfirmExcepcion").addEventListener("click", confirmExcepcion);
 
   // Save / reject actions
   document.getElementById("btnSaveDraft").addEventListener("click", ()=>saveProposal("Borrador"));
@@ -2185,6 +2270,7 @@ function renderCotTable(){
         <td class="cell-empresa"><strong>${esc(p.razonSocial)}</strong><span>${esc(p.giro)}</span></td>
         <td class="cell-hide-mobile">${esc(q.propuestaCodigo)}</td>
         <td class="cell-hide-mobile"><span class="tag-neutral">${esc(p.solucion)}</span></td>
+        <td class="cell-hide-mobile">${esc(p.producto)}</td>
         <td class="num cell-bv">${money(bvTotalFor(p))}</td>
         <td class="cell-estado"><span class="badge ${cotBadgeClass(q.estado)}">${esc(q.estado)}</span></td>
         <td class="cell-hide-mobile">${esc(q.email.estado)}</td>
@@ -3295,9 +3381,6 @@ function renderUserTable(){
             <button class="icon-btn" data-useraction="edit" data-userid="${u.id}" title="Editar" type="button">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M4 20l3.6-1 10-10-2.6-2.6-10 10L4 20z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
             </button>
-            <button class="icon-btn" data-useraction="delete" data-userid="${u.id}" title="Eliminar" type="button">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6h16Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
-            </button>
           </div>
         </td>
       </tr>`;
@@ -3328,7 +3411,6 @@ function openUserDrawer(id){
   document.getElementById("u_area").value = u ? u.area : "";
   document.getElementById("u_estado").value = u ? u.estado : "Invitado";
   document.getElementById("u_ultimoAcceso").querySelector(".lv-text").textContent = u ? u.fechaUltimoAcceso : "—";
-  document.getElementById("btnDeleteUser").style.display = u ? "" : "none";
   document.getElementById("btnUserHistory").style.display = u ? "" : "none";
   document.getElementById("userDrawer").classList.add("open");
   userOverlay.classList.add("visible");
@@ -3393,19 +3475,6 @@ function openUserHistoryModal(u){
   trapFocus(document.getElementById("userHistoryModal"));
 }
 
-function deleteUserById(id){
-  const u = findUser(id);
-  if(!u) return;
-  if(!confirm("¿Confirmas eliminar al usuario \"" + u.nombre + "\"? Esta acción no se puede deshacer.")) return;
-  const idx = USERS.findIndex(x=>x.id===u.id);
-  if(idx>-1) USERS.splice(idx,1);
-  if(document.getElementById("userDrawer").classList.contains("open")) closeUserDrawer();
-  renderRoleGrid();
-  applyUserFilters();
-  showToast("Usuario eliminado.", "success");
-}
-function deleteUser(){ deleteUserById(userDrawerTargetId); }
-
 function initPermisosUsuariosModule(){
   renderRoleGrid();
   document.getElementById("roleGrid").addEventListener("click", e=>{
@@ -3445,10 +3514,6 @@ function initPermisosUsuariosModule(){
 
   document.getElementById("userTableBody").addEventListener("click", e=>{
     const btn = e.target.closest("button[data-useraction]");
-    if(btn && btn.dataset.useraction==="delete"){
-      deleteUserById(btn.dataset.userid);
-      return;
-    }
     const row = e.target.closest("tr[data-userid]");
     const id = btn ? btn.dataset.userid : (row ? row.dataset.userid : null);
     if(id) openUserDrawer(id);
@@ -3473,7 +3538,6 @@ function initPermisosUsuariosModule(){
   document.getElementById("btnCloseUserDrawer").addEventListener("click", closeUserDrawer);
   document.getElementById("btnCancelUserDrawer").addEventListener("click", closeUserDrawer);
   document.getElementById("btnSaveUserDrawer").addEventListener("click", saveUserDrawer);
-  document.getElementById("btnDeleteUser").addEventListener("click", deleteUser);
   document.getElementById("btnUserHistory").addEventListener("click", ()=>openUserHistoryModal(findUser(userDrawerTargetId)));
   userOverlay.addEventListener("click", closeUserDrawer);
 }
