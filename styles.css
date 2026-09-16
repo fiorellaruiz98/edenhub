@@ -3172,6 +3172,38 @@ table.approval-table{width:100%;border-collapse:collapse;}
 .badge-dec-rechazado{background:#FDEAEA;color:#F72717;}
 .badge-dec-rechazado::before{background:#F72717;}
 
+/* Indicador discreto "N/M" junto al badge de Estado en el listado —
+   solo con más de un decisor (Ajuste 2). */
+.cot-decisor-count{
+  display:inline-block;margin-left:6px;
+  font-size:10.5px;font-weight:800;color:var(--grey);
+  background:var(--surface-muted);border-radius:999px;padding:1px 6px;
+  vertical-align:middle;
+}
+/* Sección Decisores del drawer (Ajuste 3) — ficha por decisor en vez
+   de tabla: con 5+ columnas no había ancho que alcanzara en el drawer
+   normal (640px) sin cortar columnas fuera de vista. Una ficha
+   refluye sola en cualquier ancho y de paso resuelve que una sola
+   ficha no luce sobredimensionada (Ajuste 5). */
+.cq-decisor-list{display:flex;flex-direction:column;gap:10px;}
+.cq-decisor-card{
+  border:1px solid var(--border-soft);border-radius:var(--radius-m);
+  padding:12px 14px;
+}
+.cq-decisor-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.cq-decisor-card-id{display:flex;flex-direction:column;gap:2px;}
+.cq-decisor-card-id strong{font-size:13px;}
+.cq-decisor-card-id .tag-neutral{margin-left:6px;}
+.cq-decisor-card-email{font-size:11.5px;color:var(--grey);}
+.cq-decisor-card-status{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex:0 0 auto;}
+.cq-decisor-card-bottom{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  margin-top:10px;padding-top:10px;border-top:1px solid var(--border-soft);
+}
+.cq-decisor-card-meta{display:flex;flex-direction:column;gap:2px;font-size:11.5px;color:var(--grey);}
+.cq-dec-sustento{font-size:10.5px;color:var(--grey);}
+.cq-dec-entrega{font-size:10.5px;color:var(--grey);}
+
 /* Fila "próxima a vencer" (día 12 a 15 de vigencia) — clase dedicada,
    no reutiliza las del semáforo de rentabilidad ni las de estado. */
 #view-cotizaciones .data-table tbody tr.cot-row-nearing-expiry{background:#FFFBEE;}

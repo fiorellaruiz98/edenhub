@@ -1942,6 +1942,7 @@ document.addEventListener("DOMContentLoaded", function(){
       if(document.getElementById("userDrawer").classList.contains("open")) closeUserDrawer();
       closeSidebar();
       closeRowMenu();
+      closeDecRowMenu();
     }
   });
 
@@ -2237,20 +2238,20 @@ const quotations = [
   },
   {
     id: nextCotId(), codigo:"COT-2026-010", propuestaCodigo:"COD-2026-011",
-    fechaGeneracion:"2026-07-08", horaGeneracion:"09:47", validaHasta:"2026-07-23", responsable:"F. Ruiz",
+    fechaGeneracion:"2026-08-01", horaGeneracion:"09:47", validaHasta:"2026-08-16", responsable:"F. Ruiz",
     estado:"Aprobada", motivoRechazo:null, comentarioPerdida:null, avisoSlaGenerado:false,
     email:{asunto:"Cotización COT-2026-010 · Edenred Perú", cc:[]},
     decisores:[
       {id:"dec1_cot10", nombre:"Tesorería San Fernando", email:"tesoreria@sanfernando.com.pe", estado:"Aprobado",
-        fechaRespuesta:"2026-07-15", canalRespuesta:"Enlace", registradoPor:null, motivoRechazo:null,
-        documentosSustento:[{nombreArchivo:"sustento_aprobacion_sanfernando.pdf", fecha:"2026-07-15", hora:"16:03", cargadoPor:"F. Ruiz"}],
-        respuestaRevertida:false, entrega:{estado:"Leído", messageId:null, intentos:[{fecha:"2026-07-08", resultado:"Enviado"}]}}
+        fechaRespuesta:"2026-08-04", canalRespuesta:"Enlace", registradoPor:null, motivoRechazo:null,
+        documentosSustento:[{nombreArchivo:"sustento_aprobacion_sanfernando.pdf", fecha:"2026-08-04", hora:"16:03", cargadoPor:"F. Ruiz"}],
+        respuestaRevertida:false, entrega:{estado:"Leído", messageId:null, intentos:[{fecha:"2026-08-01", resultado:"Enviado"}]}}
     ],
     historial:[
-      {fecha:"2026-07-08", usuario:"F. Ruiz", accion:"Cotización generada", detalle:"Generada a partir de la propuesta COD-2026-011, validada como rentable."},
-      {fecha:"2026-07-08", usuario:"F. Ruiz", accion:"Enviada al cliente", detalle:"Email enviado a tesoreria@sanfernando.com.pe."},
-      {fecha:"2026-07-10", usuario:"Sistema", accion:"Email leído", detalle:"El cliente abrió el email de la cotización."},
-      {fecha:"2026-07-15", usuario:"F. Ruiz", accion:"Cotización aprobada", detalle:"Aprobada con documento de sustento adjunto."}
+      {fecha:"2026-08-01", usuario:"F. Ruiz", accion:"Cotización generada", detalle:"Generada a partir de la propuesta COD-2026-011, validada como rentable."},
+      {fecha:"2026-08-01", usuario:"F. Ruiz", accion:"Enviada al cliente", detalle:"Email enviado a tesoreria@sanfernando.com.pe."},
+      {fecha:"2026-08-02", usuario:"Sistema", accion:"Email leído", detalle:"El cliente abrió el email de la cotización."},
+      {fecha:"2026-08-04", usuario:"F. Ruiz", accion:"Cotización aprobada", detalle:"Aprobada con documento de sustento adjunto."}
     ]
   },
   /* ---- Mocks nuevos: aprobación paralela de decisores (3 decisores) ---- */
@@ -2447,12 +2448,13 @@ function clearCotFilters(){
 function renderCotKPIs(){
   const sent = quotations.filter(q=>q.estado==="Enviada" || q.estado==="Aprobada").length;
   const pending = quotations.filter(q=>q.estado==="Enviada").length;
-  const now = "2026-07"; // mes de referencia de la demo (Julio 2026), mismo criterio que "BV cerrado en el mes" de Propuestas
+  const now = COT_HOY_STR.slice(0,7); // mes de referencia de la demo, derivado de COT_HOY (no hardcodeado)
   const approvedThisMonth = quotations.filter(q=>q.estado==="Aprobada" && q.fechaGeneracion.startsWith(now));
+  const mesLabel = COT_HOY.toLocaleDateString('es-PE', {month:'long', year:'numeric'});
   document.getElementById("kpiCotSent").textContent = intFmt(sent);
   document.getElementById("kpiCotPending").textContent = intFmt(pending);
   document.getElementById("kpiCotApproved").textContent = intFmt(approvedThisMonth.length);
-  document.getElementById("kpiCotApprovedSub").textContent = "Julio 2026";
+  document.getElementById("kpiCotApprovedSub").textContent = mesLabel.charAt(0).toUpperCase() + mesLabel.slice(1);
 }
 
 function emailIconSvg(estado){
@@ -2473,16 +2475,14 @@ function lastCotActivity(q){
   return q.historial.reduce((max,h)=> h.fecha > max ? h.fecha : max, q.historial[0].fecha);
 }
 
-/* "2 de 3", o quién rechazó si la cotización ya está Rechazada — ver
-   Cambio 2. */
-function cotAprobacionesCell(q){
-  if(q.estado==="Rechazada"){
-    const rechazante = (q.decisores||[]).find(d=>d.estado==="Rechazado");
-    return rechazante ? `Rechazó: ${esc(rechazante.nombre)}` : "Rechazada";
-  }
+/* Indicador discreto junto al badge de Estado, solo cuando hay más de
+   un decisor — con uno solo, el dato ya lo da el badge y repetirlo
+   (ej. "1 de 1") era ruido. El detalle completo (incluido quién
+   rechazó) vive en la sección Decisores del drawer, no en el listado. */
+function cotDecisorCountBadge(q){
   const quorum = cotQuorum(q);
-  if(!quorum.total) return "—";
-  return `${quorum.aprobados} de ${quorum.total}`;
+  if(quorum.total <= 1) return "";
+  return `<span class="cot-decisor-count" title="${quorum.aprobados} de ${quorum.total} decisores aprobaron">${quorum.aprobados}/${quorum.total}</span>`;
 }
 
 function renderCotTable(){
@@ -2497,7 +2497,7 @@ function renderCotTable(){
   const pageItems = filteredCot.slice(start, start+COT_PAGE_SIZE);
 
   if(pageItems.length===0){
-    tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state">
+    tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state">
       <svg viewBox="0 0 24 24" width="40" height="40" fill="none"><rect x="3" y="6" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
       <strong>No se encontraron cotizaciones</strong>
       <p>Ajusta los filtros de búsqueda para ver más resultados.</p>
@@ -2519,8 +2519,7 @@ function renderCotTable(){
         <td class="cell-hide-mobile"><span class="tag-neutral">${esc(p.solucion)}</span></td>
         <td class="cell-hide-mobile">${esc(p.producto)}</td>
         <td class="num cell-bv">${money(bvTotalFor(p))}</td>
-        <td class="cell-estado"><span class="badge ${cotBadgeClass(q.estado)}">${esc(q.estado)}</span></td>
-        <td class="cell-hide-mobile">${cotAprobacionesCell(q)}</td>
+        <td class="cell-estado"><span class="badge ${cotBadgeClass(q.estado)}">${esc(q.estado)}</span>${cotDecisorCountBadge(q)}</td>
         <td class="cell-hide-mobile">${esc(cotEmailEstadoResumen(q))}</td>
         <td class="cell-hide-mobile">${fmtDate(lastCotActivity(q))}</td>
         <td class="center cell-acciones">
@@ -2698,58 +2697,141 @@ function renderCotResultBox(q){
   }
 }
 
-/* ---------- Sección Decisores (Cambio 4) ---------- */
+/* ---------- Sección Decisores (Cambio 4, reorganizada — Ajuste 3) ----------
+   5 columnas en vez de 7: Estado+Entrega combinados, Sustento se
+   muestra bajo el nombre en vez de columna propia. Acciones: máximo 2
+   botones visibles por fila (las principales según el estado de esa
+   fila) + un menú "⋮" con el resto, para que las 5 acciones sigan
+   siendo alcanzables sin scroll horizontal en el drawer normal (640px)
+   y expandido. */
+const DECISOR_ACTION_META = {
+  approve:   {label:"Aprobar",              icon:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'},
+  reject:    {label:"Rechazar",             icon:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>'},
+  manual:    {label:"Registrar respuesta",  icon:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 00-3-3L5 17v3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>'},
+  resend:    {label:"Reenviar",             icon:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M4 4v6h6M20 20v-6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 15a7 7 0 0 0 12.3 2.5M18.5 9a7 7 0 0 0-12.3-2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'},
+  viewemail: {label:"Ver email",            icon:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M4 12s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.4" stroke="currentColor" stroke-width="1.7"/></svg>'},
+  revert:    {label:"Revertir respuesta",   icon:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M4 4v6h6M20 20v-6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 9a8 8 0 1 0 1 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'}
+};
+/* Principales = Aprobar/Rechazar si está pendiente (las 2 decisiones
+   reales de esa fila); si ya respondió, principales son las que
+   queden (Ver email / Revertir), que nunca son más de 2 — nunca hace
+   falta menú en ese caso. */
+function computeDecisorActions(d, q){
+  const puedeResponder = d.estado==="Pendiente" && q.estado==="Enviada";
+  const puedeRevertir = !!d.canalRespuesta && d.canalRespuesta!=="Enlace" && q.estado==="Enviada";
+  const puedeVerEmail = d.entrega.estado !== "Sin enviar";
+  const all = [];
+  if(puedeResponder) all.push("approve","reject","manual","resend");
+  if(puedeVerEmail) all.push("viewemail");
+  if(puedeRevertir) all.push("revert");
+  const primary = puedeResponder ? ["approve","reject"] : all.slice(0,2);
+  const secondary = all.filter(k=>!primary.includes(k));
+  return {primary, secondary};
+}
+function decisorActionBtnHtml(key, decisorId){
+  const meta = DECISOR_ACTION_META[key];
+  return `<button type="button" class="icon-btn" data-decaction="${key}" data-decisorid="${decisorId}" title="${meta.label}">${meta.icon}</button>`;
+}
+
 function renderCotDecisoresSection(q){
   const quorum = cotQuorum(q);
-  document.getElementById("cq_decisoresResumen").textContent = quorum.total ? `${quorum.aprobados} de ${quorum.total} aprobaciones` : "Sin decisores todavía";
+  /* Con un solo decisor el contador "1 de 1"/"0 de 1" no aporta nada
+     que el estado de la fila ya no diga — se muestra el estado del
+     decisor directamente. Con 2 o 3, se mantiene el resumen agregado. */
+  const resumenEl = document.getElementById("cq_decisoresResumen");
+  if(!quorum.total) resumenEl.textContent = "Sin decisores todavía";
+  else if(quorum.total === 1) resumenEl.textContent = q.decisores[0].estado;
+  else resumenEl.textContent = `${quorum.aprobados} de ${quorum.total} aprobaciones`;
 
+  /* Ficha por decisor, no tabla — con 7 columnas no había ancho que
+     alcanzara en el drawer normal (640px) sin scroll horizontal
+     invisible (las columnas se cortaban sin ninguna forma de
+     alcanzarlas). Una ficha refluye sola sin importar el ancho, y de
+     paso resuelve que una sola ficha no luce "sobredimensionada" como
+     sí lo hacía una tabla de una fila (Ajuste 3 + Ajuste 5). */
   const body = document.getElementById("cq_decisoresBody");
   if(!q.decisores || !q.decisores.length){
-    body.innerHTML = `<tr class="doc-row-empty"><td colspan="7" class="hint">Esta cotización todavía no se ha enviado a ningún decisor.</td></tr>`;
+    body.innerHTML = `<p class="hint" style="padding:14px 0;">Esta cotización todavía no se ha enviado a ningún decisor.</p>`;
     return;
   }
   body.innerHTML = q.decisores.map(d=>{
-    const puedeResponder = d.estado==="Pendiente" && q.estado==="Enviada";
-    const puedeRevertir = !!d.canalRespuesta && d.canalRespuesta!=="Enlace" && q.estado==="Enviada";
-    const puedeVerEmail = d.entrega.estado !== "Sin enviar";
+    const {primary, secondary} = computeDecisorActions(d, q);
     const sustento = (d.documentosSustento||[]).length
-      ? d.documentosSustento.map(doc=>esc(doc.nombreArchivo)).join("<br>")
-      : "—";
-    const acciones = [];
-    if(puedeResponder){
-      acciones.push(`<button type="button" class="icon-btn" data-decaction="approve" data-decisorid="${d.id}" title="Aprobar">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>`);
-      acciones.push(`<button type="button" class="icon-btn" data-decaction="reject" data-decisorid="${d.id}" title="Rechazar">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
-      </button>`);
-      acciones.push(`<button type="button" class="icon-btn" data-decaction="manual" data-decisorid="${d.id}" title="Registrar respuesta">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 00-3-3L5 17v3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
-      </button>`);
-      acciones.push(`<button type="button" class="icon-btn" data-decaction="resend" data-decisorid="${d.id}" title="Reenviar">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M4 4v6h6M20 20v-6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 15a7 7 0 0 0 12.3 2.5M18.5 9a7 7 0 0 0-12.3-2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      </button>`);
-    }
-    if(puedeVerEmail){
-      acciones.push(`<button type="button" class="icon-btn" data-decaction="viewemail" data-decisorid="${d.id}" title="Ver email">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M4 12s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.4" stroke="currentColor" stroke-width="1.7"/></svg>
-      </button>`);
-    }
-    if(puedeRevertir){
-      acciones.push(`<button type="button" class="icon-btn" data-decaction="revert" data-decisorid="${d.id}" title="Revertir respuesta">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M4 4v6h6M20 20v-6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 9a8 8 0 1 0 1 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      </button>`);
-    }
-    return `<tr data-decisorid="${d.id}">
-      <td><strong>${esc(d.nombre)}</strong>${d.respuestaRevertida ? `<span class="tag-neutral" style="margin-left:6px;">Corregido</span>` : ``}</td>
-      <td>${esc(d.email)}</td>
-      <td><span class="badge ${decisorBadgeClass(d.estado)}">${esc(d.estado)}</span></td>
-      <td>${esc(d.entrega.estado)}</td>
-      <td>${d.fechaRespuesta ? fmtDate(d.fechaRespuesta) + (d.canalRespuesta ? ` · ${esc(d.canalRespuesta)}` : "") : "—"}</td>
-      <td>${sustento}</td>
-      <td class="center"><div class="row-actions">${acciones.join("")}</div></td>
-    </tr>`;
+      ? `<span class="cq-dec-sustento">${d.documentosSustento.map(doc=>esc(doc.nombreArchivo)).join(", ")}</span>`
+      : "";
+    const primaryHtml = primary.map(k=>decisorActionBtnHtml(k, d.id)).join("");
+    const kebabHtml = secondary.length
+      ? `<button type="button" class="icon-btn kebab" data-deckebab="${d.id}" title="Más acciones" aria-haspopup="true" aria-expanded="false">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><circle cx="12" cy="5" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="19" r="1.6" fill="currentColor"/></svg>
+        </button>`
+      : "";
+    return `<div class="cq-decisor-card" data-decisorid="${d.id}">
+      <div class="cq-decisor-card-top">
+        <div class="cq-decisor-card-id">
+          <strong>${esc(d.nombre)}</strong>${d.respuestaRevertida ? `<span class="tag-neutral">Corregido</span>` : ``}
+          <span class="cq-decisor-card-email">${esc(d.email)}</span>
+        </div>
+        <div class="cq-decisor-card-status">
+          <span class="badge ${decisorBadgeClass(d.estado)}">${esc(d.estado)}</span>
+          <span class="cq-dec-entrega">${esc(d.entrega.estado)}</span>
+        </div>
+      </div>
+      <div class="cq-decisor-card-bottom">
+        <div class="cq-decisor-card-meta">
+          <span>${d.fechaRespuesta ? fmtDate(d.fechaRespuesta) + (d.canalRespuesta ? ` · ${esc(d.canalRespuesta)}` : "") : "Sin respuesta todavía"}</span>
+          ${sustento}
+        </div>
+        <div class="row-actions">${primaryHtml}${kebabHtml}</div>
+      </div>
+    </div>`;
   }).join("");
+}
+
+/* ---------- Menú "más acciones" de una fila de decisor ----------
+   Mismo patrón que rowMenuPopover (Propuestas): un único popover
+   compartido, reposicionado junto al botón que lo abrió. Contenido
+   dinámico (varía según qué acciones secundarias tenga esa fila). */
+let decRowMenuTargetId = null;
+function toggleDecRowMenu(triggerBtn, decisorId, secondaryKeys){
+  const popover = document.getElementById("decRowMenuPopover");
+  if(popover.classList.contains("open") && decRowMenuTargetId===decisorId){
+    closeDecRowMenu();
+    return;
+  }
+  decRowMenuTargetId = decisorId;
+  popover.innerHTML = secondaryKeys.map(key=>{
+    const meta = DECISOR_ACTION_META[key];
+    return `<button type="button" class="row-menu-item" data-decaction="${key}" data-decisorid="${decisorId}" role="menuitem">${meta.icon}${meta.label}</button>`;
+  }).join("");
+  const rect = triggerBtn.getBoundingClientRect();
+  const popW = 200;
+  const popH = secondaryKeys.length * 38 + 12;
+  let left = rect.right - popW;
+  left = Math.max(8, Math.min(left, window.innerWidth - popW - 8));
+  let top = rect.bottom + 6;
+  if(top + popH > window.innerHeight) top = rect.top - popH - 6;
+  const zoomFactor = parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+  popover.style.left = (left / zoomFactor) + "px";
+  popover.style.top = (top / zoomFactor) + "px";
+  popover.classList.add("open");
+  document.querySelectorAll('.icon-btn.kebab[data-deckebab][aria-expanded="true"]').forEach(b=>b.setAttribute("aria-expanded","false"));
+  triggerBtn.setAttribute("aria-expanded","true");
+}
+function closeDecRowMenu(){
+  const popover = document.getElementById("decRowMenuPopover");
+  popover.classList.remove("open");
+  document.querySelectorAll('.icon-btn.kebab[data-deckebab][aria-expanded="true"]').forEach(b=>b.setAttribute("aria-expanded","false"));
+  decRowMenuTargetId = null;
+}
+/* Despachador compartido por los botones directos de la fila y por
+   los ítems del menú "⋮" — mismo efecto sin importar de dónde vino el click. */
+function handleDecisorAction(action, q, d, triggerBtn){
+  if(action==="approve") openCotApproveModal(q, d.id);
+  else if(action==="reject") openCotRejectModal(q, d.id);
+  else if(action==="manual") openCotManualResponseModal(q, d.id);
+  else if(action==="viewemail") openCotEmailPreview(q, d.id);
+  else if(action==="resend") sendCotEmail(q, {isResend:true, triggerBtn, decisorIds:[d.id]});
+  else if(action==="revert") revertirRespuestaDecisor(q, d.id);
 }
 
 /* Barra fija del drawer: resumen agregado (cotEmailEstadoResumen +
@@ -2759,7 +2841,6 @@ function renderCotEmailBar(q){
   const icon = document.getElementById("cotEmailIcon");
   const stateText = document.getElementById("cotEmailStateText");
   const subText = document.getElementById("cotEmailSubText");
-  const resendBtn = document.getElementById("btnResendEmail");
   const e = cotEmailEstadoResumen(q);
   const quorum = cotQuorum(q);
 
@@ -2770,7 +2851,9 @@ function renderCotEmailBar(q){
     e==="Fallido" ? " is-failed" : ""
   );
   icon.innerHTML = emailIconSvg(e);
-  stateText.textContent = quorum.total ? `${e} · ${quorum.aprobados} de ${quorum.total} aprobaciones` : e;
+  /* Con un solo decisor, la barra solo muestra el estado de entrega —
+     el contador de aprobaciones no aporta nada extra (Cambio 5). */
+  stateText.textContent = quorum.total > 1 ? `${e} · ${quorum.aprobados} de ${quorum.total} aprobaciones` : e;
   const subs = {
     "Sin enviar":"Aún no se ha enviado esta cotización a los decisores",
     "Enviando":"Enviando el email a los decisores…",
@@ -2780,8 +2863,6 @@ function renderCotEmailBar(q){
     "Fallido":"No se pudo entregar el email a algún decisor — revisa el detalle en Decisores"
   };
   subText.textContent = subs[e] || "";
-  const pendientes = (q.decisores||[]).filter(d=>d.estado==="Pendiente");
-  resendBtn.style.display = (e==="Sin enviar" || e==="Enviando" || !pendientes.length) ? "none" : "inline-flex";
 }
 
 /* Dueño de la cotización o Head Comercial, nadie más (Cambio 9). En
@@ -2913,6 +2994,7 @@ function closeCotDrawer(){
   cotizacionDrawer.classList.remove("expanded");
   cotizacionDrawer.setAttribute("aria-hidden","true");
   cotOverlay.classList.remove("visible");
+  closeDecRowMenu();
 }
 
 /* Refresca todo lo que puede haber cambiado sin re-abrir el drawer
@@ -2969,7 +3051,7 @@ function sendCotEmail(q, opts){
     : q.decisores.slice();
   if(!targets.length) return;
 
-  const btn = opts.triggerBtn || (isResend ? document.getElementById("btnResendEmail") : document.getElementById("btnCotSend"));
+  const btn = opts.triggerBtn || (isResend ? null : document.getElementById("btnCotSend"));
   const label = opts.triggerBtn ? "" : (isResend ? "Reenviando…" : "Enviando…");
   cotSetButtonLoading(btn, label);
   targets.forEach(d=>{ d.entrega.estado = "Enviando"; });
@@ -3520,19 +3602,35 @@ function initCotizacionesModule(){
   });
 
   document.getElementById("cq_decisoresBody").addEventListener("click", function(e){
+    const kebabBtn = e.target.closest("button[data-deckebab]");
+    if(kebabBtn){
+      const q = findQuotation(cotDrawerTargetId);
+      const d = findDecisor(q, kebabBtn.dataset.deckebab);
+      if(d) toggleDecRowMenu(kebabBtn, d.id, computeDecisorActions(d, q).secondary);
+      return;
+    }
     const btn = e.target.closest("button[data-decaction]");
     if(!btn) return;
     const q = findQuotation(cotDrawerTargetId);
     const d = findDecisor(q, btn.dataset.decisorid);
     if(!d) return;
-    const action = btn.dataset.decaction;
-    if(action==="approve") openCotApproveModal(q, d.id);
-    else if(action==="reject") openCotRejectModal(q, d.id);
-    else if(action==="manual") openCotManualResponseModal(q, d.id);
-    else if(action==="viewemail") openCotEmailPreview(q, d.id);
-    else if(action==="resend") sendCotEmail(q, {isResend:true, triggerBtn:btn, decisorIds:[d.id]});
-    else if(action==="revert") revertirRespuestaDecisor(q, d.id);
+    handleDecisorAction(btn.dataset.decaction, q, d, btn);
   });
+  document.getElementById("decRowMenuPopover").addEventListener("click", function(e){
+    const btn = e.target.closest("button[data-decaction]");
+    if(!btn) return;
+    const q = findQuotation(cotDrawerTargetId);
+    const d = findDecisor(q, btn.dataset.decisorid);
+    closeDecRowMenu();
+    if(d) handleDecisorAction(btn.dataset.decaction, q, d, btn);
+  });
+  document.addEventListener("click", function(e){
+    if(!document.getElementById("decRowMenuPopover").classList.contains("open")) return;
+    if(e.target.closest("#decRowMenuPopover") || e.target.closest("button[data-deckebab]")) return;
+    closeDecRowMenu();
+  });
+  window.addEventListener("scroll", closeDecRowMenu, true);
+  window.addEventListener("resize", closeDecRowMenu);
 
   function applyCotKpiFilter(estadoValue){
     clearCotFilters();
@@ -3624,13 +3722,6 @@ function initCotizacionesModule(){
       if(isActive) activeBtn = b;
     });
     if(activeBtn) scrollNavItemIntoView(activeBtn);
-  });
-
-  // Email bar — Reenviar (a todos los decisores pendientes)
-  document.getElementById("btnResendEmail").addEventListener("click", ()=>{
-    const q = findQuotation(cotDrawerTargetId);
-    const pendientes = q.decisores.filter(d=>d.estado==="Pendiente").map(d=>d.id);
-    sendCotEmail(q, {isResend:true, decisorIds:pendientes});
   });
 
   // Email preview modal — links simulados, asociados al decisor cuyo
