@@ -3156,6 +3156,87 @@ table.approval-table{width:100%;border-collapse:collapse;}
 .cot-email-link:disabled{color:var(--grey);cursor:not-allowed;text-decoration:none;}
 .cot-email-links-hint{font-size:11px;color:var(--grey);margin:8px 0 0;}
 
+/* ---------- Aprobación paralela de decisores (Cotizaciones) ---------- */
+
+/* Estado terminal "Vencida" — tono neutro/apagado, distinto de
+   Enviada (ámbar) y de Oportunidad perdida/Borrador (gris). */
+.badge-vencida{background:#ECECEC;color:#5A5A5A;}
+.badge-vencida::before{background:#5A5A5A;}
+
+/* Estados de decisor — clases dedicadas, nunca las de estado de
+   cotización ni las de usuarios. */
+.badge-dec-pendiente{background:#FFF3D6;color:#8A5A00;}
+.badge-dec-pendiente::before{background:#8A5A00;}
+.badge-dec-aprobado{background:#E8F5E9;color:#4CAF50;}
+.badge-dec-aprobado::before{background:#4CAF50;}
+.badge-dec-rechazado{background:#FDEAEA;color:#F72717;}
+.badge-dec-rechazado::before{background:#F72717;}
+
+/* Fila "próxima a vencer" (día 12 a 15 de vigencia) — clase dedicada,
+   no reutiliza las del semáforo de rentabilidad ni las de estado. */
+#view-cotizaciones .data-table tbody tr.cot-row-nearing-expiry{background:#FFFBEE;}
+#view-cotizaciones .data-table tbody tr.cot-row-nearing-expiry:hover{background:#FFF6DE;}
+#view-cotizaciones .data-table tbody tr.cot-row-nearing-expiry td.cell-codigo::after{
+  content:'Vence pronto';
+  display:inline-block;margin-left:8px;
+  font-size:9.5px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;
+  color:#B3840A;background:#FFF3D6;border-radius:999px;padding:2px 7px;
+  vertical-align:middle;
+}
+
+/* Chips de decisores — compose (Cambio 5) y editar decisores (Cambio 9) */
+.cot-chip-field{
+  flex:1;min-width:0;display:flex;flex-wrap:wrap;gap:6px;align-items:center;
+  border:1px solid var(--border-soft);border-radius:4px;
+  padding:4px 6px;background:var(--white);
+}
+.cot-chip{
+  display:flex;align-items:center;gap:5px;
+  background:var(--surface-muted);border:1px solid var(--border-soft);
+  padding:3px 8px 3px 8px;border-radius:999px;
+  font-size:11.5px;font-weight:700;color:var(--black);
+}
+.cot-chip button{background:none;border:none;color:var(--grey);cursor:pointer;display:flex;padding:0;}
+.cot-chip button:hover{color:var(--red-hero-dark);}
+.cot-chip-field input{
+  flex:1;min-width:120px;border:none;outline:none;font-size:12px;
+  padding:3px 2px;background:transparent;
+}
+.cot-chip-field input:disabled{color:var(--grey);}
+.cot-chip-hint{font-size:11px;color:var(--red-hero-dark);}
+
+/* Editar decisores (Cambio 9) */
+.cot-edit-decisor-row{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:9px 0;border-bottom:1px solid var(--border-soft);
+}
+.cot-edit-decisor-row:last-child{border-bottom:none;}
+.cot-edit-decisor-info{display:flex;flex-direction:column;gap:2px;}
+.cot-edit-decisor-info span:not(.tag-neutral):not(.badge){font-size:11.5px;color:var(--grey);}
+.cot-edit-decisor-info .tag-neutral,.cot-edit-decisor-info .badge{align-self:flex-start;margin-top:2px;}
+#cotEditDecisorInput{
+  width:100%;border:1px solid var(--border-soft);border-radius:var(--radius-s);
+  padding:9px 12px;font-size:13px;
+}
+
+/* Registro manual — selector Aprobó/Rechazó (Cambio 7) */
+.cot-manual-decision-row{display:flex;gap:10px;margin:8px 0 16px;}
+.radio-pill{
+  display:flex;align-items:center;gap:6px;
+  border:1px solid var(--border-soft);border-radius:999px;
+  padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;
+}
+.radio-pill:has(input:checked){border-color:var(--red-hero);background:var(--light-pink);color:var(--red-hero-dark);}
+#cotManualCanal{width:100%;margin-bottom:4px;}
+
+/* Contador de avisos en el nav (Cambio 12) */
+.nav-badge{
+  margin-left:auto;flex:0 0 auto;
+  min-width:17px;height:17px;padding:0 5px;border-radius:999px;
+  background:var(--red-hero-dark);color:var(--white);
+  font-size:10px;font-weight:800;line-height:17px;text-align:center;
+}
+
 /* ---------- Fase 3 (tarjeta apilada en móvil) — mismo patrón que
    Propuestas, adaptado a las columnas propias de Cotizaciones.
    Visible en la tarjeta: Código, Razón social, Business Volume,

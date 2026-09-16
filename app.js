@@ -2023,26 +2023,95 @@ function generateCotizacionFromProposal(propuestaCodigo){
   return true;
 }
 
-const COT_ESTADOS = ["Generada","Enviada","Aprobada","Rechazada","Oportunidad perdida"];
+const COT_ESTADOS = ["Generada","Enviada","Aprobada","Rechazada","Oportunidad perdida","Vencida"];
 const EMAIL_ESTADOS = ["Sin enviar","Enviando","Enviado","Entregado","Leído","Fallido"];
+const DECISOR_ESTADOS = ["Pendiente","Aprobado","Rechazado"];
+const CANAL_RESPUESTA_OPTIONS = ["Correo","Llamada","WhatsApp","Otro"];
+
+/* Fecha de referencia fija de la demo — mismo criterio ya usado en el
+   proyecto (renderCotKPIs usa now="2026-07"; Pricebook usa
+   TODAY=new Date('2026-07-14')): evaluar vigencia/SLA contra el reloj
+   real del sistema dejaría "vencida" a toda la semilla apenas pase el
+   tiempo. COT_HOY es el "hoy" fijo de la demo para aprobación paralela
+   de decisores (Cambios 10 y 12). */
+const COT_HOY = new Date('2026-08-05T00:00:00');
+const COT_HOY_STR = '2026-08-05';
 
 /* Generada->badge-creada, Aprobada->badge-aprobada, Rechazada->badge-rechazada
    y Oportunidad perdida->badge-borrador se reutilizan tal cual (mismo
-   significado semántico que ya tienen en Propuestas). Enviada es la
-   única sin equivalente — badge-enviada es la única clase CSS nueva
-   de todo el módulo. */
+   significado semántico que ya tienen en Propuestas). Enviada y Vencida
+   son las únicas sin equivalente — badge-enviada/badge-vencida son las
+   únicas clases CSS nuevas de todo el módulo. */
 function cotBadgeClass(estado){
-  return {"Generada":"badge-creada","Enviada":"badge-enviada","Aprobada":"badge-aprobada","Rechazada":"badge-rechazada","Oportunidad perdida":"badge-borrador"}[estado] || "badge-creada";
+  return {"Generada":"badge-creada","Enviada":"badge-enviada","Aprobada":"badge-aprobada","Rechazada":"badge-rechazada","Oportunidad perdida":"badge-borrador","Vencida":"badge-vencida"}[estado] || "badge-creada";
+}
+function decisorBadgeClass(estado){
+  return {"Pendiente":"badge-dec-pendiente","Aprobado":"badge-dec-aprobado","Rechazado":"badge-dec-rechazado"}[estado] || "badge-dec-pendiente";
+}
+/* nombre de despliegue cuando un decisor se agrega solo con su correo
+   (fase actual, sin autocompletado real contra Salesforce — ver Cambio 5) */
+function deriveNombreFromEmail(email){
+  const local = String(email).split("@")[0] || email;
+  return local.split(/[._-]+/).filter(Boolean).map(s=>s.charAt(0).toUpperCase()+s.slice(1)).join(" ");
+}
+function nextDecisorId(q){ return "dec" + (q.decisores.length + 1) + "_" + q.id; }
+function blankDecisor(email){
+  return {
+    id: null, nombre: deriveNombreFromEmail(email), email,
+    estado: "Pendiente", fechaRespuesta: null, canalRespuesta: null, registradoPor: null,
+    motivoRechazo: null, documentosSustento: [], respuestaRevertida: false,
+    entrega: {estado:"Sin enviar", messageId:null, intentos:[]}
+  };
+}
+/* {aprobados, total, completo} — aprobación unánime y paralela entre
+   1 y 3 decisores (reglas de negocio, Comercial). */
+function cotQuorum(q){
+  const total = (q.decisores||[]).length;
+  const aprobados = (q.decisores||[]).filter(d=>d.estado==="Aprobado").length;
+  return {aprobados, total, completo: total>0 && aprobados===total};
+}
+/* Cierra la cotización solo cuando TODOS los decisores aprobaron —
+   se llama después de cada aprobación individual (enlace o manual) y
+   después de editar la lista de decisores (Cambio 9), nunca al revés. */
+function evaluarCierreCotizacion(q){
+  const quorum = cotQuorum(q);
+  if(quorum.completo && q.estado==="Enviada"){
+    q.estado = "Aprobada";
+    q.historial.push({fecha:COT_HOY_STR, usuario:"Sistema", accion:"Cotización aprobada", detalle:`Los ${quorum.total} decisores aprobaron — quórum completo.`});
+    refreshCotDrawerIfOpen(q);
+    renderCotTable();
+    openCotCongratsModal(q);
+  }
+}
+/* Orden de "menos avanzado" para la columna Email del listado — Fallido
+   domina siempre (basta que uno falle), el resto se compara por avance
+   real de entrega, no por la posición de EMAIL_ESTADOS (que termina en
+   Fallido solo por ser el peor caso terminal, no el menos avanzado). */
+const EMAIL_PIPELINE_ORDER = ["Sin enviar","Enviando","Enviado","Entregado","Leído"];
+function cotEmailEstadoResumen(q){
+  if(!q.decisores || !q.decisores.length) return q.estado==="Generada" ? "Sin enviar" : "—";
+  const estados = q.decisores.map(d=>d.entrega.estado);
+  if(estados.includes("Fallido")) return "Fallido";
+  let worstIdx = EMAIL_PIPELINE_ORDER.length - 1;
+  estados.forEach(e=>{
+    const idx = EMAIL_PIPELINE_ORDER.indexOf(e);
+    if(idx > -1 && idx < worstIdx) worstIdx = idx;
+  });
+  return EMAIL_PIPELINE_ORDER[worstIdx];
 }
 
 const quotations = [
   {
     id: nextCotId(), codigo:"COT-2026-001", propuestaCodigo:"COD-2026-001",
     fechaGeneracion:"2026-07-10", horaGeneracion:"09:14", validaHasta:"2026-07-25", responsable:"F. Ruiz",
-    estado:"Aprobada", motivoRechazo:null, comentarioPerdida:null,
-    documentoSustento:{nombreArchivo:"sustento_aprobacion_alicorp.pdf", fecha:"2026-07-16", hora:"11:24", cargadoPor:"F. Ruiz"},
-    email:{estado:"Leído", destinatario:"tesoreria@alicorp.com.pe", asunto:"Cotización COT-2026-001 · Edenred Perú",
-      intentos:[{fecha:"2026-07-10", resultado:"Enviado"}]},
+    estado:"Aprobada", motivoRechazo:null, comentarioPerdida:null, avisoSlaGenerado:false,
+    email:{asunto:"Cotización COT-2026-001 · Edenred Perú", cc:[]},
+    decisores:[
+      {id:"dec1_cot1", nombre:"Tesorería Alicorp", email:"tesoreria@alicorp.com.pe", estado:"Aprobado",
+        fechaRespuesta:"2026-07-16", canalRespuesta:"Enlace", registradoPor:null, motivoRechazo:null,
+        documentosSustento:[{nombreArchivo:"sustento_aprobacion_alicorp.pdf", fecha:"2026-07-16", hora:"11:24", cargadoPor:"F. Ruiz"}],
+        respuestaRevertida:false, entrega:{estado:"Leído", messageId:null, intentos:[{fecha:"2026-07-10", resultado:"Enviado"}]}}
+    ],
     historial:[
       {fecha:"2026-07-10", usuario:"F. Ruiz", accion:"Cotización generada", detalle:"Generada a partir de la propuesta COD-2026-001, validada como rentable."},
       {fecha:"2026-07-10", usuario:"F. Ruiz", accion:"Enviada al cliente", detalle:"Email enviado a tesoreria@alicorp.com.pe."},
@@ -2052,22 +2121,32 @@ const quotations = [
   },
   {
     id: nextCotId(), codigo:"COT-2026-002", propuestaCodigo:"COD-2026-005",
-    fechaGeneracion:"2026-07-18", horaGeneracion:"11:32", validaHasta:"2026-08-02", responsable:"F. Ruiz",
-    estado:"Enviada", motivoRechazo:null, comentarioPerdida:null, documentoSustento:null,
-    email:{estado:"Leído", destinatario:"compras@falabella.com.pe", asunto:"Cotización COT-2026-002 · Edenred Perú",
-      intentos:[{fecha:"2026-07-18", resultado:"Enviado"}]},
+    fechaGeneracion:"2026-07-21", horaGeneracion:"11:32", validaHasta:"2026-08-05", responsable:"F. Ruiz",
+    estado:"Enviada", motivoRechazo:null, comentarioPerdida:null, avisoSlaGenerado:false,
+    email:{asunto:"Cotización COT-2026-002 · Edenred Perú", cc:[]},
+    decisores:[
+      {id:"dec1_cot2", nombre:"Compras Falabella", email:"compras@falabella.com.pe", estado:"Pendiente",
+        fechaRespuesta:null, canalRespuesta:null, registradoPor:null, motivoRechazo:null, documentosSustento:[],
+        respuestaRevertida:false, entrega:{estado:"Leído", messageId:null, intentos:[{fecha:"2026-07-21", resultado:"Enviado"}]}}
+    ],
     historial:[
-      {fecha:"2026-07-18", usuario:"F. Ruiz", accion:"Cotización generada", detalle:"Generada a partir de la propuesta COD-2026-005, validada como rentable."},
-      {fecha:"2026-07-18", usuario:"F. Ruiz", accion:"Enviada al cliente", detalle:"Email enviado a compras@falabella.com.pe."},
-      {fecha:"2026-07-19", usuario:"Sistema", accion:"Email leído", detalle:"El cliente abrió el email de la cotización."}
+      {fecha:"2026-07-21", usuario:"F. Ruiz", accion:"Cotización generada", detalle:"Generada a partir de la propuesta COD-2026-005, validada como rentable."},
+      {fecha:"2026-07-21", usuario:"F. Ruiz", accion:"Enviada al cliente", detalle:"Email enviado a compras@falabella.com.pe."},
+      {fecha:"2026-07-22", usuario:"Sistema", accion:"Email leído", detalle:"El cliente abrió el email de la cotización."}
     ]
   },
   {
     id: nextCotId(), codigo:"COT-2026-003", propuestaCodigo:"COD-2026-009",
     fechaGeneracion:"2026-07-05", horaGeneracion:"15:47", validaHasta:"2026-07-20", responsable:"F. Ruiz",
-    estado:"Rechazada", motivoRechazo:"El cliente indicó que el rebate ofrecido no alcanza el mínimo esperado para este periodo.", comentarioPerdida:null, documentoSustento:null,
-    email:{estado:"Leído", destinatario:"administracion@nufoods.com.pe", asunto:"Cotización COT-2026-003 · Edenred Perú",
-      intentos:[{fecha:"2026-07-05", resultado:"Enviado"}]},
+    estado:"Rechazada", motivoRechazo:"El cliente indicó que el rebate ofrecido no alcanza el mínimo esperado para este periodo.", comentarioPerdida:null, avisoSlaGenerado:false,
+    email:{asunto:"Cotización COT-2026-003 · Edenred Perú", cc:[]},
+    decisores:[
+      {id:"dec1_cot3", nombre:"Administración Nufoods", email:"administracion@nufoods.com.pe", estado:"Rechazado",
+        fechaRespuesta:"2026-07-09", canalRespuesta:"Enlace", registradoPor:null,
+        motivoRechazo:"El cliente indicó que el rebate ofrecido no alcanza el mínimo esperado para este periodo.",
+        documentosSustento:[], respuestaRevertida:false,
+        entrega:{estado:"Leído", messageId:null, intentos:[{fecha:"2026-07-05", resultado:"Enviado"}]}}
+    ],
     historial:[
       {fecha:"2026-07-05", usuario:"F. Ruiz", accion:"Cotización generada", detalle:"Generada a partir de la propuesta COD-2026-009, validada como rentable."},
       {fecha:"2026-07-05", usuario:"F. Ruiz", accion:"Enviada al cliente", detalle:"Email enviado a administracion@nufoods.com.pe."},
@@ -2078,29 +2157,38 @@ const quotations = [
   {
     id: nextCotId(), codigo:"COT-2026-004", propuestaCodigo:"COD-2026-012",
     fechaGeneracion:"2026-07-22", horaGeneracion:"10:05", validaHasta:"2026-08-06", responsable:"F. Ruiz",
-    estado:"Generada", motivoRechazo:null, comentarioPerdida:null, documentoSustento:null,
-    email:{estado:"Sin enviar", destinatario:"contacto@tottus.com.pe", asunto:"Cotización COT-2026-004 · Edenred Perú", intentos:[]},
+    estado:"Generada", motivoRechazo:null, comentarioPerdida:null, avisoSlaGenerado:false,
+    email:{asunto:"Cotización COT-2026-004 · Edenred Perú", cc:[]},
+    decisores:[],
     historial:[
       {fecha:"2026-07-22", usuario:"F. Ruiz", accion:"Cotización generada", detalle:"Generada a partir de la propuesta COD-2026-012, validada como rentable."}
     ]
   },
   {
     id: nextCotId(), codigo:"COT-2026-005", propuestaCodigo:"COD-2026-002",
-    fechaGeneracion:"2026-07-19", horaGeneracion:"14:20", validaHasta:"2026-08-03", responsable:"F. Ruiz",
-    estado:"Enviada", motivoRechazo:null, comentarioPerdida:null, documentoSustento:null,
-    email:{estado:"Entregado", destinatario:"finanzas@interbank.pe", asunto:"Cotización COT-2026-005 · Edenred Perú",
-      intentos:[{fecha:"2026-07-19", resultado:"Enviado"}]},
+    fechaGeneracion:"2026-07-10", horaGeneracion:"14:20", validaHasta:"2026-07-25", responsable:"F. Ruiz",
+    estado:"Enviada", motivoRechazo:null, comentarioPerdida:null, avisoSlaGenerado:false,
+    email:{asunto:"Cotización COT-2026-005 · Edenred Perú", cc:[]},
+    decisores:[
+      {id:"dec1_cot5", nombre:"Finanzas Interbank", email:"finanzas@interbank.pe", estado:"Pendiente",
+        fechaRespuesta:null, canalRespuesta:null, registradoPor:null, motivoRechazo:null, documentosSustento:[],
+        respuestaRevertida:false, entrega:{estado:"Entregado", messageId:null, intentos:[{fecha:"2026-07-10", resultado:"Enviado"}]}}
+    ],
     historial:[
-      {fecha:"2026-07-19", usuario:"F. Ruiz", accion:"Cotización generada", detalle:"Generada a partir de la propuesta COD-2026-002, validada como rentable."},
-      {fecha:"2026-07-19", usuario:"F. Ruiz", accion:"Enviada al cliente", detalle:"Email enviado a finanzas@interbank.pe."}
+      {fecha:"2026-07-10", usuario:"F. Ruiz", accion:"Cotización generada", detalle:"Generada a partir de la propuesta COD-2026-002, validada como rentable."},
+      {fecha:"2026-07-10", usuario:"F. Ruiz", accion:"Enviada al cliente", detalle:"Email enviado a finanzas@interbank.pe."}
     ]
   },
   {
     id: nextCotId(), codigo:"COT-2026-006", propuestaCodigo:"COD-2026-006",
     fechaGeneracion:"2026-07-14", horaGeneracion:"16:38", validaHasta:"2026-07-29", responsable:"F. Ruiz",
-    estado:"Oportunidad perdida", motivoRechazo:null, comentarioPerdida:"El cliente decidió postergar el proyecto de Gift Card para el siguiente semestre.", documentoSustento:null,
-    email:{estado:"Entregado", destinatario:"compras@sodimac.com.pe", asunto:"Cotización COT-2026-006 · Edenred Perú",
-      intentos:[{fecha:"2026-07-14", resultado:"Enviado"}]},
+    estado:"Oportunidad perdida", motivoRechazo:null, comentarioPerdida:"El cliente decidió postergar el proyecto de Gift Card para el siguiente semestre.", avisoSlaGenerado:false,
+    email:{asunto:"Cotización COT-2026-006 · Edenred Perú", cc:[]},
+    decisores:[
+      {id:"dec1_cot6", nombre:"Compras Sodimac", email:"compras@sodimac.com.pe", estado:"Pendiente",
+        fechaRespuesta:null, canalRespuesta:null, registradoPor:null, motivoRechazo:null, documentosSustento:[],
+        respuestaRevertida:false, entrega:{estado:"Entregado", messageId:null, intentos:[{fecha:"2026-07-14", resultado:"Enviado"}]}}
+    ],
     historial:[
       {fecha:"2026-07-14", usuario:"F. Ruiz", accion:"Cotización generada", detalle:"Generada a partir de la propuesta COD-2026-006, validada como rentable."},
       {fecha:"2026-07-14", usuario:"F. Ruiz", accion:"Enviada al cliente", detalle:"Email enviado a compras@sodimac.com.pe."},
@@ -2109,52 +2197,187 @@ const quotations = [
   },
   {
     id: nextCotId(), codigo:"COT-2026-007", propuestaCodigo:"COD-2026-010",
-    fechaGeneracion:"2026-07-21", horaGeneracion:"08:52", validaHasta:"2026-08-05", responsable:"F. Ruiz",
-    estado:"Enviada", motivoRechazo:null, comentarioPerdida:null, documentoSustento:null,
-    email:{estado:"Fallido", destinatario:"contacto@compartamos.pe", asunto:"Cotización COT-2026-007 · Edenred Perú",
-      intentos:[{fecha:"2026-07-21", resultado:"Fallido"}]},
+    fechaGeneracion:"2026-07-24", horaGeneracion:"08:52", validaHasta:"2026-08-08", responsable:"F. Ruiz",
+    estado:"Enviada", motivoRechazo:null, comentarioPerdida:null, avisoSlaGenerado:false,
+    email:{asunto:"Cotización COT-2026-007 · Edenred Perú", cc:[]},
+    decisores:[
+      {id:"dec1_cot7", nombre:"Contacto Compartamos", email:"contacto@compartamos.pe", estado:"Pendiente",
+        fechaRespuesta:null, canalRespuesta:null, registradoPor:null, motivoRechazo:null, documentosSustento:[],
+        respuestaRevertida:false, entrega:{estado:"Fallido", messageId:null, intentos:[{fecha:"2026-07-24", resultado:"Fallido"}]}}
+    ],
     historial:[
-      {fecha:"2026-07-21", usuario:"F. Ruiz", accion:"Cotización generada", detalle:"Generada a partir de la propuesta COD-2026-010, validada como rentable."},
-      {fecha:"2026-07-21", usuario:"F. Ruiz", accion:"Enviada al cliente", detalle:"Intento de envío falló — error de entrega del proveedor de email."}
+      {fecha:"2026-07-24", usuario:"F. Ruiz", accion:"Cotización generada", detalle:"Generada a partir de la propuesta COD-2026-010, validada como rentable."},
+      {fecha:"2026-07-24", usuario:"F. Ruiz", accion:"Enviada al cliente", detalle:"Intento de envío falló — error de entrega del proveedor de email."}
     ]
   },
   {
     id: nextCotId(), codigo:"COT-2026-008", propuestaCodigo:"COD-2026-004",
     fechaGeneracion:"2026-07-23", horaGeneracion:"13:10", validaHasta:"2026-08-07", responsable:"F. Ruiz",
-    estado:"Generada", motivoRechazo:null, comentarioPerdida:null, documentoSustento:null,
-    email:{estado:"Sin enviar", destinatario:"legal@rappi.com.pe", asunto:"Cotización COT-2026-008 · Edenred Perú", intentos:[]},
+    estado:"Generada", motivoRechazo:null, comentarioPerdida:null, avisoSlaGenerado:false,
+    email:{asunto:"Cotización COT-2026-008 · Edenred Perú", cc:[]},
+    decisores:[],
     historial:[
       {fecha:"2026-07-23", usuario:"F. Ruiz", accion:"Cotización generada", detalle:"Generada a partir de la propuesta COD-2026-004, validada como rentable."}
     ]
   },
   {
     id: nextCotId(), codigo:"COT-2026-009", propuestaCodigo:"COD-2026-007",
-    fechaGeneracion:"2026-07-24", horaGeneracion:"17:05", validaHasta:"2026-08-08", responsable:"F. Ruiz",
-    estado:"Enviada", motivoRechazo:null, comentarioPerdida:null, documentoSustento:null,
-    email:{estado:"Enviado", destinatario:"gerencia@cineplanet.com.pe", asunto:"Cotización COT-2026-009 · Edenred Perú",
-      intentos:[{fecha:"2026-07-24", resultado:"Enviado"}]},
+    fechaGeneracion:"2026-07-28", horaGeneracion:"17:05", validaHasta:"2026-08-12", responsable:"F. Ruiz",
+    estado:"Enviada", motivoRechazo:null, comentarioPerdida:null, avisoSlaGenerado:false,
+    email:{asunto:"Cotización COT-2026-009 · Edenred Perú", cc:[]},
+    decisores:[
+      {id:"dec1_cot9", nombre:"Gerencia Cineplanet", email:"gerencia@cineplanet.com.pe", estado:"Pendiente",
+        fechaRespuesta:null, canalRespuesta:null, registradoPor:null, motivoRechazo:null, documentosSustento:[],
+        respuestaRevertida:false, entrega:{estado:"Enviado", messageId:null, intentos:[{fecha:"2026-07-28", resultado:"Enviado"}]}}
+    ],
     historial:[
-      {fecha:"2026-07-24", usuario:"F. Ruiz", accion:"Cotización generada", detalle:"Generada a partir de la propuesta COD-2026-007, validada como rentable."},
-      {fecha:"2026-07-24", usuario:"F. Ruiz", accion:"Enviada al cliente", detalle:"Email enviado a gerencia@cineplanet.com.pe."}
+      {fecha:"2026-07-28", usuario:"F. Ruiz", accion:"Cotización generada", detalle:"Generada a partir de la propuesta COD-2026-007, validada como rentable."},
+      {fecha:"2026-07-28", usuario:"F. Ruiz", accion:"Enviada al cliente", detalle:"Email enviado a gerencia@cineplanet.com.pe."}
     ]
   },
   {
     id: nextCotId(), codigo:"COT-2026-010", propuestaCodigo:"COD-2026-011",
     fechaGeneracion:"2026-07-08", horaGeneracion:"09:47", validaHasta:"2026-07-23", responsable:"F. Ruiz",
-    estado:"Aprobada", motivoRechazo:null, comentarioPerdida:null,
-    documentoSustento:{nombreArchivo:"sustento_aprobacion_sanfernando.pdf", fecha:"2026-07-15", hora:"16:03", cargadoPor:"F. Ruiz"},
-    email:{estado:"Leído", destinatario:"tesoreria@sanfernando.com.pe", asunto:"Cotización COT-2026-010 · Edenred Perú",
-      intentos:[{fecha:"2026-07-08", resultado:"Enviado"}]},
+    estado:"Aprobada", motivoRechazo:null, comentarioPerdida:null, avisoSlaGenerado:false,
+    email:{asunto:"Cotización COT-2026-010 · Edenred Perú", cc:[]},
+    decisores:[
+      {id:"dec1_cot10", nombre:"Tesorería San Fernando", email:"tesoreria@sanfernando.com.pe", estado:"Aprobado",
+        fechaRespuesta:"2026-07-15", canalRespuesta:"Enlace", registradoPor:null, motivoRechazo:null,
+        documentosSustento:[{nombreArchivo:"sustento_aprobacion_sanfernando.pdf", fecha:"2026-07-15", hora:"16:03", cargadoPor:"F. Ruiz"}],
+        respuestaRevertida:false, entrega:{estado:"Leído", messageId:null, intentos:[{fecha:"2026-07-08", resultado:"Enviado"}]}}
+    ],
     historial:[
       {fecha:"2026-07-08", usuario:"F. Ruiz", accion:"Cotización generada", detalle:"Generada a partir de la propuesta COD-2026-011, validada como rentable."},
       {fecha:"2026-07-08", usuario:"F. Ruiz", accion:"Enviada al cliente", detalle:"Email enviado a tesoreria@sanfernando.com.pe."},
       {fecha:"2026-07-10", usuario:"Sistema", accion:"Email leído", detalle:"El cliente abrió el email de la cotización."},
       {fecha:"2026-07-15", usuario:"F. Ruiz", accion:"Cotización aprobada", detalle:"Aprobada con documento de sustento adjunto."}
     ]
+  },
+  /* ---- Mocks nuevos: aprobación paralela de decisores (3 decisores) ---- */
+  {
+    id: nextCotId(), codigo:"COT-2026-011", propuestaCodigo:"COD-2026-006",
+    fechaGeneracion:"2026-08-01", horaGeneracion:"10:30", validaHasta:"2026-08-16", responsable:"F. Ruiz",
+    estado:"Enviada", motivoRechazo:null, comentarioPerdida:null, avisoSlaGenerado:false,
+    email:{asunto:"Cotización COT-2026-011 · Edenred Perú", cc:[]},
+    decisores:[
+      {id:"dec1_cot11", nombre:"Marisol Chávez", email:"marisol.chavez@sodimac.com.pe", estado:"Aprobado",
+        fechaRespuesta:"2026-08-02", canalRespuesta:"Enlace", registradoPor:null, motivoRechazo:null,
+        documentosSustento:[{nombreArchivo:"sustento_marisol_chavez.pdf", fecha:"2026-08-02", hora:"09:40", cargadoPor:"Marisol Chávez"}],
+        respuestaRevertida:false, entrega:{estado:"Leído", messageId:null, intentos:[{fecha:"2026-08-01", resultado:"Enviado"}]}},
+      {id:"dec2_cot11", nombre:"Andrés Bermúdez", email:"andres.bermudez@sodimac.com.pe", estado:"Aprobado",
+        fechaRespuesta:"2026-08-03", canalRespuesta:"WhatsApp", registradoPor:"F. Ruiz", motivoRechazo:null,
+        documentosSustento:[
+          {nombreArchivo:"captura_whatsapp_bermudez.jpg", fecha:"2026-08-03", hora:"15:12", cargadoPor:"F. Ruiz"},
+          {nombreArchivo:"correo_confirmacion_bermudez.pdf", fecha:"2026-08-03", hora:"15:14", cargadoPor:"F. Ruiz"}
+        ],
+        respuestaRevertida:false, entrega:{estado:"Leído", messageId:null, intentos:[{fecha:"2026-08-01", resultado:"Enviado"}]}},
+      {id:"dec3_cot11", nombre:"Karla Rojas", email:"karla.rojas@sodimac.com.pe", estado:"Pendiente",
+        fechaRespuesta:null, canalRespuesta:null, registradoPor:null, motivoRechazo:null, documentosSustento:[],
+        respuestaRevertida:false, entrega:{estado:"Entregado", messageId:null, intentos:[{fecha:"2026-08-01", resultado:"Enviado"}]}}
+    ],
+    historial:[
+      {fecha:"2026-08-01", usuario:"F. Ruiz", accion:"Cotización generada", detalle:"Generada a partir de la propuesta COD-2026-006, validada como rentable."},
+      {fecha:"2026-08-01", usuario:"F. Ruiz", accion:"Enviada al cliente", detalle:"Email enviado a marisol.chavez@sodimac.com.pe, andres.bermudez@sodimac.com.pe, karla.rojas@sodimac.com.pe."},
+      {fecha:"2026-08-02", usuario:"Marisol Chávez", accion:"Decisor aprobó", detalle:"Marisol Chávez aprobó la cotización mediante el enlace del correo. Avance: 1 de 3."},
+      {fecha:"2026-08-03", usuario:"F. Ruiz", accion:"Decisor aprobó", detalle:"Andrés Bermúdez aprobó por WhatsApp. Registrado por F. Ruiz. Avance: 2 de 3."}
+    ]
+  },
+  {
+    id: nextCotId(), codigo:"COT-2026-012", propuestaCodigo:"COD-2026-001",
+    fechaGeneracion:"2026-07-30", horaGeneracion:"09:00", validaHasta:"2026-08-14", responsable:"F. Ruiz",
+    estado:"Rechazada", motivoRechazo:"El comité de riesgos no aprobó las condiciones de facturación mínima.", comentarioPerdida:null, avisoSlaGenerado:false,
+    email:{asunto:"Cotización COT-2026-012 · Edenred Perú", cc:[]},
+    decisores:[
+      {id:"dec1_cot12", nombre:"Renzo Aguilar", email:"renzo.aguilar@alicorp.com.pe", estado:"Aprobado",
+        fechaRespuesta:"2026-07-31", canalRespuesta:"Enlace", registradoPor:null, motivoRechazo:null,
+        documentosSustento:[{nombreArchivo:"sustento_renzo_aguilar.pdf", fecha:"2026-07-31", hora:"10:05", cargadoPor:"Renzo Aguilar"}],
+        respuestaRevertida:false, entrega:{estado:"Leído", messageId:null, intentos:[{fecha:"2026-07-30", resultado:"Enviado"}]}},
+      {id:"dec2_cot12", nombre:"Lucía Ventura", email:"lucia.ventura@alicorp.com.pe", estado:"Aprobado",
+        fechaRespuesta:"2026-08-01", canalRespuesta:"Enlace", registradoPor:null, motivoRechazo:null,
+        documentosSustento:[{nombreArchivo:"sustento_lucia_ventura.pdf", fecha:"2026-08-01", hora:"11:20", cargadoPor:"Lucía Ventura"}],
+        respuestaRevertida:false, entrega:{estado:"Leído", messageId:null, intentos:[{fecha:"2026-07-30", resultado:"Enviado"}]}},
+      {id:"dec3_cot12", nombre:"Diego Salcedo", email:"diego.salcedo@alicorp.com.pe", estado:"Rechazado",
+        fechaRespuesta:"2026-08-02", canalRespuesta:"Correo", registradoPor:"F. Ruiz",
+        motivoRechazo:"El comité de riesgos no aprobó las condiciones de facturación mínima.",
+        documentosSustento:[], respuestaRevertida:false,
+        entrega:{estado:"Leído", messageId:null, intentos:[{fecha:"2026-07-30", resultado:"Enviado"}]}}
+    ],
+    historial:[
+      {fecha:"2026-07-30", usuario:"F. Ruiz", accion:"Cotización generada", detalle:"Generada a partir de una renegociación de la propuesta COD-2026-001 (ya con COT-2026-001 aprobada), validada como rentable."},
+      {fecha:"2026-07-30", usuario:"F. Ruiz", accion:"Enviada al cliente", detalle:"Email enviado a renzo.aguilar@alicorp.com.pe, lucia.ventura@alicorp.com.pe, diego.salcedo@alicorp.com.pe."},
+      {fecha:"2026-07-31", usuario:"Renzo Aguilar", accion:"Decisor aprobó", detalle:"Renzo Aguilar aprobó la cotización mediante el enlace del correo. Avance: 1 de 3."},
+      {fecha:"2026-08-01", usuario:"Lucía Ventura", accion:"Decisor aprobó", detalle:"Lucía Ventura aprobó la cotización mediante el enlace del correo. Avance: 2 de 3."},
+      {fecha:"2026-08-02", usuario:"F. Ruiz", accion:"Decisor rechazó", detalle:"Diego Salcedo rechazó por Correo: \"El comité de riesgos no aprobó las condiciones de facturación mínima.\". Registrado por F. Ruiz."},
+      {fecha:"2026-08-02", usuario:"Sistema", accion:"Cotización rechazada", detalle:"Basta un rechazo para cerrar la cotización — Diego Salcedo rechazó."},
+      {fecha:"2026-08-02", usuario:"Sistema", accion:"Cascada no aplicada", detalle:"La propuesta COD-2026-001 ya tiene una cotización aprobada (COT-2026-001) — no se modificó su estado."}
+    ]
   }
 ];
 
 function findQuotation(id){ return quotations.find(q=>q.id===id); }
+function findDecisor(q, decisorId){ return (q.decisores||[]).find(d=>d.id===decisorId); }
+function fmtISODate(d){ return d.toISOString().slice(0,10); }
+
+/* ---------- Vencimiento (SLA 15 días) + aviso previo (día 12) ----------
+   Se evalúa contra COT_HOY (fecha fija de referencia de la demo, ver
+   arriba) — nunca contra new Date() real, para que la semilla no
+   quede vencida apenas pase el tiempo real. Se llama al renderizar el
+   listado y al abrir el drawer (Cambio 10). Solo aplica a "Enviada":
+   una vencida no propaga ningún cambio a la propuesta ni afecta
+   documentos ya cargados. */
+function evaluarEstadoVigenciaCotizacion(q){
+  if(q.estado !== "Enviada") return;
+  const vh = new Date(q.validaHasta + "T00:00:00");
+  const diffDias = Math.round((vh - COT_HOY) / 86400000);
+  if(diffDias < 0){
+    q.estado = "Vencida";
+    q.historial.push({fecha:COT_HOY_STR, usuario:"Sistema", accion:"Cotización vencida", detalle:`Vencida al superarse la vigencia de 15 días calendario (hasta ${fmtDate(q.validaHasta)}).`});
+    return;
+  }
+  if(diffDias <= 3 && !q.avisoSlaGenerado){
+    q.avisoSlaGenerado = true;
+    crearAviso(q.id, "sla_proximo", `La cotización ${q.codigo} vence en ${diffDias} día${diffDias===1?"":"s"}.`);
+  }
+}
+/* Distingue del punto anterior: esto es solo el indicador VISUAL del
+   listado (clase CSS dedicada, Cambio 12) — se recalcula en cada
+   render, independiente de si ya se generó el aviso una sola vez. */
+function proximaAVencer(q){
+  if(q.estado !== "Enviada") return false;
+  const diffDias = Math.round((new Date(q.validaHasta + "T00:00:00") - COT_HOY) / 86400000);
+  return diffDias >= 0 && diffDias <= 3;
+}
+
+/* ---------- Avisos al ejecutivo (Cambio 12) ----------
+   EdenHub no tiene backend: el aviso vive solo en memoria del módulo,
+   visible como contador en el nav lateral. */
+let avisos = [];
+let avisoSeq = 1;
+function nextAvisoId(){ return "aviso" + (avisoSeq++); }
+function crearAviso(cotizacionId, tipo, texto){
+  avisos.push({id:nextAvisoId(), cotizacionId, tipo, texto, fecha:COT_HOY_STR, leido:false});
+  renderCotNavBadge();
+}
+function crearAvisoRespuestaDecisor(q, d, verbo){
+  crearAviso(q.id, "respuesta_decisor", `${d.nombre} ${verbo} la cotización ${q.codigo}.`);
+}
+function marcarAvisosLeidos(cotizacionId){
+  let changed = false;
+  avisos.forEach(a=>{ if(a.cotizacionId===cotizacionId && !a.leido){ a.leido = true; changed = true; } });
+  if(changed) renderCotNavBadge();
+}
+function marcarTodosAvisosLeidos(){
+  let changed = false;
+  avisos.forEach(a=>{ if(!a.leido){ a.leido = true; changed = true; } });
+  if(changed) renderCotNavBadge();
+}
+function renderCotNavBadge(){
+  const el = document.getElementById("cotNavBadge");
+  if(!el) return;
+  const count = avisos.filter(a=>!a.leido).length;
+  el.textContent = count;
+  el.style.display = count>0 ? "" : "none";
+}
 
 /* ---------- Filtros + tabla ---------- */
 let filteredCot = quotations.slice();
@@ -2162,11 +2385,15 @@ let cotCurrentPage = 1;
 const COT_PAGE_SIZE = 5;
 
 /* Buscador: cubre TODAS las columnas visibles de esta tabla (Código,
-   Razón social, Propuesta origen, Solución, Business Volume, Cantidad
-   de tarjetas, Estado, Email) más el RUC de la propuesta origen —
-   explícitamente incluido porque no se muestra como columna propia. */
+   Razón social, Propuesta origen, Solución, Producto, Business Volume,
+   Estado, Aprobaciones/Email) más el RUC de la propuesta origen y los
+   correos/nombres de los decisores — insensible a acentos (stripAccents,
+   Cambio 2). */
 function applyCotFilters(){
-  const cliente = document.getElementById("fCotCliente").value.trim().toLowerCase();
+  quotations.forEach(evaluarEstadoVigenciaCotizacion);
+
+  const clienteRaw = document.getElementById("fCotCliente").value.trim().toLowerCase();
+  const cliente = window.stripAccents(clienteRaw);
   const solucion = document.getElementById("fCotSolucion").value;
   const producto = document.getElementById("fCotProducto").value;
   const estado = document.getElementById("fCotEstado").value;
@@ -2177,20 +2404,22 @@ function applyCotFilters(){
   filteredCot = quotations.filter(q=>{
     const p = findProposalByCodigo(q.propuestaCodigo);
     if(cliente){
-      const hay = p.razonSocial.toLowerCase().includes(cliente) ||
-        p.ruc.includes(cliente) ||
-        q.codigo.toLowerCase().includes(cliente) ||
-        q.propuestaCodigo.toLowerCase().includes(cliente) ||
-        p.solucion.toLowerCase().includes(cliente) ||
-        String(bvTotalFor(p)).includes(cliente) ||
-        q.estado.toLowerCase().includes(cliente) ||
-        q.email.estado.toLowerCase().includes(cliente);
+      const hay = window.stripAccents(p.razonSocial.toLowerCase()).includes(cliente) ||
+        p.ruc.includes(clienteRaw) ||
+        window.stripAccents(q.codigo.toLowerCase()).includes(cliente) ||
+        window.stripAccents(q.propuestaCodigo.toLowerCase()).includes(cliente) ||
+        window.stripAccents(p.solucion.toLowerCase()).includes(cliente) ||
+        window.stripAccents(p.producto.toLowerCase()).includes(cliente) ||
+        String(bvTotalFor(p)).includes(clienteRaw) ||
+        window.stripAccents(q.estado.toLowerCase()).includes(cliente) ||
+        window.stripAccents(cotEmailEstadoResumen(q).toLowerCase()).includes(cliente) ||
+        (q.decisores||[]).some(d=>window.stripAccents(d.email.toLowerCase()).includes(cliente) || window.stripAccents(d.nombre.toLowerCase()).includes(cliente));
       if(!hay) return false;
     }
     if(solucion && p.solucion !== solucion) return false;
     if(producto && p.producto !== producto) return false;
     if(estado && q.estado !== estado) return false;
-    if(emailEstado && q.email.estado !== emailEstado) return false;
+    if(emailEstado && cotEmailEstadoResumen(q) !== emailEstado) return false;
     if(fechaIni && q.fechaGeneracion < fechaIni) return false;
     if(fechaFin && q.fechaGeneracion > fechaFin) return false;
     return true;
@@ -2212,8 +2441,11 @@ function clearCotFilters(){
   applyCotFilters();
 }
 
+/* "Cotizaciones enviadas": cuenta las que salieron al cliente y siguen
+   vivas o cerraron positivamente (Enviada + Aprobada) — Vencida no
+   cuenta ni acá ni en "Pendientes de respuesta" (Cambio 3). */
 function renderCotKPIs(){
-  const sent = quotations.filter(q=>q.estado!=="Generada").length;
+  const sent = quotations.filter(q=>q.estado==="Enviada" || q.estado==="Aprobada").length;
   const pending = quotations.filter(q=>q.estado==="Enviada").length;
   const now = "2026-07"; // mes de referencia de la demo (Julio 2026), mismo criterio que "BV cerrado en el mes" de Propuestas
   const approvedThisMonth = quotations.filter(q=>q.estado==="Aprobada" && q.fechaGeneracion.startsWith(now));
@@ -2241,7 +2473,21 @@ function lastCotActivity(q){
   return q.historial.reduce((max,h)=> h.fecha > max ? h.fecha : max, q.historial[0].fecha);
 }
 
+/* "2 de 3", o quién rechazó si la cotización ya está Rechazada — ver
+   Cambio 2. */
+function cotAprobacionesCell(q){
+  if(q.estado==="Rechazada"){
+    const rechazante = (q.decisores||[]).find(d=>d.estado==="Rechazado");
+    return rechazante ? `Rechazó: ${esc(rechazante.nombre)}` : "Rechazada";
+  }
+  const quorum = cotQuorum(q);
+  if(!quorum.total) return "—";
+  return `${quorum.aprobados} de ${quorum.total}`;
+}
+
 function renderCotTable(){
+  quotations.forEach(evaluarEstadoVigenciaCotizacion);
+
   const tbody = document.getElementById("cotTableBody");
   document.getElementById("cotResultCount").textContent = filteredCot.length;
 
@@ -2251,7 +2497,7 @@ function renderCotTable(){
   const pageItems = filteredCot.slice(start, start+COT_PAGE_SIZE);
 
   if(pageItems.length===0){
-    tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state">
+    tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state">
       <svg viewBox="0 0 24 24" width="40" height="40" fill="none"><rect x="3" y="6" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
       <strong>No se encontraron cotizaciones</strong>
       <p>Ajusta los filtros de búsqueda para ver más resultados.</p>
@@ -2259,13 +2505,14 @@ function renderCotTable(){
   } else {
     tbody.innerHTML = pageItems.map(q=>{
       const p = findProposalByCodigo(q.propuestaCodigo);
-      const resendBtn = q.estado==="Enviada"
-        ? `<button type="button" class="icon-btn" data-cotaction="resend" data-cotid="${q.id}" title="Reenviar">
+      const pendientes = (q.decisores||[]).filter(d=>d.estado==="Pendiente");
+      const resendBtn = (q.estado==="Enviada" && pendientes.length)
+        ? `<button type="button" class="icon-btn" data-cotaction="resend" data-cotid="${q.id}" title="Reenviar a los decisores pendientes">
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M4 4v6h6M20 20v-6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 15a7 7 0 0 0 12.3 2.5M18.5 9a7 7 0 0 0-12.3-2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
           </button>`
         : "";
       return `
-      <tr data-cotid="${q.id}" role="button" tabindex="0" aria-label="Ver detalle de ${esc(q.codigo)}">
+      <tr data-cotid="${q.id}" role="button" tabindex="0" aria-label="Ver detalle de ${esc(q.codigo)}" class="${proximaAVencer(q) ? "cot-row-nearing-expiry" : ""}">
         <td class="cell-codigo">${esc(q.codigo)}</td>
         <td class="cell-empresa"><strong>${esc(p.razonSocial)}</strong><span>${esc(p.giro)}</span></td>
         <td class="cell-hide-mobile">${esc(q.propuestaCodigo)}</td>
@@ -2273,7 +2520,8 @@ function renderCotTable(){
         <td class="cell-hide-mobile">${esc(p.producto)}</td>
         <td class="num cell-bv">${money(bvTotalFor(p))}</td>
         <td class="cell-estado"><span class="badge ${cotBadgeClass(q.estado)}">${esc(q.estado)}</span></td>
-        <td class="cell-hide-mobile">${esc(q.email.estado)}</td>
+        <td class="cell-hide-mobile">${cotAprobacionesCell(q)}</td>
+        <td class="cell-hide-mobile">${esc(cotEmailEstadoResumen(q))}</td>
         <td class="cell-hide-mobile">${fmtDate(lastCotActivity(q))}</td>
         <td class="center cell-acciones">
           <div class="row-actions">
@@ -2368,9 +2616,8 @@ function openCotHistoryModal(q){
    enviar el email (mismo nombre "Cotizacion_<codigo>.pdf" que arma
    openCotEmailPreview) y solo existe una vez la cotización se envió
    al menos una vez (q.estado ya no es "Generada"). "Documento de
-   sustento" es el archivo cargado obligatoriamente al aprobar
-   (q.documentoSustento) — solo existe si la cotización ya fue
-   aprobada. */
+   sustento" es uno o varios archivos por decisor (d.documentosSustento)
+   — una fila por archivo, identificada con el decisor que la aportó. */
 /* Tipo de archivo derivado de la extensión — no asume PDF, el
    documento de sustento puede ser correo (.eml), imagen u otro
    archivo (explícitamente no Excel en el flujo de aprobación actual,
@@ -2414,20 +2661,26 @@ function renderCotDocumentacion(q){
         <td><strong>Documento propuesta</strong></td>
         <td colspan="5" class="hint">Se generará al enviar la cotización al cliente.</td>
       </tr>`;
-  const filaSustento = q.documentoSustento
-    ? `<tr>
-        <td><strong>Documento de sustento</strong></td>
-        <td>${esc(q.documentoSustento.nombreArchivo)}</td>
-        <td>${esc(q.documentoSustento.cargadoPor || "F. Ruiz")}</td>
-        <td>${fmtDate(q.documentoSustento.fecha)}</td>
-        <td>${esc(q.documentoSustento.hora || "—")}</td>
-        <td class="center">${docDownloadBtnHtml(q.documentoSustento.nombreArchivo)}</td>
-      </tr>`
-    : `<tr class="doc-row-empty">
-        <td><strong>Documento de sustento</strong></td>
-        <td colspan="5" class="hint">Se cargará al aprobar la cotización.</td>
-      </tr>`;
-  body.innerHTML = filaPropuesta + filaSustento;
+  /* Cada decisor aporta su propio sustento — uno o varios archivos,
+     se conservan todos e identificados con su decisor (Cambio 6). */
+  const filasSustento = [];
+  (q.decisores||[]).forEach(d=>{
+    (d.documentosSustento||[]).forEach(doc=>{
+      filasSustento.push(`<tr>
+        <td><strong>Sustento · ${esc(d.nombre)}</strong></td>
+        <td>${esc(doc.nombreArchivo)}</td>
+        <td>${esc(doc.cargadoPor || d.nombre)}</td>
+        <td>${fmtDate(doc.fecha)}</td>
+        <td>${esc(doc.hora || "—")}</td>
+        <td class="center">${docDownloadBtnHtml(doc.nombreArchivo)}</td>
+      </tr>`);
+    });
+  });
+  const sustentoHtml = filasSustento.length ? filasSustento.join("") : `<tr class="doc-row-empty">
+      <td><strong>Documento de sustento</strong></td>
+      <td colspan="5" class="hint">Se cargará cuando algún decisor apruebe la cotización.</td>
+    </tr>`;
+  body.innerHTML = filaPropuesta + sustentoHtml;
 }
 
 function renderCotResultBox(q){
@@ -2445,12 +2698,70 @@ function renderCotResultBox(q){
   }
 }
 
+/* ---------- Sección Decisores (Cambio 4) ---------- */
+function renderCotDecisoresSection(q){
+  const quorum = cotQuorum(q);
+  document.getElementById("cq_decisoresResumen").textContent = quorum.total ? `${quorum.aprobados} de ${quorum.total} aprobaciones` : "Sin decisores todavía";
+
+  const body = document.getElementById("cq_decisoresBody");
+  if(!q.decisores || !q.decisores.length){
+    body.innerHTML = `<tr class="doc-row-empty"><td colspan="7" class="hint">Esta cotización todavía no se ha enviado a ningún decisor.</td></tr>`;
+    return;
+  }
+  body.innerHTML = q.decisores.map(d=>{
+    const puedeResponder = d.estado==="Pendiente" && q.estado==="Enviada";
+    const puedeRevertir = !!d.canalRespuesta && d.canalRespuesta!=="Enlace" && q.estado==="Enviada";
+    const puedeVerEmail = d.entrega.estado !== "Sin enviar";
+    const sustento = (d.documentosSustento||[]).length
+      ? d.documentosSustento.map(doc=>esc(doc.nombreArchivo)).join("<br>")
+      : "—";
+    const acciones = [];
+    if(puedeResponder){
+      acciones.push(`<button type="button" class="icon-btn" data-decaction="approve" data-decisorid="${d.id}" title="Aprobar">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>`);
+      acciones.push(`<button type="button" class="icon-btn" data-decaction="reject" data-decisorid="${d.id}" title="Rechazar">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>`);
+      acciones.push(`<button type="button" class="icon-btn" data-decaction="manual" data-decisorid="${d.id}" title="Registrar respuesta">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 00-3-3L5 17v3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+      </button>`);
+      acciones.push(`<button type="button" class="icon-btn" data-decaction="resend" data-decisorid="${d.id}" title="Reenviar">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M4 4v6h6M20 20v-6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 15a7 7 0 0 0 12.3 2.5M18.5 9a7 7 0 0 0-12.3-2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>`);
+    }
+    if(puedeVerEmail){
+      acciones.push(`<button type="button" class="icon-btn" data-decaction="viewemail" data-decisorid="${d.id}" title="Ver email">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M4 12s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.4" stroke="currentColor" stroke-width="1.7"/></svg>
+      </button>`);
+    }
+    if(puedeRevertir){
+      acciones.push(`<button type="button" class="icon-btn" data-decaction="revert" data-decisorid="${d.id}" title="Revertir respuesta">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M4 4v6h6M20 20v-6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 9a8 8 0 1 0 1 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>`);
+    }
+    return `<tr data-decisorid="${d.id}">
+      <td><strong>${esc(d.nombre)}</strong>${d.respuestaRevertida ? `<span class="tag-neutral" style="margin-left:6px;">Corregido</span>` : ``}</td>
+      <td>${esc(d.email)}</td>
+      <td><span class="badge ${decisorBadgeClass(d.estado)}">${esc(d.estado)}</span></td>
+      <td>${esc(d.entrega.estado)}</td>
+      <td>${d.fechaRespuesta ? fmtDate(d.fechaRespuesta) + (d.canalRespuesta ? ` · ${esc(d.canalRespuesta)}` : "") : "—"}</td>
+      <td>${sustento}</td>
+      <td class="center"><div class="row-actions">${acciones.join("")}</div></td>
+    </tr>`;
+  }).join("");
+}
+
+/* Barra fija del drawer: resumen agregado (cotEmailEstadoResumen +
+   quórum). El detalle completo por decisor vive en la sección
+   Decisores (Cambio 4) — esta barra ya no asume un solo destinatario. */
 function renderCotEmailBar(q){
   const icon = document.getElementById("cotEmailIcon");
   const stateText = document.getElementById("cotEmailStateText");
   const subText = document.getElementById("cotEmailSubText");
   const resendBtn = document.getElementById("btnResendEmail");
-  const e = q.email.estado;
+  const e = cotEmailEstadoResumen(q);
+  const quorum = cotQuorum(q);
 
   icon.className = "cot-email-icon" + (
     e==="Enviando" ? " is-sending" :
@@ -2459,18 +2770,25 @@ function renderCotEmailBar(q){
     e==="Fallido" ? " is-failed" : ""
   );
   icon.innerHTML = emailIconSvg(e);
-  stateText.textContent = e;
+  stateText.textContent = quorum.total ? `${e} · ${quorum.aprobados} de ${quorum.total} aprobaciones` : e;
   const subs = {
-    "Sin enviar":"Aún no se ha enviado esta cotización al cliente",
-    "Enviando":"Enviando el email al cliente…",
+    "Sin enviar":"Aún no se ha enviado esta cotización a los decisores",
+    "Enviando":"Enviando el email a los decisores…",
     "Enviado":"El email fue enviado, esperando confirmación de entrega",
-    "Entregado":"El email llegó a la casilla del cliente",
-    "Leído":"El cliente abrió el email de la cotización",
-    "Fallido":"No se pudo entregar el email — intenta reenviar"
+    "Entregado":"El email llegó a la casilla de todos los decisores",
+    "Leído":"Todos los decisores abrieron el email de la cotización",
+    "Fallido":"No se pudo entregar el email a algún decisor — revisa el detalle en Decisores"
   };
   subText.textContent = subs[e] || "";
-  resendBtn.style.display = (e==="Sin enviar" || e==="Enviando") ? "none" : "inline-flex";
+  const pendientes = (q.decisores||[]).filter(d=>d.estado==="Pendiente");
+  resendBtn.style.display = (e==="Sin enviar" || e==="Enviando" || !pendientes.length) ? "none" : "inline-flex";
 }
+
+/* Dueño de la cotización o Head Comercial, nadie más (Cambio 9). En
+   esta demo el único actor existente es "F. Ruiz" (sin sesión real por
+   usuario), así que la condición siempre es verdadera — queda igual
+   como guardia de código para cuando exista una identidad real. */
+function puedeEditarDecisores(q){ return q.responsable === "F. Ruiz"; }
 
 function renderCotFooterButtons(q){
   const left = document.getElementById("cotFooterLeft");
@@ -2480,6 +2798,11 @@ function renderCotFooterButtons(q){
       Ver historial
     </button><button class="btn-text" id="btnCloseCotDrawerFooter" type="button">Cerrar</button>`;
 
+  /* Aprobar/Rechazar ya no son acciones genéricas de la cotización —
+     con 1 a 3 decisores, cada respuesta se registra por fila en la
+     sección Decisores (Cambio 4). El footer conserva solo lo que sigue
+     siendo a nivel de cotización: enviar, marcar perdida, editar
+     decisores. */
   if(q.estado==="Generada"){
     leftHtml = `<button class="btn btn-outline-danger" id="btnCotMarkLost" type="button">Marcar como oportunidad perdida</button>`;
     rightHtml += `<button class="btn btn-primary" id="btnCotSend" type="button">
@@ -2487,12 +2810,15 @@ function renderCotFooterButtons(q){
       Enviar cotización al cliente
     </button>`;
   } else if(q.estado==="Enviada"){
-    leftHtml = `<button class="btn btn-outline-danger" id="btnCotReject" type="button">Rechazar cotización</button>
-      <button class="btn btn-secondary" id="btnCotMarkLost" type="button">Marcar como oportunidad perdida</button>`;
-    rightHtml += `<button class="btn btn-primary" id="btnCotApprove" type="button">
-      <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Aprobar cotización
-    </button>`;
+    leftHtml = `<button class="btn btn-secondary" id="btnCotMarkLost" type="button">Marcar como oportunidad perdida</button>`;
+    if(puedeEditarDecisores(q)){
+      rightHtml += `<button class="btn btn-secondary" id="btnCotEditDecisores" type="button">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M4 20l3.6-1 10-10-2.6-2.6-10 10L4 20z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        Editar decisores
+      </button>`;
+    }
+  } else if(q.estado==="Rechazada"){
+    leftHtml = `<button class="btn btn-secondary" id="btnCotMarkLost" type="button">Marcar como oportunidad perdida</button>`;
   }
   left.innerHTML = leftHtml;
   right.innerHTML = rightHtml;
@@ -2501,17 +2827,17 @@ function renderCotFooterButtons(q){
   document.getElementById("btnCotHistory").addEventListener("click", ()=>openCotHistoryModal(q));
   const sendBtn = document.getElementById("btnCotSend");
   if(sendBtn) sendBtn.addEventListener("click", ()=>openCotComposeModal(q));
-  const rejectBtn = document.getElementById("btnCotReject");
-  if(rejectBtn) rejectBtn.addEventListener("click", ()=>openCotRejectModal(q));
-  const approveBtn = document.getElementById("btnCotApprove");
-  if(approveBtn) approveBtn.addEventListener("click", ()=>openCotApproveModal(q));
   const lostBtn = document.getElementById("btnCotMarkLost");
   if(lostBtn) lostBtn.addEventListener("click", ()=>openCotLostModal(q));
+  const editDecisoresBtn = document.getElementById("btnCotEditDecisores");
+  if(editDecisoresBtn) editDecisoresBtn.addEventListener("click", ()=>openCotEditDecisoresModal(q));
 }
 
 function openCotDrawer(id){
   cotDrawerTargetId = id;
   const q = findQuotation(id);
+  evaluarEstadoVigenciaCotizacion(q);
+  marcarAvisosLeidos(q.id);
   const p = findProposalByCodigo(q.propuestaCodigo);
 
   document.getElementById("cotDrawerEyebrow").innerHTML = `Cotización · <span class="badge ${cotBadgeClass(q.estado)}" style="vertical-align:middle;">${esc(q.estado)}</span>`;
@@ -2566,6 +2892,7 @@ function openCotDrawer(id){
   if(p.productoCustom){ mdrWrap.classList.add("open"); setLockedValue("cq_mdrNegociado", p.mdrNegociado+"%"); }
   else mdrWrap.classList.remove("open");
 
+  renderCotDecisoresSection(q);
   renderCotDocumentacion(q);
   renderCotResultBox(q);
   renderCotEmailBar(q);
@@ -2595,6 +2922,8 @@ function closeCotDrawer(){
 function refreshCotDrawerIfOpen(q){
   if(cotDrawerTargetId !== q.id) return;
   document.getElementById("cotDrawerEyebrow").innerHTML = `Cotización · <span class="badge ${cotBadgeClass(q.estado)}" style="vertical-align:middle;">${esc(q.estado)}</span>`;
+  document.getElementById("cotDrawerValidaHasta").textContent = fmtDate(q.validaHasta);
+  renderCotDecisoresSection(q);
   renderCotDocumentacion(q);
   renderCotResultBox(q);
   renderCotHistory(q);
@@ -2627,73 +2956,120 @@ function simulateEmailFetch(){
   });
 }
 
+/* Envía a un subconjunto de decisores (opts.decisorIds) o a todos si se
+   omite — un simulateEmailFetch() independiente por decisor, cada uno
+   con su propio estado de entrega y su propia entrada en intentos
+   (Cambio 5). Si TODOS fallan, la cotización no pasa a "Enviada"; si
+   falla solo alguno, sí pasa y ese decisor queda "Fallido". */
 function sendCotEmail(q, opts){
-  const isResend = !!(opts && opts.isResend);
-  const btn = (opts && opts.triggerBtn) || (isResend ? document.getElementById("btnResendEmail") : document.getElementById("btnCotSend"));
-  const label = (opts && opts.triggerBtn) ? "" : (isResend ? "Reenviando…" : "Enviando…");
+  opts = opts || {};
+  const isResend = !!opts.isResend;
+  const targets = opts.decisorIds
+    ? q.decisores.filter(d=>opts.decisorIds.includes(d.id))
+    : q.decisores.slice();
+  if(!targets.length) return;
+
+  const btn = opts.triggerBtn || (isResend ? document.getElementById("btnResendEmail") : document.getElementById("btnCotSend"));
+  const label = opts.triggerBtn ? "" : (isResend ? "Reenviando…" : "Enviando…");
   cotSetButtonLoading(btn, label);
-  q.email.estado = "Enviando";
+  targets.forEach(d=>{ d.entrega.estado = "Enviando"; });
   refreshCotDrawerIfOpen(q);
+  renderCotTable();
 
-  simulateEmailFetch().then(resultado=>{
-    q.email.estado = resultado;
-    q.email.intentos.push({fecha:"2026-07-25", resultado});
+  Promise.all(targets.map(d=>simulateEmailFetch().then(resultado=>({d, resultado})))).then(results=>{
     cotRestoreButton(btn);
+    let anySuccess = false;
+    results.forEach(({d, resultado})=>{
+      d.entrega.estado = resultado;
+      d.entrega.intentos.push({fecha:COT_HOY_STR, resultado});
+      if(resultado==="Enviado") anySuccess = true;
+    });
 
-    if(resultado==="Enviado" && !isResend){
-      q.estado = "Enviada";
-      q.historial.push({fecha:"2026-07-25", usuario:"F. Ruiz", accion:"Enviada al cliente", detalle:`Email enviado a ${q.email.destinatario}.`});
-    } else if(resultado==="Enviado" && isResend){
-      q.historial.push({fecha:"2026-07-25", usuario:"F. Ruiz", accion:"Email reenviado", detalle:`Reenvío exitoso a ${q.email.destinatario}.`});
+    if(!isResend){
+      if(anySuccess){
+        q.estado = "Enviada";
+        const okList = results.filter(r=>r.resultado==="Enviado").map(r=>r.d.email).join(", ");
+        q.historial.push({fecha:COT_HOY_STR, usuario:"F. Ruiz", accion:"Enviada al cliente", detalle:`Email enviado a ${okList}.`});
+        const failList = results.filter(r=>r.resultado==="Fallido").map(r=>r.d.email);
+        if(failList.length) q.historial.push({fecha:COT_HOY_STR, usuario:"Sistema", accion:"Envío fallido", detalle:`No se pudo entregar a: ${failList.join(", ")} — se puede reintentar.`});
+      } else {
+        q.historial.push({fecha:COT_HOY_STR, usuario:"Sistema", accion:"Envío fallido", detalle:"No se pudo entregar el email a ningún decisor — se puede reintentar."});
+      }
     } else {
-      q.historial.push({fecha:"2026-07-25", usuario:"F. Ruiz", accion:"Envío fallido", detalle:"Error de entrega del proveedor de email — se puede reintentar."});
+      results.forEach(({d, resultado})=>{
+        q.historial.push({fecha:COT_HOY_STR, usuario:"F. Ruiz",
+          accion: resultado==="Enviado" ? "Email reenviado" : "Envío fallido",
+          detalle: resultado==="Enviado" ? `Reenvío exitoso a ${d.email}.` : `Reintento fallido para ${d.email}.`});
+      });
     }
 
     refreshCotDrawerIfOpen(q);
     renderCotTable();
-    showToast(resultado==="Enviado" ? `Email ${isResend?"reenviado":"enviado"} correctamente.` : "No se pudo enviar el email. Puedes reintentar.", resultado==="Enviado" ? "success" : "danger");
+    const okCount = results.filter(r=>r.resultado==="Enviado").length;
+    showToast(
+      okCount===results.length ? `Email ${isResend?"reenviado":"enviado"} correctamente.`
+      : okCount>0 ? `Email ${isResend?"reenviado":"enviado"} a ${okCount} de ${results.length} decisores.`
+      : "No se pudo enviar el email. Puedes reintentar.",
+      okCount===results.length ? "success" : okCount>0 ? "info" : "danger"
+    );
 
-    if(resultado==="Enviado"){
-      if(!isResend) openCotEmailPreview(q);
-      // Simula el webhook asíncrono de entrega (Infobip), independiente de si el drawer sigue abierto
+    // Simula el webhook asíncrono de entrega (Infobip) por decisor, independiente de si el drawer sigue abierto
+    results.filter(r=>r.resultado==="Enviado").forEach(({d})=>{
       setTimeout(()=>{
-        if(q.email.estado==="Enviado"){
-          q.email.estado = "Entregado";
-          q.historial.push({fecha:"2026-07-25", usuario:"Sistema", accion:"Email entregado", detalle:"Confirmación de entrega recibida del proveedor de email."});
+        if(d.entrega.estado==="Enviado"){
+          d.entrega.estado = "Entregado";
+          q.historial.push({fecha:COT_HOY_STR, usuario:"Sistema", accion:"Email entregado", detalle:`Confirmación de entrega recibida para ${d.email}.`});
           refreshCotDrawerIfOpen(q);
           renderCotTable();
         }
       }, 2000);
-    }
+    });
   });
 }
 
-/* Vista previa de un email ya enviado (o en curso) — Para/CC quedan
-   deshabilitados (solo lectura), footer "Cerrar" únicamente. */
-function openCotEmailPreview(q){
+/* Vista previa del email de UN decisor específico — Para/CC quedan
+   deshabilitados (solo lectura), footer "Cerrar" únicamente. Los
+   enlaces Aprobar/Rechazar quedan asociados a ese decisor (Cambio 8). */
+let cotEmailPreviewTargetDecisorId = null;
+function openCotEmailPreview(q, decisorId){
+  const d = findDecisor(q, decisorId);
+  if(!d) return;
+  cotEmailPreviewTargetDecisorId = decisorId;
+
   document.getElementById("cotEmailModalCodigo").textContent = q.codigo;
+  document.getElementById("cotEmailToRowSent").style.display = "";
+  document.getElementById("cotEmailToRowCompose").style.display = "none";
+  document.getElementById("cotEmailChipHintRow").style.display = "none";
   const toInput = document.getElementById("cotEmailToInput");
   const ccInput = document.getElementById("cotEmailCcInput");
-  toInput.value = q.email.destinatario;
+  toInput.value = d.email;
   toInput.disabled = true;
   ccInput.value = (q.email.cc||[]).join(", ");
   ccInput.disabled = true;
   document.getElementById("cotEmailSubject").textContent = q.email.asunto;
   document.getElementById("cotEmailAttachmentName").textContent = `Cotizacion_${q.codigo}.pdf`;
 
-  const canAct = q.email.estado==="Enviado" || q.email.estado==="Entregado" || q.email.estado==="Leído";
-  const canRespond = canAct && q.estado==="Enviada";
+  const canAct = d.entrega.estado==="Enviado" || d.entrega.estado==="Entregado" || d.entrega.estado==="Leído";
+  const canRespond = canAct && q.estado==="Enviada" && d.estado==="Pendiente";
   const approveLink = document.getElementById("cotEmailLinkApprove");
   const rejectLink = document.getElementById("cotEmailLinkReject");
   approveLink.disabled = !canRespond;
   rejectLink.disabled = !canRespond;
-  document.getElementById("cotEmailLinksHint").textContent = canRespond
-    ? ""
-    : (canAct ? "Esta cotización ya fue resuelta — los enlaces quedan inactivos." : "Los enlaces se activan una vez que el email se haya enviado correctamente.");
 
-  if(canAct && q.email.estado!=="Leído"){
-    q.email.estado = "Leído";
-    q.historial.push({fecha:"2026-07-25", usuario:"Sistema", accion:"Email leído", detalle:"El cliente abrió el email de la cotización (simulado)."});
+  /* Cuatro motivos de inactividad distintos (Cambio 8): aún no
+     enviado, ya respondiste, el proceso ya terminó, la cotización venció. */
+  let hint = "";
+  if(!canRespond){
+    if(!canAct) hint = "Los enlaces se activan una vez que el email de este decisor se haya enviado correctamente.";
+    else if(d.estado!=="Pendiente") hint = "Ya respondiste a esta cotización.";
+    else if(q.estado==="Vencida") hint = "La cotización venció.";
+    else hint = "El proceso ya terminó — los enlaces quedan inactivos.";
+  }
+  document.getElementById("cotEmailLinksHint").textContent = hint;
+
+  if(canAct && d.entrega.estado!=="Leído"){
+    d.entrega.estado = "Leído";
+    q.historial.push({fecha:COT_HOY_STR, usuario:"Sistema", accion:"Email leído", detalle:`${d.nombre} abrió el email de la cotización (simulado).`});
     refreshCotDrawerIfOpen(q);
     renderCotTable();
   }
@@ -2705,16 +3081,53 @@ function openCotEmailPreview(q){
   trapFocus(document.getElementById("cotEmailModal"));
 }
 
-/* Paso previo al primer envío — Para/CC editables (Para precargado con
-   el destinatario semilla, CC vacío/opcional), con "Cancelar"/"Enviar"
-   en vez de "Cerrar". Reutiliza el mismo modal que la vista previa de
-   solo lectura en vez de crear uno paralelo. */
+/* ---------- Compose — chips de decisores (Cambio 5) ----------
+   Hasta 3 destinatarios, sin duplicados, validados por formato. La
+   fuente de sugerencias queda sustituible (hoy vacía, sin integración
+   Salesforce) — decisorSuggestions() es el único punto a reemplazar
+   cuando exista el autocompletado real. */
+let cotComposeChips = [];
+function decisorSuggestions(){ return []; }
+function renderCotComposeChips(){
+  const list = document.getElementById("cotEmailChipsList");
+  list.innerHTML = cotComposeChips.map((email,i)=>`<span class="cot-chip">${esc(email)}<button type="button" data-chipidx="${i}" title="Quitar">
+    <svg viewBox="0 0 24 24" width="10" height="10" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+  </button></span>`).join("");
+  const input = document.getElementById("cotEmailChipInput");
+  const atMax = cotComposeChips.length >= 3;
+  input.disabled = atMax;
+  input.placeholder = atMax ? "Máximo 3 decisores" : "Escribe un correo y presiona Enter";
+  document.getElementById("btnConfirmCotSendCompose").disabled = cotComposeChips.length === 0;
+}
+function addComposeChip(raw){
+  const hint = document.getElementById("cotEmailChipHint");
+  const email = raw.trim();
+  if(!email) return;
+  if(cotComposeChips.length >= 3){ showToast("Máximo 3 decisores por cotización.", "danger"); return; }
+  if(!EMAIL_RE.test(email)){ showToast("Ingresa un correo con formato válido.", "danger"); return; }
+  if(cotComposeChips.some(e=>e.toLowerCase()===email.toLowerCase())){ showToast("Ese decisor ya está en la lista.", "danger"); return; }
+  const suggestions = decisorSuggestions();
+  hint.textContent = (suggestions.length && !suggestions.includes(email))
+    ? "Destinatario no encontrado en los resultados: regístralo en Salesforce."
+    : "";
+  cotComposeChips.push(email);
+  document.getElementById("cotEmailChipInput").value = "";
+  renderCotComposeChips();
+}
+
+/* Paso previo al primer envío — define la lista de decisores (chips,
+   máx. 3) en vez de un único destinatario. CC se mantiene como un
+   input informativo aparte (no decide, no cuenta para el quórum). */
 function openCotComposeModal(q){
   document.getElementById("cotEmailModalCodigo").textContent = q.codigo;
-  const toInput = document.getElementById("cotEmailToInput");
+  document.getElementById("cotEmailToRowSent").style.display = "none";
+  document.getElementById("cotEmailToRowCompose").style.display = "";
+  document.getElementById("cotEmailChipHintRow").style.display = "";
+  cotComposeChips = [];
+  document.getElementById("cotEmailChipHint").textContent = "";
+  document.getElementById("cotEmailChipInput").value = "";
+  renderCotComposeChips();
   const ccInput = document.getElementById("cotEmailCcInput");
-  toInput.value = q.email.destinatario || "";
-  toInput.disabled = false;
   ccInput.value = (q.email.cc||[]).join(", ");
   ccInput.disabled = false;
   document.getElementById("cotEmailSubject").textContent = q.email.asunto;
@@ -2733,16 +3146,15 @@ function openCotComposeModal(q){
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/* Valida Para (obligatorio) + CC (opcional, múltiple separado por
-   coma), guarda ambos en q.email y recién ahí dispara el envío
-   simulado real — antes de esto no se ha "enviado" nada. */
+/* Valida los chips (1 a 3, obligatorio al menos uno) + CC (opcional,
+   múltiple separado por coma), crea decisores[] y recién ahí dispara
+   el envío simulado real — antes de esto no se ha "enviado" nada. */
 function confirmCotSendFromCompose(){
   const q = findQuotation(cotDrawerTargetId);
   if(!q) return;
 
-  const destinatario = document.getElementById("cotEmailToInput").value.trim();
-  if(!destinatario || !EMAIL_RE.test(destinatario)){
-    showToast("Ingresa un email válido en Para.", "danger");
+  if(!cotComposeChips.length){
+    showToast("Agrega al menos un decisor para enviar la cotización.", "danger");
     return;
   }
 
@@ -2757,49 +3169,99 @@ function confirmCotSendFromCompose(){
     }
   }
 
-  q.email.destinatario = destinatario;
   q.email.cc = cc;
+  q.decisores = cotComposeChips.map((email,i)=>{
+    const dec = blankDecisor(email);
+    dec.id = "dec" + (i+1) + "_" + q.id;
+    return dec;
+  });
+
   closeModalById("cotEmailModal");
   sendCotEmail(q, {isResend:false});
 }
 
 /* ---------- Modales de acción (Rechazar / Perdida / Aprobar) ---------- */
-function openCotRejectModal(q){
+/* Decisor sobre el que actúa el modal de Aprobar/Rechazar/Registro
+   manual actualmente abierto — el mismo campo lo usan los 3 flujos, que
+   nunca están abiertos a la vez. */
+let cotActionTargetDecisorId = null;
+
+function openCotRejectModal(q, decisorId){
   closeModalById("cotEmailModal");
-  document.getElementById("cotRejectCodigo").textContent = q.codigo;
+  cotActionTargetDecisorId = decisorId;
+  const d = findDecisor(q, decisorId);
+  document.getElementById("cotRejectCodigo").textContent = q.codigo + (d ? " · " + d.nombre : "");
   document.getElementById("cotRejectReason").value = "";
   document.getElementById("cotRejectModal").classList.add("open");
   cotOverlay.classList.add("visible");
   trapFocus(document.getElementById("cotRejectModal"));
 }
 /* Rechazo en cascada: la propuesta de origen pasa a Rechazada también,
-   replicando exactamente lo que hace confirmReject() (estado +
-   historial) — sin disparar el flujo de "Generar nueva versión", que
-   sigue siendo 100% manual (el botón aparece solo en el listado de
-   Propuestas por estar p.estado==="Rechazada", igual que un rechazo
-   directo). */
+   salvo que YA tenga una cotización Aprobada en otra versión — en ese
+   caso el cierre tiene precedencia sobre el rechazo (Cambio 11) y la
+   propuesta no cambia de estado. Aplica igual al rechazo por enlace y
+   al manual (ambos pasan por este mismo camino). */
 function cascadeRejectProposal(q, motivo){
   const p = findProposalByCodigo(q.propuestaCodigo);
   if(!p || p.estado === "Rechazada") return;
+  if(proposalHasApprovedCotizacion(p)){
+    q.historial.push({fecha:COT_HOY_STR, usuario:"Sistema", accion:"Cascada no aplicada", detalle:`La propuesta ${p.codigo} ya tiene una cotización aprobada en otra versión — no se modificó su estado.`});
+    showToast(`La propuesta ${p.codigo} ya tiene un trato cerrado; no se modificó su estado.`, "info");
+    return;
+  }
   p.estado = "Rechazada";
   p.fecha = new Date().toISOString().slice(0,10);
   p.historial.push({version:p.version, fecha:p.fecha, estado:"Rechazada", usuario:"F. Ruiz", resumen:"Propuesta rechazada automáticamente al rechazarse la cotización " + q.codigo + " generada a partir de ella.", motivo});
   flashRow(p.id);
   applyProposalsFilters();
 }
+/* Efecto compartido por enlace (cliente) y registro manual (Cambio 7):
+   marca al decisor, evalúa cierre/cascada y avisa al ejecutivo. */
+function applyDecisorApproval(q, d, opts){
+  const horaActual = String(COT_HOY.getHours()).padStart(2,"0") + ":" + String(COT_HOY.getMinutes()).padStart(2,"0");
+  d.estado = "Aprobado";
+  d.fechaRespuesta = COT_HOY_STR;
+  d.canalRespuesta = opts.canal;
+  d.registradoPor = opts.registradoPor;
+  d.motivoRechazo = null;
+  d.documentosSustento = opts.archivos.map(f=>({nombreArchivo:f, fecha:COT_HOY_STR, hora:horaActual, cargadoPor:opts.registradoPor || d.nombre}));
+  const quorum = cotQuorum(q);
+  const usuario = opts.registradoPor || d.nombre;
+  const detalle = opts.registradoPor
+    ? `${d.nombre} aprobó por ${opts.canal}. Registrado por ${opts.registradoPor}. Avance: ${quorum.aprobados} de ${quorum.total}.`
+    : `${d.nombre} aprobó la cotización mediante el enlace del correo. Avance: ${quorum.aprobados} de ${quorum.total}.`;
+  q.historial.push({fecha:COT_HOY_STR, usuario, accion:"Decisor aprobó", detalle});
+  crearAvisoRespuestaDecisor(q, d, "aprobó");
+  evaluarCierreCotizacion(q);
+}
+function applyDecisorRejection(q, d, opts){
+  d.estado = "Rechazado";
+  d.fechaRespuesta = COT_HOY_STR;
+  d.canalRespuesta = opts.canal;
+  d.registradoPor = opts.registradoPor;
+  d.motivoRechazo = opts.motivo;
+  const usuario = opts.registradoPor || d.nombre;
+  const detalle = opts.registradoPor
+    ? `${d.nombre} rechazó por ${opts.canal}: "${opts.motivo}". Registrado por ${opts.registradoPor}.`
+    : `${d.nombre} rechazó la cotización mediante el enlace del correo: "${opts.motivo}".`;
+  q.historial.push({fecha:COT_HOY_STR, usuario, accion:"Decisor rechazó", detalle});
+  q.estado = "Rechazada";
+  q.motivoRechazo = opts.motivo;
+  q.historial.push({fecha:COT_HOY_STR, usuario:"Sistema", accion:"Cotización rechazada", detalle:`Basta un rechazo para cerrar la cotización — ${d.nombre} rechazó.`});
+  crearAvisoRespuestaDecisor(q, d, "rechazó");
+  cascadeRejectProposal(q, opts.motivo);
+}
 
 function confirmCotReject(){
   const q = findQuotation(cotDrawerTargetId);
+  const d = findDecisor(q, cotActionTargetDecisorId);
   const motivo = document.getElementById("cotRejectReason").value.trim();
-  if(!motivo){ document.getElementById("cotRejectReason").focus(); return; }
-  q.estado = "Rechazada";
-  q.motivoRechazo = motivo;
-  q.historial.push({fecha:"2026-07-25", usuario:"F. Ruiz", accion:"Cotización rechazada", detalle:motivo});
-  cascadeRejectProposal(q, motivo);
+  if(!d || !motivo){ document.getElementById("cotRejectReason").focus(); return; }
+  applyDecisorRejection(q, d, {canal:"Enlace", registradoPor:null, motivo});
   closeModalById("cotRejectModal");
   refreshCotDrawerIfOpen(q);
   renderCotTable();
-  showToast(`Cotización ${q.codigo} marcada como Rechazada. La propuesta de origen también pasó a Rechazada.`, "danger");
+  showToast(`${d.nombre} rechazó la cotización ${q.codigo}. La cotización pasó a Rechazada.`, "danger");
 }
 
 function openCotLostModal(q){
@@ -2816,7 +3278,7 @@ function confirmCotLost(){
   if(!comentario){ document.getElementById("cotLostComment").focus(); return; }
   q.estado = "Oportunidad perdida";
   q.comentarioPerdida = comentario;
-  q.historial.push({fecha:"2026-07-25", usuario:"F. Ruiz", accion:"Oportunidad perdida", detalle:comentario});
+  q.historial.push({fecha:COT_HOY_STR, usuario:"F. Ruiz", accion:"Oportunidad perdida", detalle:comentario});
   closeModalById("cotLostModal");
   refreshCotDrawerIfOpen(q);
   renderCotTable();
@@ -2837,11 +3299,13 @@ function renderCotApproveFiles(){
     });
   });
 }
-function openCotApproveModal(q){
+function openCotApproveModal(q, decisorId){
   closeModalById("cotEmailModal");
+  cotActionTargetDecisorId = decisorId;
   cotApproveFiles = [];
   renderCotApproveFiles();
-  document.getElementById("cotApproveCodigo").textContent = q.codigo;
+  const d = findDecisor(q, decisorId);
+  document.getElementById("cotApproveCodigo").textContent = q.codigo + (d ? " · " + d.nombre : "");
   document.getElementById("btnConfirmCotApprove").disabled = true;
   document.getElementById("cotApproveModal").classList.add("open");
   cotOverlay.classList.add("visible");
@@ -2849,17 +3313,163 @@ function openCotApproveModal(q){
 }
 function confirmCotApprove(){
   const q = findQuotation(cotDrawerTargetId);
-  if(!cotApproveFiles.length) return;
-  q.estado = "Aprobada";
-  const ahora = new Date();
-  const horaActual = String(ahora.getHours()).padStart(2,"0") + ":" + String(ahora.getMinutes()).padStart(2,"0");
-  q.documentoSustento = {nombreArchivo:cotApproveFiles[0], fecha:"2026-07-25", hora:horaActual, cargadoPor:"F. Ruiz"};
-  q.historial.push({fecha:"2026-07-25", usuario:"F. Ruiz", accion:"Cotización aprobada", detalle:"Aprobada con documento de sustento adjunto."});
+  const d = findDecisor(q, cotActionTargetDecisorId);
+  if(!d || !cotApproveFiles.length) return;
+  applyDecisorApproval(q, d, {canal:"Enlace", registradoPor:null, archivos:cotApproveFiles.slice()});
   closeModalById("cotApproveModal");
   refreshCotDrawerIfOpen(q);
   renderCotTable();
-  showToast(`Cotización ${q.codigo} marcada como Aprobada.`, "success");
-  openCotCongratsModal(q);
+  showToast(`${d.nombre} aprobó la cotización ${q.codigo}.`, "success");
+}
+
+/* ---------- Registro manual de respuesta (Cambio 7) ----------
+   Mismo efecto que la respuesta por enlace (applyDecisorApproval /
+   applyDecisorRejection), pero con canal + registradoPor distintos —
+   el historial distingue quién decidió (el decisor) de quién registró
+   (el ejecutivo). */
+let cotManualFiles = [];
+function renderCotManualFiles(){
+  const list = document.getElementById("cotManualFileList");
+  list.innerHTML = cotManualFiles.map((f,i)=>`<span class="file-chip">${esc(f)}<button type="button" data-manualfileidx="${i}">
+    <svg viewBox="0 0 24 24" width="11" height="11" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  </button></span>`).join("");
+  list.querySelectorAll("button[data-manualfileidx]").forEach(btn=>{
+    btn.addEventListener("click", e=>{
+      cotManualFiles.splice(+e.currentTarget.dataset.manualfileidx, 1);
+      renderCotManualFiles();
+    });
+  });
+}
+function updateCotManualDecisionUI(){
+  const decision = document.querySelector('input[name="cotManualDecision"]:checked')?.value;
+  document.getElementById("cotManualAprobarFields").style.display = decision==="aprobar" ? "" : "none";
+  document.getElementById("cotManualRechazarFields").style.display = decision==="rechazar" ? "" : "none";
+}
+function openCotManualResponseModal(q, decisorId){
+  cotActionTargetDecisorId = decisorId;
+  const d = findDecisor(q, decisorId);
+  document.getElementById("cotManualCodigo").textContent = q.codigo + (d ? " · " + d.nombre : "");
+  document.querySelectorAll('input[name="cotManualDecision"]').forEach(r=>r.checked=false);
+  document.getElementById("cotManualCanal").value = CANAL_RESPUESTA_OPTIONS[0];
+  document.getElementById("cotManualMotivo").value = "";
+  cotManualFiles = [];
+  renderCotManualFiles();
+  updateCotManualDecisionUI();
+  document.getElementById("cotManualResponseModal").classList.add("open");
+  cotOverlay.classList.add("visible");
+  trapFocus(document.getElementById("cotManualResponseModal"));
+}
+function confirmCotManualResponse(){
+  const q = findQuotation(cotDrawerTargetId);
+  const d = findDecisor(q, cotActionTargetDecisorId);
+  if(!d) return;
+  const decision = document.querySelector('input[name="cotManualDecision"]:checked')?.value;
+  const canal = document.getElementById("cotManualCanal").value;
+  if(!decision){ showToast("Selecciona si el decisor aprobó o rechazó.", "danger"); return; }
+
+  if(decision==="aprobar"){
+    if(!cotManualFiles.length){ showToast("Adjunta el documento de sustento.", "danger"); return; }
+    applyDecisorApproval(q, d, {canal, registradoPor:"F. Ruiz", archivos:cotManualFiles.slice()});
+    showToast(`Respuesta de ${d.nombre} registrada: aprobó por ${canal}.`, "success");
+  } else {
+    const motivo = document.getElementById("cotManualMotivo").value.trim();
+    if(!motivo){ showToast("Ingresa el motivo del rechazo.", "danger"); return; }
+    applyDecisorRejection(q, d, {canal, registradoPor:"F. Ruiz", motivo});
+    showToast(`Respuesta de ${d.nombre} registrada: rechazó por ${canal}.`, "danger");
+  }
+  closeModalById("cotManualResponseModal");
+  refreshCotDrawerIfOpen(q);
+  renderCotTable();
+}
+
+/* Solo respuestas manuales (canalRespuesta !== "Enlace") y solo
+   mientras la cotización sigue "Enviada" (gate ya aplicado en
+   renderCotDecisoresSection al mostrar el botón). El evento original
+   se conserva íntegro; se agrega uno nuevo de corrección — nunca se
+   reescribe ni se borra historial. */
+function revertirRespuestaDecisor(q, decisorId){
+  const d = findDecisor(q, decisorId);
+  if(!d) return;
+  const estadoPrevio = d.estado;
+  d.estado = "Pendiente";
+  d.fechaRespuesta = null;
+  d.canalRespuesta = null;
+  d.registradoPor = null;
+  d.motivoRechazo = null;
+  d.documentosSustento = [];
+  d.respuestaRevertida = true;
+  q.historial.push({fecha:COT_HOY_STR, usuario:"F. Ruiz", accion:"Respuesta revertida", detalle:`Se revirtió la respuesta registrada manualmente de ${d.nombre} (antes: ${estadoPrevio}). El decisor vuelve a Pendiente.`});
+  refreshCotDrawerIfOpen(q);
+  renderCotTable();
+  showToast(`Se revirtió la respuesta de ${d.nombre}.`, "info");
+}
+
+/* ---------- Editar decisores (Cambio 9) ----------
+   Visible solo en "Enviada" y solo para el dueño de la cotización o
+   Head Comercial (puedeEditarDecisores, ver renderCotFooterButtons).
+   Nunca reinicia el flujo — solo un rechazo lo hace. */
+let cotEditDecisoresWorking = [];
+function renderCotEditDecisoresList(){
+  const body = document.getElementById("cotEditDecisoresList");
+  body.innerHTML = cotEditDecisoresWorking.map((w,i)=>`<div class="cot-edit-decisor-row">
+      <div class="cot-edit-decisor-info">
+        <strong>${esc(w.nombre)}</strong><span>${esc(w.email)}</span>
+        ${w.isNew ? `<span class="tag-neutral">Nuevo</span>` : `<span class="badge ${decisorBadgeClass(w.estadoActual)}">${esc(w.estadoActual)}</span>`}
+      </div>
+      <button type="button" class="mini-row-remove" data-editidx="${i}" ${cotEditDecisoresWorking.length<=1?"disabled":""} title="Quitar">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>`).join("");
+  const input = document.getElementById("cotEditDecisorInput");
+  const atMax = cotEditDecisoresWorking.length >= 3;
+  input.disabled = atMax;
+  input.placeholder = atMax ? "Máximo 3 decisores" : "Agregar decisor por correo…";
+}
+function openCotEditDecisoresModal(q){
+  cotEditDecisoresWorking = q.decisores.map(d=>({id:d.id, nombre:d.nombre, email:d.email, isNew:false, estadoActual:d.estado}));
+  document.getElementById("cotEditDecisoresCodigo").textContent = q.codigo;
+  document.getElementById("cotEditDecisorInput").value = "";
+  renderCotEditDecisoresList();
+  document.getElementById("cotEditDecisoresModal").classList.add("open");
+  cotOverlay.classList.add("visible");
+  trapFocus(document.getElementById("cotEditDecisoresModal"));
+}
+function addEditDecisorChip(raw){
+  const email = raw.trim();
+  if(!email) return;
+  if(cotEditDecisoresWorking.length >= 3){ showToast("Máximo 3 decisores por cotización.", "danger"); return; }
+  if(!EMAIL_RE.test(email)){ showToast("Ingresa un correo con formato válido.", "danger"); return; }
+  if(cotEditDecisoresWorking.some(w=>w.email.toLowerCase()===email.toLowerCase())){ showToast("Ese decisor ya está en la lista.", "danger"); return; }
+  cotEditDecisoresWorking.push({id:null, nombre:deriveNombreFromEmail(email), email, isNew:true});
+  document.getElementById("cotEditDecisorInput").value = "";
+  renderCotEditDecisoresList();
+}
+function confirmEditDecisores(){
+  const q = findQuotation(cotDrawerTargetId);
+  if(!cotEditDecisoresWorking.length){ showToast("La lista de decisores no puede quedar vacía.", "danger"); return; }
+
+  const keptIds = cotEditDecisoresWorking.filter(w=>!w.isNew).map(w=>w.id);
+  const removed = q.decisores.filter(d=>!keptIds.includes(d.id));
+  const kept = q.decisores.filter(d=>keptIds.includes(d.id));
+  const nuevos = cotEditDecisoresWorking.filter(w=>w.isNew).map((w,i)=>{
+    const dec = blankDecisor(w.email);
+    dec.id = "dec" + (kept.length+i+1) + "_" + q.id;
+    return dec;
+  });
+  q.decisores = kept.concat(nuevos);
+
+  const quorum = cotQuorum(q);
+  const detalleRemovidos = removed.length ? `Se quitó a ${removed.map(d=>d.nombre).join(", ")}. ` : "";
+  const detalleAgregados = nuevos.length ? `Se agregó a ${nuevos.map(d=>d.nombre).join(", ")}. ` : "";
+  q.historial.push({fecha:COT_HOY_STR, usuario:"F. Ruiz", accion:"Decisores editados", detalle:`${detalleRemovidos}${detalleAgregados}Quórum resultante: ${quorum.aprobados} de ${quorum.total}.`});
+
+  closeModalById("cotEditDecisoresModal");
+  refreshCotDrawerIfOpen(q);
+  renderCotTable();
+  showToast("Lista de decisores actualizada.", "success");
+
+  if(nuevos.length) sendCotEmail(q, {decisorIds: nuevos.map(d=>d.id)});
+  evaluarCierreCotizacion(q);
 }
 
 /* ---------- "Felicidades" — paso final tras aprobar (con sustento ya
@@ -2885,7 +3495,7 @@ function handleFichaLuego(){
   closeModalById("cotCongratsModal");
 
   document.getElementById("cotReminderCodigo").textContent = q.codigo;
-  document.getElementById("cotReminderTo").textContent = q.email.destinatario;
+  document.getElementById("cotReminderTo").textContent = q.decisores.map(d=>d.email).join(", ");
   document.getElementById("cotReminderSubject").textContent = `Ficha de incorporación cliente · ${q.codigo}`;
   document.getElementById("cotReminderEmailModal").classList.add("open");
   cotOverlay.classList.add("visible");
@@ -2909,6 +3519,21 @@ function initCotizacionesModule(){
     if(btn) simulateDownload(btn.dataset.cotdocDownload);
   });
 
+  document.getElementById("cq_decisoresBody").addEventListener("click", function(e){
+    const btn = e.target.closest("button[data-decaction]");
+    if(!btn) return;
+    const q = findQuotation(cotDrawerTargetId);
+    const d = findDecisor(q, btn.dataset.decisorid);
+    if(!d) return;
+    const action = btn.dataset.decaction;
+    if(action==="approve") openCotApproveModal(q, d.id);
+    else if(action==="reject") openCotRejectModal(q, d.id);
+    else if(action==="manual") openCotManualResponseModal(q, d.id);
+    else if(action==="viewemail") openCotEmailPreview(q, d.id);
+    else if(action==="resend") sendCotEmail(q, {isResend:true, triggerBtn:btn, decisorIds:[d.id]});
+    else if(action==="revert") revertirRespuestaDecisor(q, d.id);
+  });
+
   function applyCotKpiFilter(estadoValue){
     clearCotFilters();
     document.getElementById("fCotEstado").value = estadoValue;
@@ -2921,15 +3546,27 @@ function initCotizacionesModule(){
     el.addEventListener("click", handler);
     el.addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); handler(); } });
   });
-  document.getElementById("kpiCotCardSent").addEventListener("click", ()=>{
+  /* "Cotizaciones enviadas" filtra por 2 estados (Enviada + Aprobada) a
+     la vez — el <select> de estado es de valor único, así que este
+     filtro se aplica directo sobre filteredCot en vez de pasar por
+     fCotEstado (mismo criterio que el filtro "__ACTIVAS__" de
+     Propuestas para un caso análogo). */
+  function applyCotKpiFilterSentOrApproved(){
     clearCotFilters();
+    filteredCot = quotations.filter(q=>q.estado==="Enviada" || q.estado==="Aprobada");
+    cotCurrentPage = 1;
+    renderCotTable();
     document.querySelector('#view-cotizaciones .table-panel').scrollIntoView({behavior:"smooth", block:"start"});
-  });
+  }
+  document.getElementById("kpiCotCardSent").addEventListener("click", applyCotKpiFilterSentOrApproved);
+  document.getElementById("kpiCotCardSent").addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); applyCotKpiFilterSentOrApproved(); } });
 
   document.getElementById("cotTableBody").addEventListener("click", function(e){
     const btn = e.target.closest("button[data-cotaction]");
     if(btn && btn.dataset.cotaction==="resend"){
-      sendCotEmail(findQuotation(btn.dataset.cotid), {isResend:true, triggerBtn:btn});
+      const q = findQuotation(btn.dataset.cotid);
+      const pendientes = q.decisores.filter(d=>d.estado==="Pendiente").map(d=>d.id);
+      sendCotEmail(q, {isResend:true, triggerBtn:btn, decisorIds:pendientes});
       return;
     }
     const row = e.target.closest("tr[data-cotid]");
@@ -2989,28 +3626,42 @@ function initCotizacionesModule(){
     if(activeBtn) scrollNavItemIntoView(activeBtn);
   });
 
-  // Email bar — Reenviar
+  // Email bar — Reenviar (a todos los decisores pendientes)
   document.getElementById("btnResendEmail").addEventListener("click", ()=>{
-    sendCotEmail(findQuotation(cotDrawerTargetId), {isResend:true});
+    const q = findQuotation(cotDrawerTargetId);
+    const pendientes = q.decisores.filter(d=>d.estado==="Pendiente").map(d=>d.id);
+    sendCotEmail(q, {isResend:true, decisorIds:pendientes});
   });
 
-  // Email preview modal — links simulados. Abren el modal real
+  // Email preview modal — links simulados, asociados al decisor cuyo
+  // correo se está previsualizando (Cambio 8). Abren el modal real
   // correspondiente (con su motivo/documento obligatorio) en vez de
   // transicionar el estado a ciegas — así una respuesta "del cliente"
   // vía email sigue las mismas reglas de datos que una acción manual.
   document.getElementById("cotEmailLinkApprove").addEventListener("click", function(){
     if(this.disabled) return;
+    const q = findQuotation(cotDrawerTargetId);
     closeModalById("cotEmailModal");
-    openCotApproveModal(findQuotation(cotDrawerTargetId));
+    openCotApproveModal(q, cotEmailPreviewTargetDecisorId);
   });
   document.getElementById("cotEmailLinkReject").addEventListener("click", function(){
     if(this.disabled) return;
+    const q = findQuotation(cotDrawerTargetId);
     closeModalById("cotEmailModal");
-    openCotRejectModal(findQuotation(cotDrawerTargetId));
+    openCotRejectModal(q, cotEmailPreviewTargetDecisorId);
   });
 
   // Modales de acción
   document.getElementById("btnConfirmCotSendCompose").addEventListener("click", confirmCotSendFromCompose);
+  document.getElementById("cotEmailChipInput").addEventListener("keydown", e=>{
+    if(e.key==="Enter"){ e.preventDefault(); addComposeChip(e.target.value); }
+  });
+  document.getElementById("cotEmailChipsList").addEventListener("click", e=>{
+    const btn = e.target.closest("button[data-chipidx]");
+    if(!btn) return;
+    cotComposeChips.splice(+btn.dataset.chipidx, 1);
+    renderCotComposeChips();
+  });
   document.getElementById("btnFichaAhora").addEventListener("click", handleFichaAhora);
   document.getElementById("btnFichaLuego").addEventListener("click", handleFichaLuego);
   document.getElementById("btnConfirmCotReject").addEventListener("click", confirmCotReject);
@@ -3022,6 +3673,27 @@ function initCotizacionesModule(){
     renderCotApproveFiles();
     document.getElementById("btnConfirmCotApprove").disabled = false;
   });
+
+  document.querySelectorAll('input[name="cotManualDecision"]').forEach(r=>{
+    r.addEventListener("change", updateCotManualDecisionUI);
+  });
+  document.getElementById("cotManualFileDrop").addEventListener("click", ()=>{
+    const n = cotManualFiles.length + 1;
+    cotManualFiles.push(`sustento_manual_0${n}.pdf`);
+    renderCotManualFiles();
+  });
+  document.getElementById("btnConfirmCotManualResponse").addEventListener("click", confirmCotManualResponse);
+
+  document.getElementById("cotEditDecisorInput").addEventListener("keydown", e=>{
+    if(e.key==="Enter"){ e.preventDefault(); addEditDecisorChip(e.target.value); }
+  });
+  document.getElementById("cotEditDecisoresList").addEventListener("click", e=>{
+    const btn = e.target.closest("button[data-editidx]");
+    if(!btn || btn.disabled) return;
+    cotEditDecisoresWorking.splice(+btn.dataset.editidx, 1);
+    renderCotEditDecisoresList();
+  });
+  document.getElementById("btnConfirmEditDecisores").addEventListener("click", confirmEditDecisores);
 }
 
 /* ============================================================
@@ -3640,7 +4312,8 @@ function initSidebarNav(){
     },
     "cotizaciones": {
       crumb: 'Gestión comercial <b>›</b> Cotizaciones',
-      title: "Cotizaciones comerciales"
+      title: "Cotizaciones comerciales",
+      onShow: function(){ marcarTodosAvisosLeidos(); }
     },
     "permisos": {
       crumb: 'Usuarios <b>›</b> Permisos y Roles',
@@ -5117,6 +5790,11 @@ const CATEGORY_ORDER = ['Tarjetas y emisión','Logística y entrega','Transaccio
 function byId(id){ return DATA.find(d=>d.id===id); }
 
 function stripAccents(s){ return s.normalize('NFD').replace(/[̀-ͯ]/g,''); }
+/* Expuesta en window: vive en el IIFE del Motor de Variables, pero
+   Cotizaciones (otro IIFE) la reutiliza para el buscador insensible a
+   acentos (Cambio 2) — mismo criterio de puente ya usado para
+   PricebookModule/MotorVariablesModule, en vez de duplicar la función. */
+window.stripAccents = stripAccents;
 /* Generador de nombre técnico compartido: usado al crear/editar un
    concepto a mano y por el motor de fórmulas para resolver referencias
    cruzadas por nombre de negocio (ver findDependencies/resolveConceptToken). */

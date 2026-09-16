@@ -100,6 +100,7 @@
         <button class="nav-link sub" data-view="cotizaciones" data-label="Cotizaciones" type="button">
           <svg viewBox="0 0 24 24" fill="none"><path d="M7 3h8l4 4v14H7z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M15 3v4h4" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
           <span class="nav-label">Cotizaciones</span>
+          <span class="nav-badge" id="cotNavBadge" style="display:none;">0</span>
         </button>
         <button class="nav-link sub" data-view="orden-comercial" data-label="Orden Comercial" type="button">
           <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="18" cy="17" r="2" stroke="currentColor" stroke-width="1.8"/></svg>
@@ -549,6 +550,7 @@
               <th>Producto</th>
               <th class="num">Business Volume</th>
               <th>Estado</th>
+              <th>Aprobaciones</th>
               <th>Email</th>
               <th>Última actividad</th>
               <th class="center">Acciones</th>
@@ -2139,6 +2141,7 @@
       <button class="drawer-nav-item" data-cot-target="cot-sec-financieros" type="button"><span class="nav-dot"></span>Gastos financieros</button>
       <button class="drawer-nav-item" data-cot-target="cot-sec-mdr" type="button"><span class="nav-dot"></span>MDR adicional</button>
       <button class="drawer-nav-item" data-cot-target="cot-sec-condiciones" type="button"><span class="nav-dot"></span>Condiciones comerciales</button>
+      <button class="drawer-nav-item" data-cot-target="cot-sec-decisores" type="button"><span class="nav-dot"></span>Decisores</button>
       <button class="drawer-nav-item" data-cot-target="cot-sec-seguimiento" type="button"><span class="nav-dot"></span>Documentación</button>
     </nav>
 
@@ -2291,10 +2294,35 @@
         </div>
       </section>
 
-      <!-- ============ 8. DOCUMENTACIÓN ============ -->
-      <section class="form-section" id="cot-sec-seguimiento">
+      <!-- ============ 8. DECISORES ============ -->
+      <section class="form-section" id="cot-sec-decisores">
         <div class="form-section-head">
           <span class="sec-num">8</span>
+          <h4>Decisores</h4>
+          <span id="cq_decisoresResumen">—</span>
+        </div>
+        <div class="cond-table-wrap">
+          <table class="cond-table">
+            <thead>
+              <tr>
+                <th>Decisor</th>
+                <th>Correo</th>
+                <th>Estado</th>
+                <th>Entrega</th>
+                <th>Respuesta</th>
+                <th>Sustento</th>
+                <th class="center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="cq_decisoresBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ 9. DOCUMENTACIÓN ============ -->
+      <section class="form-section" id="cot-sec-seguimiento">
+        <div class="form-section-head">
+          <span class="sec-num">9</span>
           <h4>Documentación</h4>
         </div>
         <div class="approval-table-wrap">
@@ -2443,6 +2471,88 @@
 </div>
 
 <!-- ============================================================
+     MODAL — Registrar respuesta manual de un decisor (Cambio 7)
+     Un decisor puede responder fuera de la plataforma (correo,
+     llamada, WhatsApp); el ejecutivo registra esa respuesta acá con
+     el mismo efecto que si hubiera llegado por el enlace del correo.
+     ============================================================ -->
+<div class="modal" id="cotManualResponseModal" role="dialog" aria-modal="true" aria-labelledby="cotManualResponseModalTitle">
+  <div class="modal-card w-sm">
+    <div class="modal-header">
+      <div>
+        <h3 id="cotManualResponseModalTitle">Registrar respuesta del decisor</h3>
+        <p>Código <b id="cotManualCodigo">—</b></p>
+      </div>
+      <button class="close-x" data-close-modal="cotManualResponseModal" type="button">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <label class="block-label">¿Qué respondió el decisor?</label>
+      <div class="cot-manual-decision-row">
+        <label class="radio-pill"><input type="radio" name="cotManualDecision" value="aprobar"> Aprobó</label>
+        <label class="radio-pill"><input type="radio" name="cotManualDecision" value="rechazar"> Rechazó</label>
+      </div>
+      <label class="block-label" for="cotManualCanal">Canal</label>
+      <select id="cotManualCanal">
+        <option value="Correo">Correo</option>
+        <option value="Llamada">Llamada</option>
+        <option value="WhatsApp">WhatsApp</option>
+        <option value="Otro">Otro</option>
+      </select>
+
+      <div id="cotManualAprobarFields" style="display:none;margin-top:14px;">
+        <label class="block-label">Documento de sustento</label>
+        <p style="font-size:12px;color:var(--grey);margin:0 0 10px;">Obligatorio para registrar la aprobación — puede ser una captura, un correo u otro archivo.</p>
+        <div class="file-drop" id="cotManualFileDrop">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M12 16V4M7 9l5-5 5 5M5 20h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Haz clic para adjuntar el documento de sustento
+        </div>
+        <div class="file-chip-list" id="cotManualFileList"></div>
+      </div>
+      <div id="cotManualRechazarFields" style="display:none;margin-top:14px;">
+        <label class="block-label" for="cotManualMotivo">Motivo del rechazo</label>
+        <textarea id="cotManualMotivo" placeholder="Describe brevemente el motivo por el cual el decisor rechazó…"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-text" data-close-modal="cotManualResponseModal" type="button">Cancelar</button>
+      <button class="btn btn-primary" id="btnConfirmCotManualResponse" type="button">Registrar respuesta</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL — Editar decisores (Cambio 9)
+     ============================================================ -->
+<div class="modal" id="cotEditDecisoresModal" role="dialog" aria-modal="true" aria-labelledby="cotEditDecisoresModalTitle">
+  <div class="modal-card w-sm">
+    <div class="modal-header">
+      <div>
+        <h3 id="cotEditDecisoresModalTitle">Editar decisores</h3>
+        <p>Código <b id="cotEditDecisoresCodigo">—</b></p>
+      </div>
+      <button class="close-x" data-close-modal="cotEditDecisoresModal" type="button">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="warn-box">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M12 9v4M12 17h.01" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
+        Quitar a un decisor que ya aprobó descarta su aprobación (la evidencia se conserva en el historial). Entre 1 y 3 decisores, sin duplicados.
+      </div>
+      <div id="cotEditDecisoresList"></div>
+      <label class="block-label" for="cotEditDecisorInput" style="margin-top:14px;">Agregar decisor</label>
+      <input type="text" id="cotEditDecisorInput" placeholder="Agregar decisor por correo…">
+    </div>
+    <div class="modal-footer">
+      <button class="btn-text" data-close-modal="cotEditDecisoresModal" type="button">Cancelar</button>
+      <button class="btn btn-primary" id="btnConfirmEditDecisores" type="button">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
      MODAL — Vista previa del email (simulación de envío)
      ============================================================ -->
 <div class="modal" id="cotEmailModal" role="dialog" aria-modal="true" aria-labelledby="cotEmailModalTitle">
@@ -2463,7 +2573,15 @@
       </div>
       <div class="cot-email-preview">
         <div class="cot-email-meta">
-          <p><span>Para</span><input type="email" id="cotEmailToInput" class="cot-email-input" placeholder="correo@empresa.com"></p>
+          <p id="cotEmailToRowSent"><span>Para</span><input type="email" id="cotEmailToInput" class="cot-email-input" placeholder="correo@empresa.com" disabled></p>
+          <p id="cotEmailToRowCompose" style="display:none;">
+            <span>Para</span>
+            <div class="cot-chip-field">
+              <div class="cot-chip-list" id="cotEmailChipsList"></div>
+              <input type="text" id="cotEmailChipInput" placeholder="Escribe un correo y presiona Enter (máx. 3 decisores)">
+            </div>
+          </p>
+          <p id="cotEmailChipHintRow" style="display:none;"><span></span><span class="cot-chip-hint" id="cotEmailChipHint"></span></p>
           <p><span>CC</span><input type="text" id="cotEmailCcInput" class="cot-email-input" placeholder="Opcional — separa varios con comas"></p>
           <p><span>Asunto</span><b id="cotEmailSubject">—</b></p>
         </div>
