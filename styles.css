@@ -3156,53 +3156,12 @@ table.approval-table{width:100%;border-collapse:collapse;}
 .cot-email-link:disabled{color:var(--grey);cursor:not-allowed;text-decoration:none;}
 .cot-email-links-hint{font-size:11px;color:var(--grey);margin:8px 0 0;}
 
-/* ---------- Aprobación paralela de decisores (Cotizaciones) ---------- */
+/* ---------- Cotizaciones — aprobador único ---------- */
 
 /* Estado terminal "Vencida" — tono neutro/apagado, distinto de
    Enviada (ámbar) y de Oportunidad perdida/Borrador (gris). */
 .badge-vencida{background:#ECECEC;color:#5A5A5A;}
 .badge-vencida::before{background:#5A5A5A;}
-
-/* Estados de decisor — clases dedicadas, nunca las de estado de
-   cotización ni las de usuarios. */
-.badge-dec-pendiente{background:#FFF3D6;color:#8A5A00;}
-.badge-dec-pendiente::before{background:#8A5A00;}
-.badge-dec-aprobado{background:#E8F5E9;color:#4CAF50;}
-.badge-dec-aprobado::before{background:#4CAF50;}
-.badge-dec-rechazado{background:#FDEAEA;color:#F72717;}
-.badge-dec-rechazado::before{background:#F72717;}
-
-/* Indicador discreto "N/M" junto al badge de Estado en el listado —
-   solo con más de un decisor (Ajuste 2). */
-.cot-decisor-count{
-  display:inline-block;margin-left:6px;
-  font-size:10.5px;font-weight:800;color:var(--grey);
-  background:var(--surface-muted);border-radius:999px;padding:1px 6px;
-  vertical-align:middle;
-}
-/* Sección Decisores del drawer (Ajuste 3) — ficha por decisor en vez
-   de tabla: con 5+ columnas no había ancho que alcanzara en el drawer
-   normal (640px) sin cortar columnas fuera de vista. Una ficha
-   refluye sola en cualquier ancho y de paso resuelve que una sola
-   ficha no luce sobredimensionada (Ajuste 5). */
-.cq-decisor-list{display:flex;flex-direction:column;gap:10px;}
-.cq-decisor-card{
-  border:1px solid var(--border-soft);border-radius:var(--radius-m);
-  padding:12px 14px;
-}
-.cq-decisor-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;}
-.cq-decisor-card-id{display:flex;flex-direction:column;gap:2px;}
-.cq-decisor-card-id strong{font-size:13px;}
-.cq-decisor-card-id .tag-neutral{margin-left:6px;}
-.cq-decisor-card-email{font-size:11.5px;color:var(--grey);}
-.cq-decisor-card-status{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex:0 0 auto;}
-.cq-decisor-card-bottom{
-  display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
-  margin-top:10px;padding-top:10px;border-top:1px solid var(--border-soft);
-}
-.cq-decisor-card-meta{display:flex;flex-direction:column;gap:2px;font-size:11.5px;color:var(--grey);}
-.cq-dec-sustento{font-size:10.5px;color:var(--grey);}
-.cq-dec-entrega{font-size:10.5px;color:var(--grey);}
 
 /* Fila "próxima a vencer" (día 12 a 15 de vigencia) — clase dedicada,
    no reutiliza las del semáforo de rentabilidad ni las de estado. */
@@ -3216,42 +3175,7 @@ table.approval-table{width:100%;border-collapse:collapse;}
   vertical-align:middle;
 }
 
-/* Chips de decisores — compose (Cambio 5) y editar decisores (Cambio 9) */
-.cot-chip-field{
-  flex:1;min-width:0;display:flex;flex-wrap:wrap;gap:6px;align-items:center;
-  border:1px solid var(--border-soft);border-radius:4px;
-  padding:4px 6px;background:var(--white);
-}
-.cot-chip{
-  display:flex;align-items:center;gap:5px;
-  background:var(--surface-muted);border:1px solid var(--border-soft);
-  padding:3px 8px 3px 8px;border-radius:999px;
-  font-size:11.5px;font-weight:700;color:var(--black);
-}
-.cot-chip button{background:none;border:none;color:var(--grey);cursor:pointer;display:flex;padding:0;}
-.cot-chip button:hover{color:var(--red-hero-dark);}
-.cot-chip-field input{
-  flex:1;min-width:120px;border:none;outline:none;font-size:12px;
-  padding:3px 2px;background:transparent;
-}
-.cot-chip-field input:disabled{color:var(--grey);}
-.cot-chip-hint{font-size:11px;color:var(--red-hero-dark);}
-
-/* Editar decisores (Cambio 9) */
-.cot-edit-decisor-row{
-  display:flex;align-items:center;justify-content:space-between;gap:10px;
-  padding:9px 0;border-bottom:1px solid var(--border-soft);
-}
-.cot-edit-decisor-row:last-child{border-bottom:none;}
-.cot-edit-decisor-info{display:flex;flex-direction:column;gap:2px;}
-.cot-edit-decisor-info span:not(.tag-neutral):not(.badge){font-size:11.5px;color:var(--grey);}
-.cot-edit-decisor-info .tag-neutral,.cot-edit-decisor-info .badge{align-self:flex-start;margin-top:2px;}
-#cotEditDecisorInput{
-  width:100%;border:1px solid var(--border-soft);border-radius:var(--radius-s);
-  padding:9px 12px;font-size:13px;
-}
-
-/* Registro manual — selector Aprobó/Rechazó (Cambio 7) */
+/* Registro manual — selector Aprobó/Rechazó */
 .cot-manual-decision-row{display:flex;gap:10px;margin:8px 0 16px;}
 .radio-pill{
   display:flex;align-items:center;gap:6px;
