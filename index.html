@@ -270,7 +270,7 @@
         <div class="kpi-body">
           <p class="kpi-label">BV oportunidades abiertas</p>
           <p class="kpi-value" id="kpiOpenBV">—</p>
-          <p class="kpi-sub">Creadas + Borrador</p>
+          <p class="kpi-sub">Generadas + Borrador</p>
         </div>
       </div>
       <div class="kpi-card kpi-closed" id="kpiCardClosed" role="button" tabindex="0" aria-label="Filtrar por propuestas aprobadas este mes">
@@ -343,8 +343,6 @@
           <label for="fEstado">Estado</label>
           <select id="fEstado">
             <option value="">Todos</option>
-            <option value="__ACTIVAS__">Activas (no rechazadas ni perdidas)</option>
-            <option value="__ABIERTAS__">Abiertas (Generada + Borrador)</option>
             <option value="Generada">Generada</option>
             <option value="Borrador">Borrador</option>
             <option value="Aprobada">Aprobada</option>
@@ -1953,14 +1951,14 @@
 <!-- ============================================================
      MODAL — Formulario de Ingreso de Oportunidad (popup central)
      Solo creación. Al guardar, genera automáticamente una Propuesta
-     asociada en estado "Creada".
+     asociada en estado "Generada".
      ============================================================ -->
 <div class="modal" id="oportunidadModal" role="dialog" aria-modal="true" aria-labelledby="oportunidadModalTitle">
   <div class="modal-card w-xl" style="max-height:88%;">
     <div class="modal-header">
       <div>
         <h3 id="oportunidadModalTitle">Nueva oportunidad</h3>
-        <p>Registra los datos y se creará automáticamente una propuesta en estado Creada</p>
+        <p>Registra los datos y se creará automáticamente una propuesta en estado Generada</p>
       </div>
       <button class="close-x" id="btnCloseOportunidad" type="button">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
@@ -2138,7 +2136,7 @@
       <div class="reject-icon" style="background:var(--status-aprobada-bg);color:var(--status-aprobada-fg);">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
-      <p style="font-size:13px;color:var(--black);margin:0 0 6px;">Se creó la propuesta <b id="oportSuccessCodigo">—</b> en estado <span class="badge badge-creada" style="vertical-align:middle;">Creada</span> con los datos de esta oportunidad.</p>
+      <p style="font-size:13px;color:var(--black);margin:0 0 6px;">Se creó la propuesta <b id="oportSuccessCodigo">—</b> en estado <span class="badge badge-creada" style="vertical-align:middle;">Generada</span> con los datos de esta oportunidad.</p>
       <p style="font-size:12px;color:var(--grey);margin:0;">Los campos provenientes de la oportunidad quedarán bloqueados dentro de la propuesta.</p>
     </div>
     <div class="modal-footer">

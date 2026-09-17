@@ -312,7 +312,7 @@ function fmtDate(iso){
   return d.toLocaleDateString("es-PE",{day:"2-digit",month:"short",year:"numeric"});
 }
 function badgeClass(estado){
-  return {"Generada":"badge-creada","Borrador":"badge-borrador","Aprobada":"badge-aprobada","Rechazada":"badge-rechazada","Oportunidad perdida":"badge-borrador"}[estado] || "badge-creada";
+  return {"Generada":"badge-creada","Borrador":"badge-borrador","Aprobada":"badge-aprobada","Rechazada":"badge-rechazada","Oportunidad perdida":"badge-perdida"}[estado] || "badge-creada";
 }
 function esc(s){
   return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -542,9 +542,7 @@ function applyProposalsFilters(){
     }
     if(solucion && p.solucion!==solucion) return false;
     if(producto && p.producto!==producto) return false;
-    if(estado==="__ACTIVAS__"){ if(p.estado==="Rechazada" || p.estado==="Oportunidad perdida") return false; }
-    else if(estado==="__ABIERTAS__"){ if(p.estado!=="Generada" && p.estado!=="Borrador") return false; }
-    else if(estado){ if(p.estado!==estado) return false; }
+    if(estado){ if(p.estado!==estado) return false; }
     if(modalidad && p.modalidadPago!==modalidad) return false;
     if(fIni && p.fecha < fIni) return false;
     if(fFin && p.fecha > fFin) return false;
@@ -1625,10 +1623,11 @@ function openRentabModal(data, codigoLabel, realCodigo){
 }
 
 /* ---------- Generar excepción de rentabilidad (semáforo rojo) ----------
-   No reutiliza p.estado (Borrador/Creada/Aprobada/Rechazada) porque ese
-   campo alimenta KPIs y filtros existentes en todo el módulo; la excepción
-   es un sub-estado independiente que se muestra por encima del badge normal
-   mientras esté "pendiente" y bloquea el guardado hasta resolverse. */
+   No reutiliza p.estado (Generada/Borrador/Aprobada/Rechazada/Oportunidad
+   perdida) porque ese campo alimenta KPIs y filtros existentes en todo el
+   módulo; la excepción es un sub-estado independiente que se muestra por
+   encima del badge normal mientras esté "pendiente" y bloquea el guardado
+   hasta resolverse. */
 let excepcionTargetCodigo = null;
 function openExcepcionModal(codigoLabel){
   excepcionTargetCodigo = codigoLabel;
@@ -1904,9 +1903,22 @@ document.addEventListener("DOMContentLoaded", function(){
     applyProposalsFilters();
     document.querySelector(".table-panel").scrollIntoView({behavior:"smooth", block:"start"});
   }
+  /* "Propuestas activas" y "BV oportunidades abiertas" no son estados —
+     son atajos de filtrado (más de un estado a la vez), así que no hay
+     una opción del <select> de estado a la que apuntarlos. Se filtran
+     directo sobre `filtered` tras limpiar, mismo criterio que ya usa
+     "Cotizaciones enviadas" en el módulo de Cotizaciones para su propio
+     filtro de dos estados a la vez (ver applyCotKpiFilterSentOrApproved). */
+  function applyKpiPredicateFilter(predicate){
+    clearProposalsFilters();
+    filtered = filtered.filter(predicate);
+    currentPage = 1;
+    renderProposalsTable();
+    document.querySelector(".table-panel").scrollIntoView({behavior:"smooth", block:"start"});
+  }
   const kpiMap = [
-    ["kpiCardTotal", ()=>applyKpiFilter("__ACTIVAS__")],
-    ["kpiCardOpen", ()=>applyKpiFilter("__ABIERTAS__")],
+    ["kpiCardTotal", ()=>applyKpiPredicateFilter(p=>p.estado!=="Rechazada" && p.estado!=="Oportunidad perdida")],
+    ["kpiCardOpen", ()=>applyKpiPredicateFilter(p=>p.estado==="Generada" || p.estado==="Borrador")],
     ["kpiCardClosed", ()=>applyKpiFilter("Aprobada", {fIni:"2026-07-01", fFin:"2026-07-31"})]
   ];
   kpiMap.forEach(([id, handler])=>{
@@ -2247,13 +2259,17 @@ const CANAL_RESPUESTA_OPTIONS = ["Correo","Llamada","WhatsApp","Otro"];
 const COT_HOY = new Date('2026-08-05T00:00:00');
 const COT_HOY_STR = '2026-08-05';
 
-/* Generada->badge-creada, Aprobada->badge-aprobada, Rechazada->badge-rechazada
-   y Oportunidad perdida->badge-borrador se reutilizan tal cual (mismo
-   significado semántico que ya tienen en Propuestas). Enviada y Vencida
-   son las únicas sin equivalente — badge-enviada/badge-vencida son las
-   únicas clases CSS nuevas de todo el módulo. */
+/* Generada->badge-creada, Aprobada->badge-aprobada y Rechazada->badge-rechazada
+   se reutilizan tal cual (mismo significado semántico que ya tienen en
+   Propuestas). Oportunidad perdida usa badge-perdida, un gris neutro
+   dedicado y compartido con Propuestas (ver badgeClass) — antes ambos
+   módulos reutilizaban badge-borrador, lo que hacía indistinguible un
+   cierre definitivo de un borrador editable en curso. Enviada y Vencida
+   sí son exclusivas de este módulo, sin equivalente en Propuestas —
+   badge-enviada/badge-vencida son las únicas clases CSS nuevas que solo
+   usa Cotizaciones. */
 function cotBadgeClass(estado){
-  return {"Generada":"badge-creada","Enviada":"badge-enviada","Aprobada":"badge-aprobada","Rechazada":"badge-rechazada","Oportunidad perdida":"badge-borrador","Vencida":"badge-vencida"}[estado] || "badge-creada";
+  return {"Generada":"badge-creada","Enviada":"badge-enviada","Aprobada":"badge-aprobada","Rechazada":"badge-rechazada","Oportunidad perdida":"badge-perdida","Vencida":"badge-vencida"}[estado] || "badge-creada";
 }
 /* nombre de despliegue cuando el aprobador se ingresa solo con su
    correo (fase actual, sin autocompletado real contra Salesforce). */
@@ -3477,8 +3493,8 @@ function initCotizacionesModule(){
   /* "Cotizaciones enviadas" filtra por 2 estados (Enviada + Aprobada) a
      la vez — el <select> de estado es de valor único, así que este
      filtro se aplica directo sobre filteredCot en vez de pasar por
-     fCotEstado (mismo criterio que el filtro "__ACTIVAS__" de
-     Propuestas para un caso análogo). */
+     fCotEstado (mismo criterio que usan los KPIs "Propuestas activas" y
+     "BV oportunidades abiertas" en Propuestas, ver applyKpiPredicateFilter). */
   function applyCotKpiFilterSentOrApproved(){
     clearCotFilters();
     filteredCot = quotations.filter(q=>q.estado==="Enviada" || q.estado==="Aprobada");

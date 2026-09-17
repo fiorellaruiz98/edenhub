@@ -865,6 +865,14 @@ table.data-table{
   white-space:nowrap;
 }
 .badge::before{content:'';width:6px;height:6px;border-radius:50%;flex:0 0 auto;}
+/* badge-creada/--status-creada-*: nombre histórico. El estado que le dio
+   origen se llama "Generada" desde la consolidación de "Creada", pero la
+   clase y sus variables de color se reutilizan como el azul genérico del
+   proyecto en varios lugares sin relación con Propuestas (hover de los
+   íconos de editar, badge-req-registrado, el resultado del P&L en Motor
+   de Variables, el ícono "Entregado" de Cotizaciones) — renombrarlas
+   implicaría tocar esos usos no relacionados, así que se quedan como
+   están. */
 .badge-creada{background:var(--status-creada-bg);color:var(--status-creada-fg);}
 .badge-creada::before{background:var(--status-creada-fg);}
 .badge-borrador{background:var(--status-borrador-bg);color:var(--status-borrador-fg);}
@@ -873,6 +881,12 @@ table.data-table{
 .badge-aprobada::before{background:var(--status-aprobada-fg);}
 .badge-rechazada{background:var(--status-rechazada-bg);color:var(--status-rechazada-fg);}
 .badge-rechazada::before{background:var(--status-rechazada-fg);}
+/* Oportunidad perdida (Propuestas y Cotizaciones) — estado terminal,
+   necesita distinguirse de Borrador (editable, en curso), con el que
+   antes compartía badge-borrador. Gris neutro del proyecto, no reutiliza
+   ninguna otra clase de badge ni la del semáforo de rentabilidad. */
+.badge-perdida{background:#F1F1F1;color:#9E9E9E;}
+.badge-perdida::before{background:#9E9E9E;}
 
 /* Row actions */
 .row-actions{display:flex;align-items:center;gap:6px;}
@@ -3068,8 +3082,9 @@ table.approval-table{width:100%;border-collapse:collapse;}
 
 /* Badge de estado — Generada/Aprobada/Rechazada reutilizan
    badge-creada/badge-aprobada/badge-rechazada tal cual; Oportunidad
-   perdida reutiliza badge-borrador (mismo gris neutro). Solo
-   "Enviada" no tiene equivalente y necesita una clase nueva. */
+   perdida usa badge-perdida (gris neutro dedicado, ver arriba — ya no
+   comparte badge-borrador con un estado editable). Solo "Enviada" no
+   tiene equivalente y necesita una clase nueva. */
 .badge-enviada{background:#FFF3D6;color:#8A5A00;}
 .badge-enviada::before{background:#8A5A00;}
 
