@@ -605,16 +605,31 @@ function renderProposalsTable(){
         <td class="cell-estado">${estadoCell}</td>
         <td class="center cell-acciones">
           <div class="row-actions">
-            ${isTerminalBlocked
-              ? ``
-              : p.estado==="Rechazada"
-                ? (isRejected ? `<button class="icon-btn newversion" data-action="newversion" data-id="${p.id}" title="Generar nueva versión">
+            ${(() => {
+              /* "Ver detalle" (ícono de ojo, mismo SVG que ya usa Cotizaciones
+                 para su fila clickeable): la única forma de abrir el drawer
+                 para un estado que no admite edición (Aprobada, Rechazada,
+                 Oportunidad perdida). Antes de esto, una propuesta Rechazada
+                 o Perdida SIN cotización asociada nunca tuvo forma de llegar
+                 al drawer — la única vía indirecta era el chip de origen
+                 desde su cotización, que no existe si nunca llegó a P3. El
+                 drawer abre en modo lectura (refreshProposalActionState ya
+                 bloquea todas las acciones fuera de Rechazada, donde deja
+                 "Cerrar como oportunidad perdida"); nunca reactiva "Editar". */
+              const viewBtn = `<button class="icon-btn history" data-action="view" data-id="${p.id}" title="Ver detalle">
+                     <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M4 12s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.4" stroke="currentColor" stroke-width="1.7"/></svg>
+                   </button>`;
+              if(isTerminalBlocked) return viewBtn;
+              if(p.estado==="Rechazada"){
+                const newversionBtn = isRejected ? `<button class="icon-btn newversion" data-action="newversion" data-id="${p.id}" title="Generar nueva versión">
                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
-                   </button>` : ``)
-                : `<button class="icon-btn edit" data-action="edit" data-id="${p.id}" title="Editar">
+                   </button>` : ``;
+                return newversionBtn + viewBtn;
+              }
+              return `<button class="icon-btn edit" data-action="edit" data-id="${p.id}" title="Editar">
                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 00-3-3L5 17v3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
-                   </button>`
-            }
+                   </button>`;
+            })()}
             <button class="icon-btn history" data-action="history" data-id="${p.id}" title="Ver histórico">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.7"/><path d="M12 7.5V12l3 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
@@ -870,6 +885,35 @@ function updateConditionalFields(){
   syncConditionalField("f_cartaFianza", "cartaFianzaMontoWrap", "f_montoCartaFianza");
 }
 
+/* Campos que quedan disabled sin excepción (calculados o ya bloqueados de
+   fábrica en el HTML) y campos cuyo disabled depende de OTRO checkbox
+   (updateConditionalFields los resuelve por su cuenta) — ninguno de los
+   dos forma parte del "candado" de solo lectura que activa/desactiva
+   setDrawerReadOnly, para no pisar su propia lógica. */
+const DRAWER_ALWAYS_LOCKED_FIELDS = ["f_bvCarga","f_bvTotal","f_esCliente"];
+const DRAWER_CONDITIONAL_FIELDS = ["f_diasCredito","f_rebateTipo","f_rebateValor","f_montoCartaFianza","f_mdrNegociado"];
+
+/* Bloquea/desbloquea todos los campos del formulario de Propuestas —
+   incluye los inputs/selects que generan renderCondicionesTable() y
+   renderDistribucionTable() (viven dentro de #drawerForm igual que el
+   resto) y los botones "Agregar"/"Eliminar" de esas mini-tablas. Se usa
+   para las propuestas que llegan al drawer solo para *verse* (Aprobada,
+   Rechazada, Oportunidad perdida — ver refreshProposalActionState) —
+   antes de esto el candado solo ocultaba los botones del pie, dejando
+   los campos con apariencia editable aunque no hubiera forma de guardar. */
+function setDrawerReadOnly(readOnly){
+  const form = document.getElementById("drawerForm");
+  form.querySelectorAll("input, select, textarea").forEach(el=>{
+    if(DRAWER_ALWAYS_LOCKED_FIELDS.includes(el.id)) return;
+    if(!readOnly && DRAWER_CONDITIONAL_FIELDS.includes(el.id)) return; // updateConditionalFields() los resuelve abajo
+    el.disabled = readOnly;
+  });
+  form.querySelectorAll(".mini-row-remove").forEach(btn=>{ btn.disabled = readOnly; });
+  document.getElementById("btnAddCondicion").disabled = readOnly;
+  document.getElementById("btnAddDestino").disabled = readOnly;
+  if(!readOnly) updateConditionalFields();
+}
+
 function recalcDrawerBv(){
   const valorFacial = +document.getElementById("f_valorFacial").value || 0;
   const cantBeneficiarios = +document.getElementById("f_cantBeneficiarios").value || 0;
@@ -1052,7 +1096,15 @@ function openDrawer(mode, id){
     drawerCodigoEl.dataset.codigo = "";
   } else if(mode==="edit"){
     source = findProposal(id);
-    document.getElementById("drawerEyebrow").textContent = "Editar propuesta · v" + source.version;
+    /* Generada/Borrador son los únicos estados editables — el resto
+       (Aprobada, Rechazada, Oportunidad perdida) llega acá solo para
+       *ver* el detalle (ícono "Ver detalle" en el listado o el chip de
+       origen desde una cotización); refreshProposalActionState() ya
+       bloquea las acciones, pero el título no debe prometer edición. */
+    const esEditable = source.estado==="Generada" || source.estado==="Borrador";
+    document.getElementById("drawerEyebrow").textContent = esEditable
+      ? "Editar propuesta · v" + source.version
+      : "Ver propuesta · v" + source.version;
     drawerCodigoEl.textContent = source.codigo;
     drawerCodigoEl.dataset.codigo = source.codigo;
   } else if(mode==="newversion"){
@@ -1128,10 +1180,12 @@ function refreshProposalActionState(){
 
   const lockBanner = document.getElementById("estadoLockBanner");
   const lockBannerText = document.getElementById("estadoLockBannerText");
-  if(terminalLocked){
+  if(terminalLocked || showRechazada){
     lockBanner.style.display = "flex";
     lockBannerText.textContent = estado==="Aprobada"
       ? "Esta propuesta está Aprobada y no admite ninguna acción — genera una nueva cotización si necesitas renegociar condiciones."
+      : estado==="Rechazada"
+      ? "Esta propuesta está Rechazada. Estás viéndola en modo lectura — solo puedes cerrarla como oportunidad perdida o generar una nueva versión desde el listado."
       : `Esta propuesta está cerrada como Oportunidad perdida y no admite ninguna acción.${p.motivoPerdida ? ` Motivo: "${p.motivoPerdida}".` : ""}`;
   } else {
     lockBanner.style.display = "none";
@@ -1154,6 +1208,8 @@ function refreshProposalActionState(){
   btnClosePerdida.style.display = showRechazada ? "inline-flex" : "none";
   btnSave.style.display = showEditActions ? "inline-flex" : "none";
   btnSave.disabled = excepcionLocked;
+
+  setDrawerReadOnly(!showEditActions);
 }
 
 /* Muestra en tiempo real que el cambio actual generará una nueva versión,
@@ -1936,6 +1992,7 @@ document.addEventListener("DOMContentLoaded", function(){
     const id = btn.dataset.id;
     const action = btn.dataset.action;
     if(action==="edit") openDrawer("edit", id);
+    else if(action==="view") openDrawer("edit", id);
     else if(action==="history") openProposalHistoryModal(id);
     else if(action==="newversion") openDrawer("newversion", id);
     else if(action==="menu") toggleRowMenu(btn, id);
