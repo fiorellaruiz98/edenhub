@@ -44,9 +44,9 @@ const proposals = [
     logoEmpresa:true, cartaFianza:true, productoCustom:false, mdrNegociado:0,
     producto:"Alimentación", estado:"Aprobada", version:2, fecha:"2026-07-08",
     historial:[
-      {version:1, fecha:"2026-05-04", estado:"Creada", usuario:"F. Ruiz", resumen:"Propuesta inicial creada para negociación de portafolio Food."},
+      {version:1, fecha:"2026-05-04", estado:"Generada", usuario:"F. Ruiz", resumen:"Propuesta inicial creada para negociación de portafolio Food."},
       {version:1, fecha:"2026-06-02", estado:"Rechazada", usuario:"J. Salinas (Comercial)", resumen:"El comité comercial solicitó reducir el BV proyectado por estacionalidad.", motivo:"El comité comercial solicitó reducir el BV proyectado por estacionalidad."},
-      {version:2, fecha:"2026-06-05", estado:"Creada", usuario:"F. Ruiz", resumen:"Nueva versión generada a partir de la propuesta rechazada, con BV mensual y condiciones comerciales renegociadas."},
+      {version:2, fecha:"2026-06-05", estado:"Generada", usuario:"F. Ruiz", resumen:"Nueva versión generada a partir de la propuesta rechazada, con BV mensual y condiciones comerciales renegociadas."},
       {version:2, fecha:"2026-07-08", estado:"Aprobada", usuario:"F. Ruiz", resumen:"Propuesta aprobada tras la renegociación."}
     ],
     solicitudes:[
@@ -66,8 +66,8 @@ const proposals = [
     expenses: makeExpenses([9,0,6,0,14,0,0,0], ["entrega","mantenimiento","carga","renovacion","otros"]),
     distribucion:[{destino:"Lima",cantidadPuntos:2}],
     logoEmpresa:false, cartaFianza:false, productoCustom:true, mdrNegociado:2.1,
-    producto:"Regalo", estado:"Creada", version:1, fecha:"2026-07-12",
-    historial:[{version:1, fecha:"2026-07-12", estado:"Creada", usuario:"F. Ruiz", resumen:"Propuesta inicial de Gift Card Digital para campaña Q3."}]
+    producto:"Regalo", estado:"Generada", version:1, fecha:"2026-07-12",
+    historial:[{version:1, fecha:"2026-07-12", estado:"Generada", usuario:"F. Ruiz", resumen:"Propuesta inicial de Gift Card Digital para campaña Q3."}]
   },
   {
     id: nextId(), codigo:"COD-2026-003", ruc:"20100128218", razonSocial:"Backus",
@@ -83,7 +83,7 @@ const proposals = [
     logoEmpresa:true, cartaFianza:true, productoCustom:false, mdrNegociado:0,
     producto:"Alimentación", estado:"Rechazada", version:1, fecha:"2026-06-28",
     historial:[
-      {version:1, fecha:"2026-05-20", estado:"Creada", usuario:"F. Ruiz", resumen:"Propuesta inicial de migración de portafolio Estándar."},
+      {version:1, fecha:"2026-05-20", estado:"Generada", usuario:"F. Ruiz", resumen:"Propuesta inicial de migración de portafolio Estándar."},
       {version:1, fecha:"2026-06-28", estado:"Rechazada", usuario:"M. Quiroz (Operaciones)", resumen:"Se revisaron condiciones de factura mínima y comisión cliente.", motivo:"Cliente solicitó comisión cliente menor al 2.0% ofertado; pendiente de reevaluación comercial."}
     ],
     solicitudes:[
@@ -102,8 +102,11 @@ const proposals = [
     expenses: makeExpenses([10,7,12,4,9,2,15,0], ["personalizacion","otros"]),
     distribucion:[{destino:"Lima",cantidadPuntos:1}],
     logoEmpresa:false, cartaFianza:false, productoCustom:false, mdrNegociado:0,
-    producto:"Movilidad", estado:"Borrador", version:1, fecha:"2026-07-14",
-    historial:[{version:1, fecha:"2026-07-14", estado:"Borrador", usuario:"F. Ruiz", resumen:"Borrador guardado, pendiente de validar cantidad de cargas al año."}],
+    producto:"Movilidad", estado:"Aprobada", version:1, fecha:"2026-07-23",
+    historial:[
+      {version:1, fecha:"2026-07-14", estado:"Borrador", usuario:"F. Ruiz", resumen:"Borrador guardado, pendiente de validar cantidad de cargas al año."},
+      {version:1, fecha:"2026-07-23", estado:"Aprobada", usuario:"F. Ruiz", resumen:"Propuesta aprobada automáticamente al generar la cotización COT-2026-008."}
+    ],
     solicitudes:[
       {id:"SOL-0004", tipo:"Excepción", fechaCreacion:"2026-07-14", estado:"En Atención", motivo:null}
     ]
@@ -138,8 +141,13 @@ const proposals = [
     expenses: makeExpenses([9,6,11,3,8,2,13,0], ["carga","otros"]),
     distribucion:[{destino:"Lima",cantidadPuntos:1}],
     logoEmpresa:false, cartaFianza:false, productoCustom:false, mdrNegociado:0,
-    producto:"Regalo", estado:"Creada", version:1, fecha:"2026-07-11",
-    historial:[{version:1, fecha:"2026-07-11", estado:"Creada", usuario:"F. Ruiz", resumen:"Propuesta inicial para campaña Gift de temporada."}]
+    producto:"Regalo", estado:"Oportunidad perdida", version:1, fecha:"2026-08-01", motivoPerdida:"Sin actividad",
+    historial:[
+      {version:1, fecha:"2026-07-11", estado:"Generada", usuario:"F. Ruiz", resumen:"Propuesta inicial para campaña Gift de temporada."},
+      {version:1, fecha:"2026-07-14", estado:"Aprobada", usuario:"F. Ruiz", resumen:"Propuesta aprobada automáticamente al generar la cotización COT-2026-006."},
+      {version:1, fecha:"2026-07-30", estado:"Rechazada", usuario:"Sistema", resumen:"Propuesta rechazada automáticamente al vencer la cotización COT-2026-006 generada a partir de ella.", motivo:"No contactabilidad"},
+      {version:1, fecha:"2026-08-01", estado:"Oportunidad perdida", usuario:"Sistema", resumen:"Propuesta cerrada como oportunidad perdida automáticamente al cerrarse la cotización COT-2026-006 generada a partir de ella.", motivo:"Sin actividad"}
+    ]
   },
   {
     id: nextId(), codigo:"COD-2026-007", ruc:"20601987654", razonSocial:"Cineplanet S.A.",
@@ -153,10 +161,11 @@ const proposals = [
     expenses: makeExpenses([8,5,9,3,7,2,11,0], ["mantenimiento"]),
     distribucion:[{destino:"Lima",cantidadPuntos:1}],
     logoEmpresa:false, cartaFianza:false, productoCustom:false, mdrNegociado:0,
-    producto:"Movilidad", estado:"Borrador", version:1, fecha:"2026-07-10",
+    producto:"Movilidad", estado:"Aprobada", version:1, fecha:"2026-07-28",
     historial:[
       {version:1, fecha:"2026-06-18", estado:"Borrador", usuario:"F. Ruiz", resumen:"Borrador inicial con datos preliminares de la oportunidad."},
-      {version:1, fecha:"2026-07-10", estado:"Borrador", usuario:"F. Ruiz", resumen:"Actualización de días de crédito y valor facial."}
+      {version:1, fecha:"2026-07-10", estado:"Borrador", usuario:"F. Ruiz", resumen:"Actualización de días de crédito y valor facial."},
+      {version:1, fecha:"2026-07-28", estado:"Aprobada", usuario:"F. Ruiz", resumen:"Propuesta aprobada automáticamente al generar la cotización COT-2026-009."}
     ],
     solicitudes:[
       {id:"SOL-0006", tipo:"Línea de Crédito", fechaCreacion:"2026-07-10", estado:"Registrado", motivo:null}
@@ -189,10 +198,11 @@ const proposals = [
     expenses: makeExpenses([10,6,12,4,8,2,16,0], ["otros"]),
     distribucion:[{destino:"Lima",cantidadPuntos:3}],
     logoEmpresa:true, cartaFianza:false, productoCustom:false, mdrNegociado:0,
-    producto:"Alimentación", estado:"Aprobada", version:1, fecha:"2026-07-15",
+    producto:"Alimentación", estado:"Rechazada", version:1, fecha:"2026-07-09",
     historial:[
-      {version:1, fecha:"2026-06-25", estado:"Creada", usuario:"F. Ruiz", resumen:"Propuesta inicial para plan de e-commerce y beneficios internos."},
-      {version:1, fecha:"2026-07-15", estado:"Aprobada", usuario:"F. Ruiz", resumen:"Aprobada tras ajuste de rebate al 0.8% de BV."}
+      {version:1, fecha:"2026-06-25", estado:"Generada", usuario:"F. Ruiz", resumen:"Propuesta inicial para plan de e-commerce y beneficios internos."},
+      {version:1, fecha:"2026-07-05", estado:"Aprobada", usuario:"F. Ruiz", resumen:"Propuesta aprobada automáticamente al generar la cotización COT-2026-003."},
+      {version:1, fecha:"2026-07-09", estado:"Rechazada", usuario:"Sistema", resumen:"Propuesta rechazada automáticamente al rechazarse la cotización COT-2026-003 generada a partir de ella.", motivo:"El cliente indicó que el rebate ofrecido no alcanza el mínimo esperado para este periodo."}
     ]
   },
   {
@@ -207,8 +217,11 @@ const proposals = [
     expenses: makeExpenses([9,0,10,0,13,0,0,0], ["entrega","mantenimiento","carga","renovacion","otros"]),
     distribucion:[{destino:"Lima",cantidadPuntos:2}],
     logoEmpresa:false, cartaFianza:false, productoCustom:true, mdrNegociado:1.8,
-    producto:"Regalo", estado:"Creada", version:1, fecha:"2026-07-13",
-    historial:[{version:1, fecha:"2026-07-13", estado:"Creada", usuario:"F. Ruiz", resumen:"Propuesta inicial para beneficios de colaboradores."}]
+    producto:"Regalo", estado:"Aprobada", version:1, fecha:"2026-07-24",
+    historial:[
+      {version:1, fecha:"2026-07-13", estado:"Generada", usuario:"F. Ruiz", resumen:"Propuesta inicial para beneficios de colaboradores."},
+      {version:1, fecha:"2026-07-24", estado:"Aprobada", usuario:"F. Ruiz", resumen:"Propuesta aprobada automáticamente al generar la cotización COT-2026-007."}
+    ]
   },
   {
     id: nextId(), codigo:"COD-2026-011", ruc:"20100998877", razonSocial:"San Fernando S.A.",
@@ -222,8 +235,11 @@ const proposals = [
     expenses: makeExpenses([13,9,16,5,11,3,19,0], []),
     distribucion:[{destino:"Lima",cantidadPuntos:2},{destino:"Provincia",cantidadPuntos:1}],
     logoEmpresa:true, cartaFianza:true, productoCustom:false, mdrNegociado:0,
-    producto:"Alimentación", estado:"Borrador", version:1, fecha:"2026-07-15",
-    historial:[{version:1, fecha:"2026-07-15", estado:"Borrador", usuario:"F. Ruiz", resumen:"Borrador en preparación, a la espera de validación de RRLL."}]
+    producto:"Alimentación", estado:"Aprobada", version:1, fecha:"2026-08-01",
+    historial:[
+      {version:1, fecha:"2026-07-15", estado:"Borrador", usuario:"F. Ruiz", resumen:"Borrador en preparación, a la espera de validación de RRLL."},
+      {version:1, fecha:"2026-08-01", estado:"Aprobada", usuario:"F. Ruiz", resumen:"Propuesta aprobada automáticamente al generar la cotización COT-2026-010."}
+    ]
   },
   {
     id: nextId(), codigo:"COD-2026-012", ruc:"20601554433", razonSocial:"Tottus Perú S.A.",
@@ -239,6 +255,43 @@ const proposals = [
     logoEmpresa:false, cartaFianza:false, productoCustom:false, mdrNegociado:0,
     producto:"Movilidad", estado:"Aprobada", version:1, fecha:"2026-07-05",
     historial:[{version:1, fecha:"2026-07-05", estado:"Aprobada", usuario:"F. Ruiz", resumen:"Aprobada en primera versión sin observaciones."}]
+  },
+  /* ---- Semillas P1/P2 sin cotización (Cambio 1-9): con el nuevo modelo
+     una propuesta solo llega a P3 al generar su cotización — todas las
+     demás propuestas de la semilla ya tienen una asociada, así que estas
+     dos garantizan cobertura de Generada y Borrador. ---- */
+  {
+    id: nextId(), codigo:"COD-2026-013", ruc:"20100123456", razonSocial:"Gloria S.A.",
+    giro:"Alimentos y bebidas", esCliente:true, direccion:"Av. República de Panamá 2461, San Isidro, Lima",
+    representantes:[{tipoDoc:"DNI",numDoc:"07412589",nombres:"Marco",apellidos:"Villavicencio Reyes",cargo:"General Manager"}],
+    solucion:"Food", marca:"Mastercard", tecnologia:"Chip contactless", sector:"Privado", categoria:"Esencial",
+    bvMes:112000, cantBeneficiarios:760, cargasAnio:12, tipoProducto:"Físico", valorFacial:145, esEmisionNueva:false,
+    modalidadPago:"Crédito", diasCredito:30,
+    rebate:{activo:false,tipo:"monto",valor:0},
+    comisionCliente:2.5, facturaMinima:1100,
+    expenses: makeExpenses([11,7,13,4,9,3,17,0], ["otros"]),
+    distribucion:[{destino:"Lima",cantidadPuntos:2}],
+    logoEmpresa:true, cartaFianza:false, productoCustom:false, mdrNegociado:0,
+    producto:"Alimentación", estado:"Generada", version:1, fecha:"2026-07-16",
+    historial:[{version:1, fecha:"2026-07-16", estado:"Generada", usuario:"F. Ruiz", resumen:"Propuesta generada automáticamente desde el registro de una nueva oportunidad."}]
+  },
+  {
+    id: nextId(), codigo:"COD-2026-014", ruc:"20100987321", razonSocial:"Telefónica del Perú S.A.A.",
+    giro:"Tecnología", esCliente:true, direccion:"Av. Arequipa 1155, Santa Beatriz, Lima",
+    representantes:[{tipoDoc:"DNI",numDoc:"08523697",nombres:"Claudia",apellidos:"Rivas Montes",cargo:"Apoderado legal"}],
+    solucion:"Gift", marca:"Visa", tecnologia:"No aplica", sector:"Privado", categoria:"No aplica",
+    bvMes:58000, cantBeneficiarios:390, cargasAnio:2, tipoProducto:"Virtual", valorFacial:149, esEmisionNueva:false,
+    modalidadPago:"Al contado", diasCredito:0,
+    rebate:{activo:false,tipo:"monto",valor:0},
+    comisionCliente:2.9, facturaMinima:750,
+    expenses: makeExpenses([9,0,10,0,12,0,0,0], ["entrega","mantenimiento","carga","renovacion","otros"]),
+    distribucion:[{destino:"Lima",cantidadPuntos:1}],
+    logoEmpresa:false, cartaFianza:false, productoCustom:true, mdrNegociado:1.5,
+    producto:"Regalo", estado:"Borrador", version:1, fecha:"2026-07-17",
+    historial:[
+      {version:1, fecha:"2026-07-16", estado:"Generada", usuario:"F. Ruiz", resumen:"Propuesta generada automáticamente desde el registro de una nueva oportunidad."},
+      {version:1, fecha:"2026-07-17", estado:"Borrador", usuario:"F. Ruiz", resumen:"Cambios guardados como borrador."}
+    ]
   }
 ];
 
@@ -259,7 +312,7 @@ function fmtDate(iso){
   return d.toLocaleDateString("es-PE",{day:"2-digit",month:"short",year:"numeric"});
 }
 function badgeClass(estado){
-  return {"Creada":"badge-creada","Borrador":"badge-borrador","Aprobada":"badge-aprobada","Rechazada":"badge-rechazada"}[estado] || "badge-creada";
+  return {"Generada":"badge-creada","Borrador":"badge-borrador","Aprobada":"badge-aprobada","Rechazada":"badge-rechazada","Oportunidad perdida":"badge-borrador"}[estado] || "badge-creada";
 }
 function esc(s){
   return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -445,8 +498,8 @@ let filtered = proposals.slice();
    KPIs
    ============================================================ */
 function renderKPIs(){
-  const activas = proposals.filter(p=>p.estado!=="Rechazada");
-  const abiertas = proposals.filter(p=>p.estado==="Creada"||p.estado==="Borrador");
+  const activas = proposals.filter(p=>p.estado!=="Rechazada" && p.estado!=="Oportunidad perdida");
+  const abiertas = proposals.filter(p=>p.estado==="Generada"||p.estado==="Borrador");
   const cerradasMes = proposals.filter(p=>p.estado==="Aprobada" && p.fecha.slice(0,7)==="2026-07");
 
   const bvAbiertas = abiertas.reduce((s,p)=>s+bvTotalFor(p),0);
@@ -489,8 +542,8 @@ function applyProposalsFilters(){
     }
     if(solucion && p.solucion!==solucion) return false;
     if(producto && p.producto!==producto) return false;
-    if(estado==="__ACTIVAS__"){ if(p.estado==="Rechazada") return false; }
-    else if(estado==="__ABIERTAS__"){ if(p.estado!=="Creada" && p.estado!=="Borrador") return false; }
+    if(estado==="__ACTIVAS__"){ if(p.estado==="Rechazada" || p.estado==="Oportunidad perdida") return false; }
+    else if(estado==="__ABIERTAS__"){ if(p.estado!=="Generada" && p.estado!=="Borrador") return false; }
     else if(estado){ if(p.estado!==estado) return false; }
     if(modalidad && p.modalidadPago!==modalidad) return false;
     if(fIni && p.fecha < fIni) return false;
@@ -532,8 +585,10 @@ function renderProposalsTable(){
     </div></td></tr>`;
   } else {
     tbody.innerHTML = pageItems.map(p=>{
-      const canReject = p.estado!=="Rechazada" && p.estado!=="Aprobada";
-      const isRejected = p.estado==="Rechazada" && !proposalHasApprovedCotizacion(p);
+      const canReject = p.estado==="Generada" || p.estado==="Borrador";
+      const canClosePerdida = p.estado==="Rechazada";
+      const isTerminalBlocked = p.estado==="Aprobada" || p.estado==="Oportunidad perdida";
+      const isRejected = p.estado==="Rechazada" && !proposalHasActiveCotizacion(p);
       const enRevision = p.excepcion && p.excepcion.estado==="pendiente";
       const estadoCell = enRevision
         ? `<span class="badge badge-revision" title="Excepción de rentabilidad pendiente de aprobación de créditos">En revisión de créditos</span>`
@@ -552,18 +607,20 @@ function renderProposalsTable(){
         <td class="cell-estado">${estadoCell}</td>
         <td class="center cell-acciones">
           <div class="row-actions">
-            ${isRejected
-              ? `<button class="icon-btn newversion" data-action="newversion" data-id="${p.id}" title="Generar nueva versión">
-                   <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
-                 </button>`
-              : `<button class="icon-btn edit" data-action="edit" data-id="${p.id}" title="Editar">
-                   <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 00-3-3L5 17v3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
-                 </button>`
+            ${isTerminalBlocked
+              ? ``
+              : p.estado==="Rechazada"
+                ? (isRejected ? `<button class="icon-btn newversion" data-action="newversion" data-id="${p.id}" title="Generar nueva versión">
+                     <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+                   </button>` : ``)
+                : `<button class="icon-btn edit" data-action="edit" data-id="${p.id}" title="Editar">
+                     <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 00-3-3L5 17v3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+                   </button>`
             }
             <button class="icon-btn history" data-action="history" data-id="${p.id}" title="Ver histórico">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.7"/><path d="M12 7.5V12l3 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
-            ${canReject ? `<button class="icon-btn kebab" data-action="menu" data-id="${p.id}" title="Más acciones" aria-haspopup="true">
+            ${(canReject || canClosePerdida) ? `<button class="icon-btn kebab" data-action="menu" data-id="${p.id}" title="Más acciones" aria-haspopup="true">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><circle cx="12" cy="5" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="19" r="1.6" fill="currentColor"/></svg>
             </button>` : ``}
           </div>
@@ -868,14 +925,23 @@ function fillForm(p){
   updateConditionalFields();
 }
 
-/* Bug encontrado en diagnóstico: nada impedía rechazar directamente una
-   propuesta (y por lo tanto generar una nueva versión desde ella) ni
-   disparar la renegociación automática al editar campos, aunque su
-   cotización ya estuviera Aprobada por el cliente — ej. COD-2026-011
-   (Borrador) con COT-2026-010 (Aprobada). quotations vive en el mismo
-   IIFE, se lee directamente. */
+/* Evita renegociar o rechazar directamente una propuesta cuya
+   cotización ya fue Aprobada por el cliente — el trato ya está
+   cerrado. quotations vive en el mismo IIFE, se lee directamente. */
 function proposalHasApprovedCotizacion(p){
   return quotations.some(q => q.propuestaCodigo === p.codigo && q.estado === "Aprobada");
+}
+/* Bloqueo de "Generar nueva versión" (Cambio 5): además de Aprobada
+   (regla ya existente), también bloquea si la cotización sigue
+   Enviada, esperando respuesta del cliente. En la práctica esta rama
+   nunca se dispara: con P3 completamente bloqueada (Cambio 4) y una
+   cotización creándose únicamente junto con la transición a P3, la
+   única propuesta que ofrece "Generar nueva versión" es una Rechazada
+   (P4) — y esa solo se alcanza cuando su cotización ya está Rechazada
+   o Vencida, nunca Enviada. Se deja la comprobación explícita para no
+   depender de esa invariante si el flujo cambia más adelante. */
+function proposalHasActiveCotizacion(p){
+  return quotations.some(q => q.propuestaCodigo === p.codigo && (q.estado === "Enviada" || q.estado === "Aprobada"));
 }
 
 /* BV por carga / BV total: campos calculados y no editables (ver
@@ -1005,12 +1071,7 @@ function openDrawer(mode, id){
   originalSnapshot = (mode==="edit") ? JSON.stringify(collectFormData()) : null;
   nextVersionForEdit = (mode==="edit") ? source.version + 1 : null;
   refreshVersionBanner();
-  refreshDrawerLockState(source);
-
-  // Reject button only visible when editing an existing, non-terminal proposal
-  // sin una cotización ya aprobada por el cliente (ver proposalHasApprovedCotizacion).
-  document.getElementById("btnRejectFromDrawer").style.display =
-    (mode==="edit" && source.estado!=="Rechazada" && source.estado!=="Aprobada" && !proposalHasApprovedCotizacion(source)) ? "inline-flex" : "none";
+  refreshProposalActionState();
 
   document.querySelectorAll(".drawer-nav-item").forEach((b,i)=>b.classList.toggle("active", i===0));
   document.getElementById("drawerForm").scrollTop = 0;
@@ -1040,13 +1101,61 @@ function diffFields(original, updated){
   return Object.keys(FIELD_LABELS).filter(k => JSON.stringify(original[k]) !== JSON.stringify(updated[k])).map(k=>FIELD_LABELS[k]);
 }
 
-/* Mientras una propuesta tenga una excepción de rentabilidad pendiente de
-   aprobación de créditos, queda bloqueada para edición (ver Cambio 8). */
-function refreshDrawerLockState(p){
-  const locked = !!(p && p.excepcion && p.excepcion.estado==="pendiente");
-  document.getElementById("excepcionBanner").style.display = locked ? "flex" : "none";
-  document.getElementById("btnSaveDraft").disabled = locked;
-  document.getElementById("btnSaveVersion").disabled = locked;
+/* Controla banners y visibilidad/estado de todos los botones de acción
+   del footer del drawer de Propuestas según el estado de la propuesta —
+   se llama al abrir el drawer y en cada input/change del formulario (para
+   la precondición de campos obligatorios, Cambio 3). Lee drawerMode /
+   drawerTargetId directamente, igual que refreshVersionBanner().
+
+   Reglas (Cambio 3, 4, 5, 7, 8):
+   - Generada/Borrador (o propuesta nueva/nueva versión, aún sin guardar):
+     Validar Rentabilidad + Enviar a Evaluación Crediticia + Guardar
+     cambios visibles; Rechazar propuesta visible solo si ya existe.
+   - Aprobada u Oportunidad perdida: bloqueadas por completo, ningún
+     botón de acción, solo banner explicativo.
+   - Rechazada: únicamente "Cerrar como oportunidad perdida" (además del
+     ícono de fila "Generar nueva versión", fuera del drawer).
+   - Excepción de rentabilidad pendiente: bloquea el guardado (no las
+     demás acciones), igual que antes de este ticket. */
+function refreshProposalActionState(){
+  const isExisting = drawerMode==="edit";
+  const p = isExisting ? findProposal(drawerTargetId) : null;
+  const estado = isExisting ? p.estado : null;
+  const excepcionLocked = !!(p && p.excepcion && p.excepcion.estado==="pendiente");
+  const terminalLocked = isExisting && (estado==="Aprobada" || estado==="Oportunidad perdida");
+  const showEditActions = !terminalLocked && (!isExisting || estado==="Generada" || estado==="Borrador");
+  const showRechazada = isExisting && estado==="Rechazada";
+
+  document.getElementById("excepcionBanner").style.display = excepcionLocked ? "flex" : "none";
+
+  const lockBanner = document.getElementById("estadoLockBanner");
+  const lockBannerText = document.getElementById("estadoLockBannerText");
+  if(terminalLocked){
+    lockBanner.style.display = "flex";
+    lockBannerText.textContent = estado==="Aprobada"
+      ? "Esta propuesta está Aprobada y no admite ninguna acción — genera una nueva cotización si necesitas renegociar condiciones."
+      : `Esta propuesta está cerrada como Oportunidad perdida y no admite ninguna acción.${p.motivoPerdida ? ` Motivo: "${p.motivoPerdida}".` : ""}`;
+  } else {
+    lockBanner.style.display = "none";
+  }
+
+  const btnValidar = document.getElementById("btnValidarRentabDrawer");
+  const btnEvalCredito = document.getElementById("btnEnviarEvalCredito");
+  const btnReject = document.getElementById("btnRejectFromDrawer");
+  const btnClosePerdida = document.getElementById("btnClosePerdidaFromDrawer");
+  const btnSave = document.getElementById("btnSaveVersion");
+
+  // Cambio 7: "Enviar a Evaluación Crediticia" solo tiene sentido sobre una
+  // propuesta que ya existe en P1/P2 — una que aún no se guardó no es
+  // realmente P1 todavía (mismo criterio que "Rechazar propuesta").
+  const showEvalCredito = isExisting && (estado==="Generada"||estado==="Borrador");
+  btnValidar.style.display = showEditActions ? "inline-flex" : "none";
+  btnValidar.disabled = showEditActions ? !proposalRequiredFieldsComplete(collectFormData()) : false;
+  btnEvalCredito.style.display = showEvalCredito ? "inline-flex" : "none";
+  btnReject.style.display = (isExisting && (estado==="Generada"||estado==="Borrador") && !proposalHasApprovedCotizacion(p)) ? "inline-flex" : "none";
+  btnClosePerdida.style.display = showRechazada ? "inline-flex" : "none";
+  btnSave.style.display = showEditActions ? "inline-flex" : "none";
+  btnSave.disabled = excepcionLocked;
 }
 
 /* Muestra en tiempo real que el cambio actual generará una nueva versión,
@@ -1075,7 +1184,13 @@ function refreshVersionBanner(){
   }
 }
 
-function saveProposal(estadoDestino){
+/* "Guardar cambios" es el único botón de guardado que queda (Cambio 2):
+   en modo edición siempre hace la transición P1→P2 (Borrador) — nunca
+   valida campos obligatorios, admite datos incompletos. Al crear una
+   propuesta nueva o una nueva versión (modos "new"/"newversion") no hay
+   un P1 existente del cual "transicionar"; se preserva el comportamiento
+   previo a este cambio y se guarda directamente en Generada (P1). */
+function saveProposal(){
   const data = collectFormData();
 
   if(drawerMode==="edit"){
@@ -1086,19 +1201,24 @@ function saveProposal(estadoDestino){
       showToast(`No se puede guardar: ${p.codigo} tiene una cotización aprobada por el cliente. Genera una nueva cotización para renegociar condiciones.`, "danger");
       return;
     }
-    const bumpsVersion = estadoDestino !== "Borrador" && changedFields.length > 0;
+    const estadoDestino = "Borrador";
+    /* Antes del Cambio 2 este bump se excluía al guardar explícitamente
+       como borrador — ahora todo guardado en modo edición ES un guardado
+       como borrador, así que el único criterio que queda es si cambió el
+       campo que dispara versión nueva. */
+    const bumpsVersion = changedFields.length > 0;
     Object.assign(p, data);
     p.estado = estadoDestino;
     p.fecha = new Date().toISOString().slice(0,10);
     if(bumpsVersion) p.version += 1;
-    let resumen;
-    if(bumpsVersion) resumen = `Nueva versión generada automáticamente por cambios en: ${changedFields.join(", ")}.`;
-    else if(estadoDestino==="Borrador") resumen = "Cambios guardados como borrador.";
-    else resumen = "Propuesta actualizada sin cambios en campos comerciales clave.";
+    const resumen = bumpsVersion
+      ? `Nueva versión generada automáticamente por cambios en: ${changedFields.join(", ")}.`
+      : "Cambios guardados como borrador.";
     p.historial.push({version:p.version, fecha:p.fecha, estado:estadoDestino, usuario:"F. Ruiz", resumen});
     flashRow(p.id);
     showToast(bumpsVersion ? `Nueva versión v${p.version} generada automáticamente (${changedFields.length} cambio${changedFields.length>1?"s":""}).` : resumen, "success");
   } else {
+    const estadoDestino = "Generada";
     let baseCodigo, baseVersion=1, producto, historialBase=[], solicitudesBase=[];
     if(drawerMode==="newversion"){
       const base = findProposal(drawerTargetId);
@@ -1144,6 +1264,10 @@ function toggleRowMenu(triggerBtn, id){
     return;
   }
   rowMenuTargetId = id;
+  const p = findProposal(id);
+  const isRechazada = p.estado==="Rechazada";
+  document.getElementById("rowMenuReject").style.display = isRechazada ? "none" : "";
+  document.getElementById("rowMenuClosePerdida").style.display = isRechazada ? "" : "none";
   const rect = triggerBtn.getBoundingClientRect();
   const popW = 188;
   let left = rect.right - popW;
@@ -1199,6 +1323,38 @@ function confirmReject(){
   closeDrawer();
   flashRow(p.id);
   showToast(`Propuesta ${p.codigo} marcada como Rechazada.`, "danger");
+  applyProposalsFilters();
+}
+
+/* ---------- Cerrar propuesta como oportunidad perdida (Cambio 8) ----------
+   Solo alcanzable desde Rechazada (P4). Motivo obligatorio del catálogo
+   cerrado (MOTIVOS_PERDIDA); comentario libre opcional además. */
+let proposalLostTargetId = null;
+function openProposalLostModal(id){
+  proposalLostTargetId = id;
+  const p = findProposal(id);
+  document.getElementById("proposalLostCodigo").textContent = p.codigo;
+  document.getElementById("proposalLostMotivo").value = "";
+  document.getElementById("proposalLostComment").value = "";
+  document.getElementById("proposalLostModal").classList.add("open");
+  overlay.classList.add("visible");
+  trapFocus(document.getElementById("proposalLostModal"));
+}
+function confirmProposalLost(){
+  const p = findProposal(proposalLostTargetId);
+  const motivo = document.getElementById("proposalLostMotivo").value;
+  if(!motivo){ document.getElementById("proposalLostMotivo").focus(); return; }
+  const comentario = document.getElementById("proposalLostComment").value.trim();
+  p.estado = "Oportunidad perdida";
+  p.motivoPerdida = motivo;
+  p.fecha = new Date().toISOString().slice(0,10);
+  p.historial.push({version:p.version, fecha:p.fecha, estado:"Oportunidad perdida", usuario:"F. Ruiz",
+    resumen: comentario ? `Propuesta cerrada como oportunidad perdida: ${comentario}` : "Propuesta cerrada como oportunidad perdida.",
+    motivo});
+  closeModalById("proposalLostModal");
+  closeDrawer();
+  flashRow(p.id);
+  showToast(`Propuesta ${p.codigo} marcada como Oportunidad perdida.`, "info");
   applyProposalsFilters();
 }
 
@@ -1382,6 +1538,28 @@ function submitReevaluacion(){
   closeModalById("stageModal");
   renderApprovalTable(p);
   showToast(`Reevaluación solicitada para ${s.id}. Estado actualizado a En Atención.`, "success");
+}
+
+/* Catálogo cerrado de motivos de cierre por oportunidad perdida (Cambio 8) —
+   comparte el mismo catálogo Propuestas (P4→P5) y Cotizaciones (C4/C6→C5). */
+const MOTIVOS_PERDIDA = [
+  "Monto Factura mínima","Penalidad","Otros motivos relacionados al contrato",
+  "Competencia","Falta de presupuesto","Sin actividad","No contactabilidad","Oportunidad duplicada"
+];
+
+/* Precondición de "Validar Rentabilidad" / "Generar cotización" (Cambio 3):
+   todos los campos de las secciones Oportunidad y Distribución completos.
+   Solución/Marca/Tecnología/Categoría/Tipo de producto/Sector no se
+   revalidan acá: son valores heredados de la Oportunidad, ya obligatorios
+   desde su creación (ver validateOportunidadForm) — nunca llegan vacíos. */
+function proposalRequiredFieldsComplete(data){
+  if(!(+data.valorFacial > 0)) return false;
+  if(!(Number.isInteger(+data.cantBeneficiarios) && +data.cantBeneficiarios > 0)) return false;
+  if(!(Number.isInteger(+data.cargasAnio) && +data.cargasAnio > 0)) return false;
+  if(data.modalidadPago === "Crédito" && !(+data.diasCredito > 0)) return false;
+  if(!data.distribucion || !data.distribucion.length) return false;
+  if(data.distribucion.some(d => !d.destino || !(+d.cantidadPuntos > 0))) return false;
+  return true;
 }
 
 /* ---------- Validador de rentabilidad (semáforo) ---------- */
@@ -1662,9 +1840,9 @@ function saveOportunidad(){
   const codigo = nextCodigo();
   const fecha = new Date().toISOString().slice(0,10);
   const newP = Object.assign({}, data, {
-    id: nextId(), codigo, estado:"Creada", version:1, fecha,
+    id: nextId(), codigo, estado:"Generada", version:1, fecha,
     solicitudes: [],
-    historial:[{version:1, fecha, estado:"Creada", usuario:"F. Ruiz", resumen:"Propuesta generada automáticamente desde el registro de una nueva oportunidad."}]
+    historial:[{version:1, fecha, estado:"Generada", usuario:"F. Ruiz", resumen:"Propuesta generada automáticamente desde el registro de una nueva oportunidad."}]
   });
   proposals.unshift(newP);
   lastCreatedFromOportunidadId = newP.id;
@@ -1678,7 +1856,7 @@ function saveOportunidad(){
   document.getElementById("oportunidadSuccessModal").classList.add("open");
   overlay.classList.add("visible");
   trapFocus(document.getElementById("oportunidadSuccessModal"));
-  showToast(`Oportunidad registrada. Propuesta ${newP.codigo} creada en estado Creada.`, "success");
+  showToast(`Oportunidad registrada. Propuesta ${newP.codigo} creada en estado Generada.`, "success");
 }
 
 /* ---------- Toasts ---------- */
@@ -1834,6 +2012,8 @@ document.addEventListener("DOMContentLoaded", function(){
   // edición del formulario, antes de guardar
   document.getElementById("drawerForm").addEventListener("input", refreshVersionBanner);
   document.getElementById("drawerForm").addEventListener("change", refreshVersionBanner);
+  document.getElementById("drawerForm").addEventListener("input", refreshProposalActionState);
+  document.getElementById("drawerForm").addEventListener("change", refreshProposalActionState);
 
   // Conditional field listeners
   document.getElementById("f_modalidadPago").addEventListener("change", updateConditionalFields);
@@ -1907,17 +2087,29 @@ document.addEventListener("DOMContentLoaded", function(){
   });
   document.getElementById("btnConfirmExcepcion").addEventListener("click", confirmExcepcion);
 
-  // Save / reject actions
-  document.getElementById("btnSaveDraft").addEventListener("click", ()=>saveProposal("Borrador"));
-  document.getElementById("btnSaveVersion").addEventListener("click", ()=>saveProposal("Creada"));
+  document.getElementById("proposalLostMotivo").innerHTML =
+    `<option value="">Selecciona un motivo…</option>` + MOTIVOS_PERDIDA.map(m=>`<option value="${esc(m)}">${esc(m)}</option>`).join("");
+
+  // Save / reject / lost / eval. crediticia actions
+  document.getElementById("btnSaveVersion").addEventListener("click", ()=>saveProposal());
   document.getElementById("btnRejectFromDrawer").addEventListener("click", ()=>openRejectModal(drawerTargetId));
   document.getElementById("btnConfirmReject").addEventListener("click", confirmReject);
+  document.getElementById("btnClosePerdidaFromDrawer").addEventListener("click", ()=>openProposalLostModal(drawerTargetId));
+  document.getElementById("btnConfirmProposalLost").addEventListener("click", confirmProposalLost);
+  document.getElementById("btnEnviarEvalCredito").addEventListener("click", ()=>{
+    showToast("La evaluación crediticia estará disponible próximamente.", "info");
+  });
 
   // Row overflow menu (kebab)
   document.getElementById("rowMenuReject").addEventListener("click", ()=>{
     const id = rowMenuTargetId;
     closeRowMenu();
     if(id) openRejectModal(id);
+  });
+  document.getElementById("rowMenuClosePerdida").addEventListener("click", ()=>{
+    const id = rowMenuTargetId;
+    closeRowMenu();
+    if(id) openProposalLostModal(id);
   });
   document.addEventListener("click", function(e){
     if(!rowMenuPopover.classList.contains("open")) return;
@@ -1975,7 +2167,11 @@ function nextCotId(){ return "cot" + (cotSeq++); }
    rentable (semáforo verde en "Validar Rentabilidad"). No pide ningún
    campo nuevo: Solución/Marca/Tecnología/Categoría/Tipo de producto/
    Producto ya se resuelven en vivo en el drawer de detalle vía
-   findProposalByCodigo() — la cotización solo guarda la referencia. */
+   findProposalByCodigo() — la cotización solo guarda la referencia.
+
+   Cambio 3: hace dos cosas a la vez — mueve la propuesta a Aprobada (P3)
+   Y crea la cotización en Generada (C1). No hay paso intermedio: por eso
+   P3 no tiene acciones propias (Cambio 4), nunca se queda "esperando". */
 function generateCotizacionFromProposal(propuestaCodigo){
   const propuesta = findProposalByCodigo(propuestaCodigo);
   if(!propuesta){
@@ -1990,6 +2186,11 @@ function generateCotizacionFromProposal(propuestaCodigo){
   const ahora = new Date();
   const fechaGeneracion = ahora.toISOString().slice(0,10);
   const horaGeneracion = String(ahora.getHours()).padStart(2,"0") + ":" + String(ahora.getMinutes()).padStart(2,"0");
+  /* Cambio 9: fecha_validez es un campo propio de la cotización, fijado
+     una sola vez acá — nunca recalculado en tiempo de render (ver
+     evaluarEstadoVigenciaCotizacion, que solo LEE validaHasta). Hoy es
+     como máximo 15 días calendario; cuando exista evaluación crediticia
+     deberá poder ser menor para no superar el vencimiento del crédito. */
   const validaHasta = new Date(ahora.getTime() + 15 * 24 * 60 * 60 * 1000).toISOString().slice(0,10);
 
   const newCotizacion = {
@@ -2000,9 +2201,11 @@ function generateCotizacionFromProposal(propuestaCodigo){
     responsable: "F. Ruiz",
     estado: "Generada",
     motivoRechazo: null,
+    motivoPerdida: null,
     comentarioPerdida: null,
-    documentoSustento: null,
-    email: {estado:"Sin enviar", destinatario:"", asunto:"", intentos:[]},
+    avisoSlaGenerado: false,
+    email: {asunto:`Cotización ${cotizacionCodigo} · Edenred Perú`, cc:[]},
+    aprobador: null,
     historial: [{fecha: fechaGeneracion, usuario:"F. Ruiz", accion:"Cotización generada",
       detalle:`Generada a partir de la propuesta ${propuestaCodigo}, validada como rentable.`}]
   };
@@ -2011,6 +2214,13 @@ function generateCotizacionFromProposal(propuestaCodigo){
      usan para propuestas nuevas — el registro recién creado aparece primero,
      visible de inmediato sin paginar. */
   quotations.unshift(newCotizacion);
+
+  propuesta.estado = "Aprobada";
+  propuesta.fecha = fechaGeneracion;
+  propuesta.historial.push({version:propuesta.version, fecha:fechaGeneracion, estado:"Aprobada", usuario:"F. Ruiz",
+    resumen:`Propuesta aprobada automáticamente al generar la cotización ${cotizacionCodigo}.`});
+  flashRow(propuesta.id);
+  applyProposalsFilters();
 
   closeModalById("rentabModal");
   showToast(`Cotización ${cotizacionCodigo} generada. Revísala en el módulo de Cotizaciones.`, "success");
@@ -2132,9 +2342,14 @@ const quotations = [
     ]
   },
   {
+    /* Pasa por Vencida (C6) antes de cerrarse como perdida (C5) — la única
+       ruta válida bajo la máquina de estados objetivo (Cambio 8): ya no
+       existe un cierre directo desde Enviada (C2). El aprobador nunca
+       respondió (Pendiente todo el ciclo). */
     id: nextCotId(), codigo:"COT-2026-006", propuestaCodigo:"COD-2026-006",
     fechaGeneracion:"2026-07-14", horaGeneracion:"16:38", validaHasta:"2026-07-29", responsable:"F. Ruiz",
-    estado:"Oportunidad perdida", motivoRechazo:null, comentarioPerdida:"El cliente decidió postergar el proyecto de Gift Card para el siguiente semestre.", avisoSlaGenerado:false,
+    estado:"Oportunidad perdida", motivoRechazo:null, motivoPerdida:"Sin actividad",
+    comentarioPerdida:"El cliente decidió postergar el proyecto de Gift Card para el siguiente semestre.", avisoSlaGenerado:false,
     email:{asunto:"Cotización COT-2026-006 · Edenred Perú", cc:[]},
     aprobador:{nombre:"Compras Sodimac", email:"compras@sodimac.com.pe", estado:"Pendiente",
       fechaRespuesta:null, canalRespuesta:null, registradoPor:null, motivoRechazo:null, documentoSustento:null,
@@ -2142,7 +2357,9 @@ const quotations = [
     historial:[
       {fecha:"2026-07-14", usuario:"F. Ruiz", accion:"Cotización generada", detalle:"Generada a partir de la propuesta COD-2026-006, validada como rentable."},
       {fecha:"2026-07-14", usuario:"F. Ruiz", accion:"Enviada al cliente", detalle:"Email enviado a compras@sodimac.com.pe."},
-      {fecha:"2026-07-21", usuario:"F. Ruiz", accion:"Oportunidad perdida", detalle:"El cliente decidió postergar el proyecto de Gift Card para el siguiente semestre."}
+      {fecha:"2026-07-30", usuario:"Sistema", accion:"Cotización vencida", detalle:"Vencida al superarse la vigencia de 15 días calendario (hasta 29 jul. 2026)."},
+      {fecha:"2026-07-30", usuario:"Sistema", accion:"Propuesta rechazada", detalle:"La propuesta COD-2026-006 pasó a Rechazada automáticamente al vencer esta cotización."},
+      {fecha:"2026-08-01", usuario:"F. Ruiz", accion:"Oportunidad perdida", detalle:"El cliente decidió postergar el proyecto de Gift Card para el siguiente semestre.", motivo:"Sin actividad"}
     ]
   },
   {
@@ -2228,9 +2445,13 @@ function fmtISODate(d){ return d.toISOString().slice(0,10); }
    Se evalúa contra COT_HOY (fecha fija de referencia de la demo, ver
    arriba) — nunca contra new Date() real, para que la semilla no
    quede vencida apenas pase el tiempo real. Se llama al renderizar el
-   listado y al abrir el drawer (Cambio 10). Solo aplica a "Enviada":
-   una vencida no propaga ningún cambio a la propuesta ni afecta
-   documentos ya cargados. */
+   listado y al abrir el drawer (Cambio 10). Solo aplica a "Enviada".
+
+   Cambio 6: a diferencia de antes de este ticket, vencer SÍ propaga —
+   la propuesta de origen pasa a Rechazada (P4) con motivo fijo "No
+   contactabilidad", sin pedírselo al ejecutivo (ver Cambio 8). Reutiliza
+   cascadeRejectProposal, la misma cascada que ya usa el rechazo manual
+   del aprobador, con "causa" distinta solo para el texto del historial. */
 function evaluarEstadoVigenciaCotizacion(q){
   if(q.estado !== "Enviada") return;
   const vh = new Date(q.validaHasta + "T00:00:00");
@@ -2238,6 +2459,7 @@ function evaluarEstadoVigenciaCotizacion(q){
   if(diffDias < 0){
     q.estado = "Vencida";
     q.historial.push({fecha:COT_HOY_STR, usuario:"Sistema", accion:"Cotización vencida", detalle:`Vencida al superarse la vigencia de 15 días calendario (hasta ${fmtDate(q.validaHasta)}).`});
+    cascadeRejectProposal(q, "No contactabilidad", "vencer");
     return;
   }
   if(diffDias <= 3 && !q.avisoSlaGenerado){
@@ -2579,9 +2801,10 @@ function renderCotResultBox(q){
   if(q.estado==="Rechazada" && q.motivoRechazo){
     wrap.style.display = "block";
     box.innerHTML = `<h5>Motivo del rechazo</h5><p class="hint">"${esc(q.motivoRechazo)}"</p>`;
-  } else if(q.estado==="Oportunidad perdida" && q.comentarioPerdida){
+  } else if(q.estado==="Oportunidad perdida" && q.motivoPerdida){
     wrap.style.display = "block";
-    box.innerHTML = `<h5>Comentario de oportunidad perdida</h5><p class="hint">"${esc(q.comentarioPerdida)}"</p>`;
+    box.innerHTML = `<h5>Motivo de oportunidad perdida</h5><p class="hint">${esc(q.motivoPerdida)}</p>` +
+      (q.comentarioPerdida ? `<p class="hint">"${esc(q.comentarioPerdida)}"</p>` : "");
   } else {
     wrap.style.display = "none";
     box.innerHTML = "";
@@ -2630,16 +2853,17 @@ function renderCotFooterButtons(q){
      "Rechazada", nunca "Enviada". Revertir reabre la cotización. */
   const puedeRevertir = q.aprobador && !!q.aprobador.canalRespuesta && q.aprobador.canalRespuesta!=="Enlace" && !q.aprobador.respuestaRevertida;
 
+  /* Cambio 8: "Marcar como oportunidad perdida" ya no se ofrece desde
+     Generada/Enviada (C1/C2) — la máquina de estados objetivo solo
+     admite cerrar como perdida desde Rechazada (C4) o Vencida (C6). */
   if(q.estado==="Generada"){
-    leftHtml = `<button class="btn btn-outline-danger" id="btnCotMarkLost" type="button">Marcar como oportunidad perdida</button>`;
     rightHtml += `<button class="btn btn-primary" id="btnCotSend" type="button">
       <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M4 4l16 8-16 8V4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
       Enviar cotización al cliente
     </button>`;
   } else if(q.estado==="Enviada"){
     leftHtml = `<button class="btn btn-outline-danger" id="btnCotReject" type="button">Rechazar cotización</button>
-      <button class="btn btn-secondary" id="btnCotManualResponse" type="button">Registrar respuesta</button>
-      <button class="btn btn-secondary" id="btnCotMarkLost" type="button">Marcar como oportunidad perdida</button>`;
+      <button class="btn btn-secondary" id="btnCotManualResponse" type="button">Registrar respuesta</button>`;
     rightHtml += `<button class="btn btn-primary" id="btnCotApprove" type="button">
       <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       Aprobar cotización
@@ -2647,6 +2871,8 @@ function renderCotFooterButtons(q){
   } else if(q.estado==="Rechazada"){
     leftHtml = `<button class="btn btn-secondary" id="btnCotMarkLost" type="button">Marcar como oportunidad perdida</button>`;
     if(puedeRevertir) leftHtml += `<button class="btn btn-secondary" id="btnCotRevert" type="button">Revertir respuesta</button>`;
+  } else if(q.estado==="Vencida"){
+    leftHtml = `<button class="btn btn-secondary" id="btnCotMarkLost" type="button">Marcar como oportunidad perdida</button>`;
   } else if(q.estado==="Aprobada"){
     if(puedeRevertir) leftHtml = `<button class="btn btn-secondary" id="btnCotRevert" type="button">Revertir respuesta</button>`;
   }
@@ -2949,9 +3175,12 @@ function openCotRejectModal(q){
 /* Rechazo en cascada: la propuesta de origen pasa a Rechazada también,
    salvo que YA tenga una cotización Aprobada en otra versión — en ese
    caso el cierre tiene precedencia sobre el rechazo y la propuesta no
-   cambia de estado (ver 3.1). Aplica igual al rechazo por enlace y al
-   manual (ambos pasan por este mismo camino). */
-function cascadeRejectProposal(q, motivo){
+   cambia de estado (ver 3.1). Aplica al rechazo por enlace, al manual
+   (ambos pasan por este mismo camino) y, desde el Cambio 6, también al
+   vencimiento — "causa" solo cambia el verbo del historial ("rechazarse"
+   vs "vencer"), la lógica de precedencia es idéntica en los tres casos. */
+function cascadeRejectProposal(q, motivo, causa){
+  causa = causa || "rechazarse";
   const p = findProposalByCodigo(q.propuestaCodigo);
   if(!p || p.estado === "Rechazada") return;
   if(proposalHasApprovedCotizacion(p)){
@@ -2960,8 +3189,29 @@ function cascadeRejectProposal(q, motivo){
     return;
   }
   p.estado = "Rechazada";
-  p.fecha = new Date().toISOString().slice(0,10);
-  p.historial.push({version:p.version, fecha:p.fecha, estado:"Rechazada", usuario:"F. Ruiz", resumen:"Propuesta rechazada automáticamente al rechazarse la cotización " + q.codigo + " generada a partir de ella.", motivo});
+  p.fecha = COT_HOY_STR;
+  p.historial.push({version:p.version, fecha:p.fecha, estado:"Rechazada", usuario:"Sistema", resumen:`Propuesta rechazada automáticamente al ${causa} la cotización ${q.codigo} generada a partir de ella.`, motivo});
+  flashRow(p.id);
+  applyProposalsFilters();
+}
+/* Cierre por pérdida en cascada (Cambio 6/8): al cerrar la cotización
+   como Oportunidad perdida (desde Rechazada o Vencida), la propuesta de
+   origen se cierra también, con el mismo motivo del catálogo. Misma
+   comprobación de precedencia que cascadeRejectProposal — si la propuesta
+   ya tiene otra cotización Aprobada, esta cotización perdida es de una
+   versión distinta y no debe tocar un trato ya cerrado. */
+function cascadeLostProposal(q, motivo){
+  const p = findProposalByCodigo(q.propuestaCodigo);
+  if(!p || p.estado === "Oportunidad perdida") return;
+  if(proposalHasApprovedCotizacion(p)){
+    q.historial.push({fecha:COT_HOY_STR, usuario:"Sistema", accion:"Cascada no aplicada", detalle:`La propuesta ${p.codigo} ya tiene una cotización aprobada en otra versión — no se modificó su estado.`});
+    showToast(`La propuesta ${p.codigo} ya tiene un trato cerrado; no se modificó su estado.`, "info");
+    return;
+  }
+  p.estado = "Oportunidad perdida";
+  p.motivoPerdida = motivo;
+  p.fecha = COT_HOY_STR;
+  p.historial.push({version:p.version, fecha:p.fecha, estado:"Oportunidad perdida", usuario:"Sistema", resumen:`Propuesta cerrada como oportunidad perdida automáticamente al cerrarse la cotización ${q.codigo} generada a partir de ella.`, motivo});
   flashRow(p.id);
   applyProposalsFilters();
 }
@@ -3019,18 +3269,25 @@ function confirmCotReject(){
 function openCotLostModal(q){
   closeModalById("cotEmailModal");
   document.getElementById("cotLostCodigo").textContent = q.codigo;
+  document.getElementById("cotLostMotivo").value = "";
   document.getElementById("cotLostComment").value = "";
   document.getElementById("cotLostModal").classList.add("open");
   cotOverlay.classList.add("visible");
   trapFocus(document.getElementById("cotLostModal"));
 }
+/* Cambio 8: motivo del catálogo cerrado (obligatorio), comentario libre
+   opcional además. Cierra la cotización Y propaga el cierre a la
+   propuesta de origen (cascadeLostProposal), salvo precedencia. */
 function confirmCotLost(){
   const q = findQuotation(cotDrawerTargetId);
+  const motivo = document.getElementById("cotLostMotivo").value;
+  if(!motivo){ document.getElementById("cotLostMotivo").focus(); return; }
   const comentario = document.getElementById("cotLostComment").value.trim();
-  if(!comentario){ document.getElementById("cotLostComment").focus(); return; }
   q.estado = "Oportunidad perdida";
-  q.comentarioPerdida = comentario;
-  q.historial.push({fecha:COT_HOY_STR, usuario:"F. Ruiz", accion:"Oportunidad perdida", detalle:comentario});
+  q.motivoPerdida = motivo;
+  q.comentarioPerdida = comentario || null;
+  q.historial.push({fecha:COT_HOY_STR, usuario:"F. Ruiz", accion:"Oportunidad perdida", detalle: comentario || motivo, motivo});
+  cascadeLostProposal(q, motivo);
   closeModalById("cotLostModal");
   refreshCotDrawerIfOpen(q);
   renderCotTable();
@@ -3190,6 +3447,9 @@ function handleFichaLuego(){
 /* ---------- Init ---------- */
 function initCotizacionesModule(){
   renderCotTable();
+
+  document.getElementById("cotLostMotivo").innerHTML =
+    `<option value="">Selecciona un motivo…</option>` + MOTIVOS_PERDIDA.map(m=>`<option value="${esc(m)}">${esc(m)}</option>`).join("");
 
   document.getElementById("fCotCliente").addEventListener("input", applyCotFilters);
   ["fCotSolucion","fCotProducto","fCotEstado","fCotEmailEstado","fCotFechaIni","fCotFechaFin"].forEach(id=>{

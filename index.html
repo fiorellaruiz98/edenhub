@@ -343,12 +343,13 @@
           <label for="fEstado">Estado</label>
           <select id="fEstado">
             <option value="">Todos</option>
-            <option value="__ACTIVAS__">Activas (no rechazadas)</option>
-            <option value="__ABIERTAS__">Abiertas (Creada + Borrador)</option>
-            <option value="Creada">Creada</option>
+            <option value="__ACTIVAS__">Activas (no rechazadas ni perdidas)</option>
+            <option value="__ABIERTAS__">Abiertas (Generada + Borrador)</option>
+            <option value="Generada">Generada</option>
             <option value="Borrador">Borrador</option>
             <option value="Aprobada">Aprobada</option>
             <option value="Rechazada">Rechazada</option>
+            <option value="Oportunidad perdida">Oportunidad perdida</option>
           </select>
         </div>
         <div class="field-group">
@@ -514,6 +515,7 @@
             <option value="Aprobada">Aprobada</option>
             <option value="Rechazada">Rechazada</option>
             <option value="Oportunidad perdida">Oportunidad perdida</option>
+            <option value="Vencida">Vencida</option>
           </select>
         </div>
         <div class="field-group">
@@ -1730,20 +1732,31 @@
     <svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
     <span class="vb-text">Esta propuesta está en revisión de créditos por una excepción de rentabilidad pendiente. No se puede editar hasta que se resuelva.</span>
   </div>
+  <div class="version-banner" id="estadoLockBanner" style="display:none;" role="status">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
+    <span class="vb-text" id="estadoLockBannerText"></span>
+  </div>
   <div class="drawer-footer">
     <div class="drawer-footer-left">
       <button class="btn btn-secondary" id="btnValidarRentabDrawer" type="button">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M9 13l2 2 4-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Validar Rentabilidad
       </button>
+      <button class="btn btn-secondary" id="btnEnviarEvalCredito" type="button">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M3 9.5h18M6.5 15h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        Enviar a Evaluación Crediticia
+      </button>
       <button class="btn btn-outline-danger" id="btnRejectFromDrawer" type="button">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
         Rechazar propuesta
       </button>
+      <button class="btn btn-secondary" id="btnClosePerdidaFromDrawer" type="button">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M12 9v4M12 17h.01" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
+        Cerrar como oportunidad perdida
+      </button>
     </div>
     <div class="drawer-footer-right">
       <button class="btn-text" id="btnCancelDrawer" type="button">Cancelar</button>
-      <button class="btn btn-secondary" id="btnSaveDraft" type="button">Guardar como borrador</button>
       <button class="btn btn-primary" id="btnSaveVersion" type="button">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Guardar cambios
@@ -1780,6 +1793,40 @@
     <div class="modal-footer">
       <button class="btn-text" data-close-modal="rejectModal" type="button">Cancelar</button>
       <button class="btn btn-primary" id="btnConfirmReject" type="button" style="background:var(--red-hero-dark);">Confirmar rechazo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL — Cerrar propuesta como oportunidad perdida
+     ============================================================ -->
+<div class="modal" id="proposalLostModal" role="dialog" aria-modal="true" aria-labelledby="proposalLostModalTitle">
+  <div class="modal-card w-sm">
+    <div class="modal-header">
+      <div>
+        <h3 id="proposalLostModalTitle">Cerrar como oportunidad perdida</h3>
+        <p>Código <b id="proposalLostCodigo">—</b></p>
+      </div>
+      <button class="close-x" data-close-modal="proposalLostModal" type="button">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="reject-icon" style="background:var(--status-borrador-bg);color:var(--status-borrador-fg);">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none"><path d="M12 9v4M12 17h.01" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
+      </div>
+      <label class="block-label" for="proposalLostMotivo">Motivo</label>
+      <select id="proposalLostMotivo"></select>
+      <label class="block-label" for="proposalLostComment" style="margin-top:12px;">Comentario (opcional)</label>
+      <textarea id="proposalLostComment" placeholder="Detalle adicional, si aplica…"></textarea>
+      <div class="warn-box" style="background:var(--status-borrador-bg);color:var(--status-borrador-fg);">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M12 9v4M12 17h.01" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
+        La propuesta pasará a estado <b>Oportunidad perdida</b> de forma definitiva.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-text" data-close-modal="proposalLostModal" type="button">Cancelar</button>
+      <button class="btn btn-primary" id="btnConfirmProposalLost" type="button" style="background:var(--status-borrador-fg);">Confirmar</button>
     </div>
   </div>
 </div>
@@ -2378,7 +2425,9 @@
       <div class="reject-icon" style="background:var(--status-borrador-bg);color:var(--status-borrador-fg);">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none"><path d="M12 9v4M12 17h.01" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
       </div>
-      <label class="block-label" for="cotLostComment">Comentario</label>
+      <label class="block-label" for="cotLostMotivo">Motivo</label>
+      <select id="cotLostMotivo"></select>
+      <label class="block-label" for="cotLostComment" style="margin-top:12px;">Comentario (opcional)</label>
       <textarea id="cotLostComment" placeholder="Describe brevemente por qué se pierde esta oportunidad…"></textarea>
       <div class="warn-box" style="background:var(--status-borrador-bg);color:var(--status-borrador-fg);">
         <svg viewBox="0 0 24 24" width="15" height="15" fill="none"><path d="M12 9v4M12 17h.01" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
@@ -2788,6 +2837,10 @@
   <button type="button" class="row-menu-item" id="rowMenuReject" role="menuitem">
     <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
     Rechazar propuesta
+  </button>
+  <button type="button" class="row-menu-item" id="rowMenuClosePerdida" role="menuitem" style="display:none;">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M12 9v4M12 17h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/></svg>
+    Cerrar como oportunidad perdida
   </button>
 </div>
 
