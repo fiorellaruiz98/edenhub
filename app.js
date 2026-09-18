@@ -317,6 +317,33 @@ function badgeClass(estado){
 function esc(s){
   return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
+
+/* Estado vacío del listado — compartido entre Propuestas y Cotizaciones,
+   dos variantes según si el conjunto COMPLETO (no el filtrado) está
+   vacío o no (ver ticket "Estados vacíos diferenciados"):
+   - Sin ningún registro: sin acción, el llamador además oculta las
+     cabeceras de la tabla (no hay nada que decidir con ellas).
+   - Con filtros que no devuelven nada: incluye "Limpiar filtros",
+     cableado acá mismo a `onClear` (la función YA existente de cada
+     módulo — no se duplica su lógica) porque el <tr> se reemplaza
+     entero en cada render y perdería cualquier listener previo. */
+function emptyStateRow(colspan, {title, subtitle, onClear}){
+  const noHeaders = !onClear;
+  return `<tr><td colspan="${colspan}"><div class="empty-state${noHeaders ? " empty-state-noheaders" : ""}">
+      <svg viewBox="0 0 24 24" width="40" height="40" fill="none"><rect x="3" y="6" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <strong>${esc(title)}</strong>
+      ${subtitle ? `<p>${esc(subtitle)}</p>` : ""}
+      ${onClear ? `<button type="button" class="btn btn-secondary empty-state-clear">Limpiar filtros</button>` : ""}
+    </div></td></tr>`;
+}
+/* Cablea el botón "Limpiar filtros" recién insertado por emptyStateRow()
+   (si existe) — se llama después de escribir el innerHTML, igual que el
+   resto de listeners dinámicos de este archivo (mini-tablas, etc.). */
+function wireEmptyStateClear(tbody, onClear){
+  const btn = tbody.querySelector(".empty-state-clear");
+  if(btn) btn.addEventListener("click", onClear);
+}
+
 function findProposal(id){ return proposals.find(p=>p.id===id); }
 
 /* ------------------------------------------------------------
@@ -568,7 +595,27 @@ function renderProposalsTable(){
   closeRowMenu();
   renderKPIs();
   const tbody = document.getElementById("tableBody");
+  const thead = document.getElementById("tableHead");
   document.getElementById("resultCount").textContent = filtered.length;
+
+  /* Cambio 3 del ticket "Estados vacíos diferenciados": se compara contra
+     el conjunto COMPLETO (proposals), no contra el filtrado — un usuario
+     puede tener filtros puestos en un sistema que además no tiene ninguna
+     propuesta, y son dos mensajes distintos (ver emptyStateRow arriba). */
+  if(proposals.length===0){
+    thead.style.display = "none";
+    tbody.innerHTML = emptyStateRow(12, {
+      title:"Aún no hay propuestas",
+      subtitle:"Crea una propuesta o una oportunidad para empezar."
+    });
+    currentPage = 1;
+    document.getElementById("pagFrom").textContent = 0;
+    document.getElementById("pagTo").textContent = 0;
+    document.getElementById("pagTotal").textContent = 0;
+    renderPagination(1);
+    return;
+  }
+  thead.style.display = "";
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   if(currentPage > totalPages) currentPage = totalPages;
@@ -576,11 +623,11 @@ function renderProposalsTable(){
   const pageItems = filtered.slice(start, start+PAGE_SIZE);
 
   if(pageItems.length===0){
-    tbody.innerHTML = `<tr><td colspan="12"><div class="empty-state">
-      <svg viewBox="0 0 24 24" width="40" height="40" fill="none"><rect x="3" y="6" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-      <strong>No se encontraron propuestas</strong>
-      <p>Ajusta los filtros de búsqueda para ver más resultados.</p>
-    </div></td></tr>`;
+    tbody.innerHTML = emptyStateRow(12, {
+      title:"No se encontraron propuestas con los filtros aplicados",
+      onClear: clearProposalsFilters
+    });
+    wireEmptyStateClear(tbody, clearProposalsFilters);
   } else {
     tbody.innerHTML = pageItems.map(p=>{
       const canReject = p.estado==="Generada" || p.estado==="Borrador";
@@ -2679,7 +2726,27 @@ function renderCotTable(){
   quotations.forEach(evaluarEstadoVigenciaCotizacion);
 
   const tbody = document.getElementById("cotTableBody");
+  const thead = document.getElementById("cotTableHead");
   document.getElementById("cotResultCount").textContent = filteredCot.length;
+
+  /* Cambio 3 del ticket "Estados vacíos diferenciados": contra el
+     conjunto COMPLETO (quotations), no el filtrado — ver el mismo
+     criterio en renderProposalsTable(). */
+  if(quotations.length===0){
+    thead.style.display = "none";
+    tbody.innerHTML = emptyStateRow(10, {
+      title:"Aún no hay cotizaciones",
+      subtitle:"Las cotizaciones se generan desde una propuesta validada como rentable."
+    });
+    cotCurrentPage = 1;
+    document.getElementById("cotPagFrom").textContent = 0;
+    document.getElementById("cotPagTo").textContent = 0;
+    document.getElementById("cotPagTotal").textContent = 0;
+    renderCotPagination(1);
+    renderCotKPIs();
+    return;
+  }
+  thead.style.display = "";
 
   const totalPages = Math.max(1, Math.ceil(filteredCot.length / COT_PAGE_SIZE));
   if(cotCurrentPage > totalPages) cotCurrentPage = totalPages;
@@ -2687,11 +2754,11 @@ function renderCotTable(){
   const pageItems = filteredCot.slice(start, start+COT_PAGE_SIZE);
 
   if(pageItems.length===0){
-    tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state">
-      <svg viewBox="0 0 24 24" width="40" height="40" fill="none"><rect x="3" y="6" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-      <strong>No se encontraron cotizaciones</strong>
-      <p>Ajusta los filtros de búsqueda para ver más resultados.</p>
-    </div></td></tr>`;
+    tbody.innerHTML = emptyStateRow(10, {
+      title:"No se encontraron cotizaciones con los filtros aplicados",
+      onClear: clearCotFilters
+    });
+    wireEmptyStateClear(tbody, clearCotFilters);
   } else {
     tbody.innerHTML = pageItems.map(q=>{
       const p = findProposalByCodigo(q.propuestaCodigo);
